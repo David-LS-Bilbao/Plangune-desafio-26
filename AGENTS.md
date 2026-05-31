@@ -6,13 +6,13 @@ Guía operativa para agentes de IA (Codex, Claude, etc.) y personas que trabajen
 
 ## Qué es este repo
 
-Monorepo MERN con npm workspaces:
+Monorepo con npm workspaces (React + Express + PostgreSQL; **no es MERN estricto**, ya que la base de datos es PostgreSQL, no MongoDB):
 
 - `frontend/` — React + Vite (JavaScript, mobile-first).
 - `backend/` — Node.js + Express, arquitectura MVC, API REST.
 - `docs/` — documentación del proyecto y de IA.
 
-MongoDB + Mongoose están **preparados pero sin features** en esta fase de bootstrap.
+**PostgreSQL + Prisma** están **preparados pero sin features** en esta fase de bootstrap. (Decisión de equipo: se descartó MongoDB/Mongoose de momento.)
 
 ## Reglas de oro
 
@@ -38,11 +38,17 @@ npm run dev:frontend    # Cliente en http://localhost:5173
 npm test                # todos los workspaces
 npm run test:backend
 npm run test:frontend
+
+# Prisma / PostgreSQL (workspace backend)
+npm run prisma:generate --workspace backend
+npm run prisma:migrate  --workspace backend    # requiere DATABASE_URL
+npm run prisma:studio   --workspace backend
+npm run prisma:format   --workspace backend
 ```
 
 ## Qué NO implementar todavía
 
-auth, roles, modelos Mongo completos, CRUD, dashboards, mapa, recomendador (Family Score) y estilos finales. Eso llega en ramas posteriores.
+auth, roles, modelos Prisma completos, CRUD, dashboards, mapa, recomendador (Family Score) y estilos finales. Eso llega en ramas posteriores.
 
 ## Documentación detallada
 

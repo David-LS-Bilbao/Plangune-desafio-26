@@ -7,9 +7,9 @@ Plantillas de prompt para trabajar con Codex en este repo. Adáptalas a cada tar
 ## Preámbulo recomendado (pegar al inicio)
 
 ```
-Actúa como Senior Full-Stack Engineer MERN en el proyecto DESAFIO-26.
+Actúa como Senior Full-Stack Engineer (React + Express + PostgreSQL) en el proyecto DESAFIO-26.
 Stack: monorepo npm workspaces, frontend React + Vite (JS), backend Express MVC,
-MongoDB + Mongoose, API REST, mobile-first, sin TypeScript, sin Tailwind.
+PostgreSQL + Prisma, API REST, mobile-first, sin TypeScript, sin Tailwind.
 
 Flujo Git obligatorio:
 - No trabajar en main ni en dev.

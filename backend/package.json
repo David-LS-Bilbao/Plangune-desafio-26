@@ -2,7 +2,7 @@
   "name": "@desafio-26/backend",
   "version": "0.1.0",
   "private": true,
-  "description": "API REST de DESAFIO-26 (Express + Mongoose, arquitectura MVC).",
+  "description": "API REST de DESAFIO-26 (Express + PostgreSQL/Prisma, arquitectura MVC).",
   "type": "module",
   "main": "src/server.js",
   "scripts": {
@@ -10,9 +10,14 @@
     "start": "node src/server.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "seed": "node src/seed/index.js"
+    "seed": "node src/seed/index.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:format": "prisma format"
   },
   "dependencies": {
+    "@prisma/client": "^6.1.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -20,11 +25,11 @@
     "express-validator": "^7.2.0",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.9.3",
     "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9",
+    "prisma": "^6.1.0",
     "supertest": "^7.0.0",
     "vitest": "^2.1.8"
   }

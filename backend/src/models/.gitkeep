@@ -1,1 +1,2 @@
-# Modelos Mongoose (vacío en bootstrap). Aún sin implementar.
+# Capa de modelos / acceso a datos (vacío en bootstrap).
+# El esquema de datos vive en prisma/schema.prisma (Prisma + PostgreSQL).

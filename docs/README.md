@@ -3,6 +3,8 @@
 Índice de la documentación del proyecto. El `README.md` raíz contiene la visión de producto completa; aquí se recoge la documentación técnica y de IA.
 
 > Nombre de la app **provisional** (lo define Marketing). Nombre técnico estable: `DESAFIO-26`.
+>
+> **Stack de datos actual: PostgreSQL + Prisma.** El proyecto se preparó inicialmente para MongoDB/Mongoose, pero el equipo decidió no usar MongoDB de momento. El stack es React + Express + PostgreSQL (no MERN estricto).
 
 ## Estructura
 

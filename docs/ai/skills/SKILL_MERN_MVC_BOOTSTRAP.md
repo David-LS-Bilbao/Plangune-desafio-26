@@ -1,6 +1,8 @@
-# SKILL · Bootstrap MERN con MVC
+# SKILL · Bootstrap del monorepo (React + Express + PostgreSQL) con MVC
 
 Cómo está montado el monorepo DESAFIO-26 y cómo extenderlo.
+
+> Nota: aunque el nombre del archivo conserva "MERN", el stack **no es MERN estricto**: la base de datos es **PostgreSQL con Prisma**, no MongoDB (decisión de equipo).
 
 ## Estructura del monorepo
 
@@ -8,7 +10,7 @@ Cómo está montado el monorepo DESAFIO-26 y cómo extenderlo.
 desafio-26/
 ├── package.json          # workspaces: ["frontend", "backend"]
 ├── frontend/             # React + Vite (JS)
-├── backend/              # Express + Mongoose (MVC)
+├── backend/              # Express + Prisma/PostgreSQL (MVC)
 └── docs/
 ```
 
@@ -32,25 +34,25 @@ npm install <paquete> --workspace frontend
 ## Capas del backend (MVC práctico)
 
 ```txt
-request → routes → controllers → services → models (Mongoose) → MongoDB
+request → routes → controllers → services → models (Prisma) → PostgreSQL
 ```
 
 - **routes/**: definen endpoints y delegan en controllers.
 - **controllers/**: orquestan la petición/respuesta HTTP.
 - **services/**: lógica de negocio reutilizable (sin Express).
-- **models/**: esquemas Mongoose.
+- **models/**: acceso a datos vía Prisma; el esquema vive en `prisma/schema.prisma`.
 - **middlewares/**: auth, validación, manejo de errores.
 - **config/**: conexión a DB y configuración.
 - **utils/**, **seed/**, **tests/**: soporte.
 
 ## Cómo añadir un recurso nuevo (patrón)
 
-1. `models/<recurso>.model.js` — esquema Mongoose.
-2. `services/<recurso>.service.js` — lógica.
+1. Define el modelo en `prisma/schema.prisma` y aplica con `npm run prisma:migrate --workspace backend`.
+2. `services/<recurso>.service.js` — lógica (usa el cliente Prisma de `src/config/prisma.js`).
 3. `controllers/<recurso>.controller.js` — handlers HTTP.
 4. `routes/<recurso>.routes.js` — endpoints, montados en `routes/index.js`.
 5. `tests/<recurso>.test.js` — test con supertest.
 
 ## Estado actual (bootstrap)
 
-Solo existe el healthcheck (`GET /api/health`). MongoDB está preparado pero sin modelos ni features.
+Solo existe el healthcheck (`GET /api/health`). PostgreSQL/Prisma está preparado (cliente en `src/config/prisma.js`, schema en `prisma/schema.prisma`) pero sin modelos ni features.

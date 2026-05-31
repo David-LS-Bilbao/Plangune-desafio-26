@@ -214,8 +214,11 @@ Ejemplo de explicación al usuario:
 
 ### Base de datos
 
-* MongoDB
-* Mongoose
+* PostgreSQL
+* Prisma (ORM)
+
+> Decisión de equipo: 
+>  **de momento NO se usa MongoDB**. La base de datos actual es **PostgreSQL con Prisma**.
 
 ### Herramientas
 
@@ -622,11 +625,11 @@ Variables previstas:
 
 ```env
 PORT=3000
-MONGODB_URI=mongodb://localhost:27017/txikiplan
+NODE_ENV=development
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/desafio26_dev?schema=public
 JWT_SECRET=change_me
 JWT_EXPIRES_IN=7d
 CLIENT_URL=http://localhost:5173
-NODE_ENV=development
 ```
 
 ### Frontend
