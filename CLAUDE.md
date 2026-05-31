@@ -6,8 +6,8 @@ Instrucciones para Claude Code (y agentes Claude) al trabajar en **DESAFIO-26**.
 
 ## Contexto del proyecto
 
-- Monorepo MERN con npm workspaces: `frontend/` (React + Vite, JS) y `backend/` (Express, MVC).
-- API REST. MongoDB + Mongoose preparados pero **sin features** en el bootstrap.
+- Monorepo con npm workspaces: `frontend/` (React + Vite, JS) y `backend/` (Express, MVC). Stack **React + Express + PostgreSQL** (no MERN estricto: la DB es PostgreSQL, no MongoDB).
+- API REST. **PostgreSQL + Prisma** preparados pero **sin features** en el bootstrap. (Se descartó MongoDB/Mongoose de momento.)
 - Mobile-first, CSS propio (sin Tailwind), sin TypeScript.
 - Nombre de la app **provisional**: usa `DESAFIO-26` como nombre técnico estable.
 
@@ -33,6 +33,12 @@ npm install
 npm run dev:backend     # http://localhost:3000  (GET /api/health)
 npm run dev:frontend    # http://localhost:5173
 npm test                # backend + frontend
+
+# Prisma (workspace backend)
+npm run prisma:generate --workspace backend   # genera el cliente
+npm run prisma:migrate  --workspace backend    # migraciones (requiere DATABASE_URL)
+npm run prisma:studio   --workspace backend    # GUI de la DB
+npm run prisma:format   --workspace backend    # formatea schema.prisma
 ```
 
 ## Límites del bootstrap

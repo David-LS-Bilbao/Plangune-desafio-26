@@ -5,7 +5,7 @@ Convenciones de backend para DESAFIO-26 (Express, ESM, MVC, API REST).
 ## Arranque
 
 - `src/app.js` exporta `createApp()` (factory, sin abrir puerto) → testeable con supertest.
-- `src/server.js` carga `.env`, conecta DB (si hay `MONGODB_URI`) y abre el puerto.
+- `src/server.js` carga `.env` y abre el puerto. La conexión a PostgreSQL (Prisma) es perezosa vía `src/config/prisma.js`, por lo que el healthcheck no requiere DB.
 
 ## Middlewares base (ya configurados)
 
@@ -20,7 +20,7 @@ routes/index.js → routes/<recurso>.routes.js → controllers/ → services/ �
 - **routes**: solo enrutan; no contienen lógica.
 - **controllers**: leen `req`, llaman a services, devuelven `res`.
 - **services**: lógica de negocio pura (sin `req`/`res`).
-- **models**: esquemas Mongoose.
+- **models**: modelos de datos definidos en `prisma/schema.prisma` (Prisma + PostgreSQL).
 
 ## Convención REST
 

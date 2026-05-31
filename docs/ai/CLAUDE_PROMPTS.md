@@ -7,7 +7,7 @@ Plantillas de prompt para trabajar con Claude Code en este repo.
 ## Preámbulo recomendado
 
 ```
-Trabaja en DESAFIO-26 (monorepo MERN, ver CLAUDE.md y AGENTS.md).
+Trabaja en DESAFIO-26 (monorepo React + Express + PostgreSQL, ver CLAUDE.md y AGENTS.md).
 Flujo Git: no tocar main/dev, ramas desde dev, sin `git add .`,
 revisar `git status --short` y `git diff --name-only` antes de commit,
 y NO commitear sin que yo lo pida. MVP + KISS. Testing con Vitest.

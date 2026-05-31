@@ -1,0 +1,16 @@
+// Prisma schema · DESAFIO-26 (PostgreSQL)
+//
+// BOOTSTRAP: aún SIN modelos reales. Los modelos (User, Activity, Business, ...)
+// llegarán en ramas posteriores. Este archivo solo deja preparada la conexión.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// TODO(features): definir aquí los modelos de datos.
+// Placeholder intencional: no crear modelos reales todavía.
