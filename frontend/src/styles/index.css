@@ -1,0 +1,105 @@
+/* Estilos base mobile-first. NO son los estilos finales del producto. */
+
+:root {
+  --max-width: 480px;
+  --color-bg: #f6f7fb;
+  --color-surface: #ffffff;
+  --color-text: #1a1a2e;
+  --color-muted: #5b5b73;
+  --color-accent: #3a5a9c;
+  --radius: 12px;
+  --space: 1rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+}
+
+/* Contenedor mobile-first: angosto por defecto, crece en pantallas mayores. */
+.app-shell {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1.5rem var(--space);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.app-header {
+  text-align: center;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+}
+
+.app-subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--color-muted);
+}
+
+.placeholder-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.placeholder-nav__link {
+  display: block;
+  padding: 0.85rem 1rem;
+  background: var(--color-surface);
+  border: 1px solid #e2e3ef;
+  border-radius: var(--radius);
+  color: var(--color-accent);
+  text-decoration: none;
+  font-weight: 600;
+  text-align: center;
+}
+
+.placeholder-nav__link:hover {
+  border-color: var(--color-accent);
+}
+
+.app-footer {
+  margin-top: auto;
+  text-align: center;
+  color: var(--color-muted);
+}
+
+/* A partir de tablet, repartimos los enlaces en rejilla. */
+@media (min-width: 600px) {
+  :root {
+    --max-width: 720px;
+  }
+
+  .placeholder-nav__list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .placeholder-nav__item {
+    flex: 1 1 180px;
+  }
+}
