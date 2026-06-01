@@ -99,6 +99,14 @@ docker compose down -v
 | Contraseña (local) | `desafio26_dev_password`    |
 | Volumen            | `desafio26_postgres_data`   |
 
+## Propuesta de modelo de Data Science
+
+Existe una propuesta de esquema SQL aportada por Data Science en
+[data/BBDD.sql](data/BBDD.sql), documentada en [data/README.md](data/README.md).
+
+> Es una **propuesta documental, no ejecutable**: no es la fuente de verdad del backend
+> y está **pendiente de alineación** con el modelo Prisma MVP. No ejecutarla ni migrarla.
+
 ## Modelo de datos (MVP)
 
 Los modelos mínimos viven en [backend/prisma/schema.prisma](../backend/prisma/schema.prisma) y
