@@ -58,6 +58,31 @@ npm run prisma:studio   --workspace backend    # abre la GUI de la DB (opcional)
 > En el bootstrap aún no hay modelos Prisma reales. `prisma:migrate` creará la base
 > de datos vacía. Los modelos llegan en ramas posteriores.
 
+## Seed Prisma (MVP)
+
+Existe un seed Prisma en [../backend/prisma/seed.js](../backend/prisma/seed.js) que inserta
+las actividades en PostgreSQL.
+
+- Usa **los mismos datos base** que el mock MVP (`backend/src/seed/mockActivities.js`):
+  los importa para no duplicar, conserva los IDs `act-001…` e incluye la actividad `pending`.
+- Es **idempotente** (`upsert` por `id`): se puede ejecutar varias veces sin duplicar.
+- **Todavía no sustituye los services en memoria**: el backend sigue sirviendo el mock en
+  runtime. El seed se ejecutará cuando haya **DB local disponible**.
+
+Ejecución (requiere DB levantada y cliente Prisma generado; ver pasos 2 y 4):
+
+```bash
+# desde el workspace backend, con backend/.env y Postgres en marcha
+npm run prisma:generate --workspace backend   # si no se ha generado el cliente
+node prisma/seed.js                            # ejecutar el seed (idempotente)
+```
+
+> Opcional: registrar el seed en `backend/package.json` como `"prisma": { "seed": "node prisma/seed.js" }`
+> para poder usar `npx prisma db seed`. No se ha modificado `package.json` en esta tarea.
+>
+> **Siguiente paso futuro:** migrar los services de memoria a Prisma (lectura/escritura real),
+> manteniendo el contrato de endpoints intacto.
+
 ## 5. Parar el contenedor
 
 ```bash
