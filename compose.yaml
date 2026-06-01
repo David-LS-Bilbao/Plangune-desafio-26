@@ -1,0 +1,27 @@
+# compose.yaml — PostgreSQL local de desarrollo para DESAFIO-26
+# Uso: docker compose up -d postgres
+# Ver instrucciones completas en docs/database.md
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: desafio26_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: desafio26_dev
+      POSTGRES_USER: desafio26
+      POSTGRES_PASSWORD: desafio26_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - desafio26_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U desafio26 -d desafio26_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  desafio26_postgres_data:
+    name: desafio26_postgres_data
