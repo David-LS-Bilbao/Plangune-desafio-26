@@ -1,11 +1,13 @@
-# TxikiPlan Euskadi
+# DESAFIO-26
 
-> **Nombre provisional del proyecto.**
-> El naming definitivo será definido más adelante por el equipo de Marketing.
+> **Nombre funcional provisional:** "TxikiPlan Euskadi".
+> El naming definitivo será definido más adelante por el equipo de Marketing. Como nombre técnico estable se usa `DESAFIO-26` / `desafio-26`.
+
+> **Nota de naming:** DESAFIO-26 es el nombre técnico del repositorio. El nombre de la app es provisional hasta decisión final de Marketing.
 
 ## Descripción
 
-TxikiPlan Euskadi es una web/app responsive, mobile-first y SPA orientada a familias jóvenes con bebés y niños pequeños que buscan planes, lugares, actividades y negocios familiares en Euskadi de forma sencilla, segura y sin complicaciones.
+DESAFIO-26 es una web/app responsive, mobile-first y SPA orientada a familias jóvenes con bebés y niños pequeños que buscan planes, lugares, actividades y negocios familiares en Euskadi de forma sencilla, segura y sin complicaciones.
 
 El objetivo principal es ayudar a las familias a responder preguntas prácticas antes de salir de casa:
 
@@ -23,7 +25,7 @@ Este proyecto se desarrolla dentro del **Desafío de Tripulaciones 2026**.
 
 ## Estado del proyecto
 
-Proyecto en fase inicial de bootstrap.
+Proyecto en fase inicial de bootstrap técnico.
 
 Actualmente existen:
 
@@ -33,6 +35,11 @@ Actualmente existen:
 * Dosier preliminar de objetivos.
 * Carpeta Drive organizada por verticales.
 * Plan inicial de arquitectura Full Stack.
+* Monorepo npm workspaces con `frontend/` y `backend/`.
+* Frontend React + Vite con pantalla placeholder inicial y test mínimo.
+* Backend Express con healthcheck, middlewares base y test mínimo.
+* PostgreSQL + Prisma preparados, aún sin modelos ni features de producto.
+* Documentación de IA y flujo de agentes en `docs/ai/`.
 
 ---
 
@@ -201,7 +208,8 @@ Ejemplo de explicación al usuario:
 * React
 * Vite
 * React Router
-* CSS modular o sistema de estilos acordado por el equipo
+* JavaScript (no TypeScript)
+* CSS propio (no Tailwind)
 * Diseño mobile-first
 
 ### Backend
@@ -210,7 +218,8 @@ Ejemplo de explicación al usuario:
 * Express
 * Arquitectura MVC práctica
 * API REST
-* Middlewares de autenticación y roles
+* Middlewares base de seguridad y API
+* Autenticación y roles previstos para futuras ramas
 
 ### Base de datos
 
@@ -223,21 +232,31 @@ Ejemplo de explicación al usuario:
 ### Herramientas
 
 * GitHub
-* Git Flow simplificado
+* Flujo Git simplificado por ramas
 * Postman / Insomnia para pruebas de API
 * Figma, Excalidraw o recursos UX/UI compartidos en Drive
+
+### Testing
+
+* Vitest
+* Supertest para backend
+* Testing Library para frontend
 
 ---
 
 ## Arquitectura prevista
 
 ```txt
-txikiplan-euskadi/
+desafio-26-1/
 ├── frontend/
 ├── backend/
 ├── docs/
+├── AGENTS.md
+├── CLAUDE.md
 ├── README.md
 ├── .gitignore
+├── .env.example
+├── package-lock.json
 └── package.json
 ```
 
@@ -254,8 +273,10 @@ backend/
 │   ├── seed/
 │   ├── services/
 │   ├── utils/
-│   └── app.js
-├── server.js
+│   ├── app.js
+│   └── server.js
+├── prisma/
+│   └── schema.prisma
 ├── .env.example
 └── package.json
 ```
@@ -576,32 +597,20 @@ Login admin
 
 ---
 
-## Instalación
+## Instalación y ejecución
 
-Pendiente de cerrar durante el bootstrap técnico.
-
-Estructura esperada:
+Desde la raíz del monorepo:
 
 ```bash
-git clone <url-del-repositorio>
-cd txikiplan-euskadi
-```
-
-Instalar frontend:
-
-```bash
-cd frontend
+git clone https://github.com/David-LS-Bilbao/desafio-26-1.git
+cd desafio-26-1
 npm install
-npm run dev
+npm test
+npm run dev:backend
+npm run dev:frontend
 ```
 
-Instalar backend:
-
-```bash
-cd backend
-npm install
-npm run dev
-```
+Para desarrollo diario, `npm run dev:backend` y `npm run dev:frontend` se ejecutan en terminales separadas.
 
 ---
 
@@ -654,15 +663,33 @@ VITE_API_URL=http://localhost:3000/api
 
 ---
 
-## Scripts previstos
+## Scripts disponibles
+
+### Raíz
+
+```json
+{
+  "dev:frontend": "npm run dev --workspace frontend",
+  "dev:backend": "npm run dev --workspace backend",
+  "test": "npm run test --workspaces --if-present",
+  "test:frontend": "npm run test --workspace frontend",
+  "test:backend": "npm run test --workspace backend"
+}
+```
 
 ### Backend
 
 ```json
 {
-  "dev": "nodemon server.js",
-  "start": "node server.js",
-  "seed": "node src/seed/index.js"
+  "dev": "nodemon src/server.js",
+  "start": "node src/server.js",
+  "test": "vitest run",
+  "test:watch": "vitest",
+  "seed": "node src/seed/index.js",
+  "prisma:generate": "prisma generate",
+  "prisma:migrate": "prisma migrate dev",
+  "prisma:studio": "prisma studio",
+  "prisma:format": "prisma format"
 }
 ```
 
@@ -672,7 +699,9 @@ VITE_API_URL=http://localhost:3000/api
 {
   "dev": "vite",
   "build": "vite build",
-  "preview": "vite preview"
+  "preview": "vite preview",
+  "test": "vitest run",
+  "test:watch": "vitest"
 }
 ```
 
@@ -683,22 +712,24 @@ VITE_API_URL=http://localhost:3000/api
 Ramas principales:
 
 ```txt
-main    → rama estable/final
-dev     → rama de integración
-feat/*  → nuevas funcionalidades
-fix/*   → correcciones
-docs/*  → documentación
-test/*  → pruebas
+main      → rama estable/final
+dev       → rama de integración global
+frontend  → integración frontend
+backend   → integración backend
+feat/*    → nuevas funcionalidades
+fix/*     → correcciones
+docs/*    → documentación
+test/*    → pruebas
 ```
 
 Reglas:
 
-* No trabajar directamente sobre `main`.
-* Crear ramas desde `dev`.
-* Pull Requests siempre hacia `dev`.
+* No trabajar directamente sobre `main`, `dev`, `frontend` ni `backend`.
+* Crear ramas desde la integración correcta: frontend desde `frontend`, backend desde `backend`, documentación o cambios globales desde `dev`.
+* Pull Requests hacia la rama de integración correspondiente.
 * Commits pequeños y descriptivos.
 * No subir secretos.
-* No usar `git add .` sin revisar antes.
+* No usar `git add .` ni `git add -A`; añadir archivos explícitamente.
 * Probar antes de abrir PR.
 
 Ejemplos de ramas iniciales:
@@ -727,9 +758,25 @@ feat: add activity model
 
 ---
 
-## Documentación prevista
+## Documentación
 
-La carpeta `/docs` deberá contener progresivamente:
+La carpeta `/docs` ya contiene la documentación operativa de agentes e irá incorporando documentación técnica del producto.
+
+Estructura actual:
+
+```txt
+docs/
+├── README.md
+└── ai/
+    ├── AGENT_WORKFLOW.md
+    ├── GIT_BRANCHING_POLICY.md
+    ├── AGENT_RULES.md
+    ├── PR_REVIEW_CHECKLIST.md
+    ├── prompts/
+    └── skills/
+```
+
+Documentos técnicos previstos para futuras ramas:
 
 ```txt
 docs/
@@ -793,9 +840,9 @@ Proyecto multidisciplinar con participación de:
 ## Notas importantes
 
 * El nombre **TxikiPlan Euskadi** es provisional.
+* `DESAFIO-26` / `desafio-26-1` es el nombre técnico estable del repositorio.
 * Los mocks UX/UI son referencia visual, no código final obligatorio.
 * Los archivos `code.html` de los mocks no deben condicionar la arquitectura final.
 * Prioridad absoluta: MVP funcional antes que funcionalidades avanzadas.
 * KISS: primero que funcione, luego se mejora.
 * La demo final manda sobre las ideas secundarias.
-
