@@ -69,16 +69,31 @@ las actividades en PostgreSQL.
 - **Todavía no sustituye los services en memoria**: el backend sigue sirviendo el mock en
   runtime. El seed se ejecutará cuando haya **DB local disponible**.
 
-Ejecución (requiere DB levantada y cliente Prisma generado; ver pasos 2 y 4):
+El seed está **registrado** en `backend/package.json`:
+
+- `"prisma": { "seed": "node prisma/seed.js" }` → habilita `prisma db seed`.
+- script cómodo `db:seed` → `prisma db seed`.
+
+**Prerequisitos:** PostgreSQL levantado (paso 2), `backend/.env` configurado y las **tablas
+creadas** (aplicar el modelo con `prisma migrate`/`prisma db push`, ver paso 4). El seed
+**no** crea las tablas: solo inserta datos.
 
 ```bash
-# desde el workspace backend, con backend/.env y Postgres en marcha
-npm run prisma:generate --workspace backend   # si no se ha generado el cliente
-node prisma/seed.js                            # ejecutar el seed (idempotente)
+# 0. (opcional) validar el schema sin conectar a la DB
+npx prisma validate --schema backend/prisma/schema.prisma
+
+# 1. generar el cliente Prisma si aún no existe
+npm run prisma:generate --workspace backend
+
+# 2. ejecutar el seed (idempotente) — requiere DB en marcha y tablas creadas
+npm run db:seed --workspace backend
+# alternativa equivalente:
+#   npx prisma db seed            (desde el workspace backend)
+#   node prisma/seed.js           (ejecución directa)
 ```
 
-> Opcional: registrar el seed en `backend/package.json` como `"prisma": { "seed": "node prisma/seed.js" }`
-> para poder usar `npx prisma db seed`. No se ha modificado `package.json` en esta tarea.
+> El seed **no cambia todavía el runtime de la API**: los services siguen sirviendo el mock
+> en memoria. Sembrar la DB no afecta a las respuestas de los endpoints por ahora.
 >
 > **Siguiente paso futuro:** migrar los services de memoria a Prisma (lectura/escritura real),
 > manteniendo el contrato de endpoints intacto.
