@@ -1,7 +1,11 @@
 // Prisma schema · DESAFIO-26 (PostgreSQL)
 //
-// BOOTSTRAP: aún SIN modelos reales. Los modelos (User, Activity, Business, ...)
-// llegarán en ramas posteriores. Este archivo solo deja preparada la conexión.
+// Modelos mínimos del MVP, alineados con el contrato documentado en docs/api.md.
+// Objetivo: preparar la sustitución progresiva del almacenamiento mock en memoria
+// SIN cambiar las URLs de endpoints ni el shape de las respuestas.
+//
+// Los valores de los enums se escriben en minúscula para coincidir EXACTAMENTE con
+// el JSON del contrato actual (p. ej. "approved", "pending", "open", "medium").
 
 generator client {
   provider = "prisma-client-js"
@@ -12,5 +16,105 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// TODO(features): definir aquí los modelos de datos.
-// Placeholder intencional: no crear modelos reales todavía.
+// ── Enums ────────────────────────────────────────────────────────────────────
+
+enum ActivityStatus {
+  pending
+  approved
+  rejected
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+}
+
+enum IncidentStatus {
+  open
+  in_review
+  resolved
+}
+
+enum PriceType {
+  free
+  low
+  medium
+  high
+}
+
+// ── Modelos ──────────────────────────────────────────────────────────────────
+
+/// Actividad / plan familiar. `id` es String para conservar los identificadores
+/// legibles del contrato mock (p. ej. "act-001") al migrar el seed.
+model Activity {
+  id                  String         @id @default(cuid())
+  title               String
+  category            String
+  province            String
+  municipality        String
+  recommendedAgeMin   Int            @default(0)
+  recommendedAgeMax   Int            @default(99)
+  priceType           PriceType      @default(medium)
+  estimatedFamilyCost Int            @default(0)
+  isIndoor            Boolean        @default(false)
+  rainSuitable        Boolean        @default(false)
+  strollerFriendly    Boolean        @default(false)
+  hasToilet           Boolean        @default(false)
+  hasChangingTable    Boolean        @default(false)
+  averageRating       Float          @default(0)
+  status              ActivityStatus @default(pending)
+
+  reviews   Review[]
+  incidents Incident[]
+  favorites Favorite[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([province, municipality])
+}
+
+/// Reseña de una actividad. Entra como `pending` (moderación pendiente).
+model Review {
+  id         String       @id @default(cuid())
+  activityId String
+  activity   Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  rating     Int
+  comment    String?
+  status     ReviewStatus @default(pending)
+
+  createdAt DateTime @default(now())
+
+  @@index([activityId])
+}
+
+/// Incidencia reportada sobre una actividad. Entra como `open`.
+model Incident {
+  id          String         @id @default(cuid())
+  activityId  String
+  activity    Activity       @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  type        String
+  description String?
+  status      IncidentStatus @default(open)
+
+  createdAt DateTime @default(now())
+
+  @@index([activityId])
+}
+
+/// Favorito. Sin auth todavía: se usa un `userId` placeholder ("mock-user") para
+/// no introducir un modelo User aún. La pareja (userId, activityId) es única para
+/// que la operación sea idempotente, como en el contrato actual.
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String   @default("mock-user")
+  activityId String
+  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, activityId])
+  @@index([activityId])
+}
