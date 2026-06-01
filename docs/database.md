@@ -98,3 +98,51 @@ docker compose down -v
 | Usuario            | `desafio26`                 |
 | Contraseña (local) | `desafio26_dev_password`    |
 | Volumen            | `desafio26_postgres_data`   |
+
+## Modelo de datos (MVP)
+
+Los modelos mínimos viven en [backend/prisma/schema.prisma](../backend/prisma/schema.prisma) y
+están alineados con el contrato documentado en [api.md](api.md). Objetivo: poder sustituir
+**progresivamente** el almacenamiento mock en memoria **sin cambiar URLs ni el shape de las
+respuestas**.
+
+### Modelos
+
+| Modelo     | Propósito                                  | Relaciones                       |
+| ---------- | ------------------------------------------ | -------------------------------- |
+| `Activity` | Actividad / plan familiar                  | 1—N `Review`, `Incident`, `Favorite` |
+| `Review`   | Reseña de una actividad (entra `pending`)  | N—1 `Activity`                   |
+| `Incident` | Incidencia sobre una actividad (entra `open`) | N—1 `Activity`                |
+| `Favorite` | Favorito de un usuario (mock por ahora)    | N—1 `Activity`                   |
+
+### Enums
+
+| Enum             | Valores                          | Notas                                    |
+| ---------------- | -------------------------------- | ---------------------------------------- |
+| `ActivityStatus` | `pending` `approved` `rejected`  | El contrato expone `"approved"`          |
+| `ReviewStatus`   | `pending` `approved` `rejected`  | Reseñas entran como `pending`            |
+| `IncidentStatus` | `open` `in_review` `resolved`    | Incidencias entran como `open`           |
+| `PriceType`      | `free` `low` `medium` `high`     | El contrato expone `"medium"`            |
+
+### Decisiones de modelo
+
+- **Valores de enum en minúscula**: coinciden 1:1 con el JSON del contrato actual
+  (`api.md`), para no cambiar el shape de respuesta al migrar del mock a Prisma.
+- **`Activity.id` es `String`**: conserva los identificadores legibles del mock
+  (`"act-001"`) cuando se prepare el seed; evita exponer enteros autoincrementales.
+- **`averageRating` se mantiene como campo denormalizado** en `Activity` (no se calcula
+  en vivo): refleja el contrato actual y mantiene KISS. Recalcularlo desde `Review`
+  queda para una rama posterior.
+- **`Favorite` sin modelo `User` todavía**: se usa `userId String @default("mock-user")`
+  y `@@unique([userId, activityId])` para idempotencia. Cuando exista auth real, ese
+  `userId` pasará a referenciar el modelo `User`. No se crea `User` en esta rama (KISS).
+- **`category` y `Incident.type` son `String`** (no enum): son conjuntos abiertos que
+  conviene no congelar todavía.
+- **`onDelete: Cascade`** en las relaciones hijas: al borrar una actividad se limpian sus
+  reseñas, incidencias y favoritos.
+- **Índices mínimos**: `Activity.status`, `Activity(province, municipality)` y las claves
+  foráneas, pensando en los filtros del recomendador (Family Score).
+
+> **Pendiente (no incluido en esta rama):** el seed equivalente a los datos mock y la
+> sustitución de los services. Ver notas en el resumen de la rama `feat/backend-prisma-models`.
+> No se han ejecutado migraciones (`prisma migrate`) todavía: requiere decisión humana y DB local.
