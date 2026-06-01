@@ -36,6 +36,10 @@ docs/
         └── SKILL_DOCUMENTATION.md
 ```
 
+## Documentación técnica
+
+- [PostgreSQL local con Docker Compose](database.md) — levantar la DB de desarrollo y conectarla con Prisma.
+
 ## Documentación técnica prevista (futuras ramas)
 
 A medida que avance el proyecto, se irán añadiendo: `architecture.md`, `api.md`, `data-model.md`, `security.md`, `family-score.md`, `git-workflow.md`, `decisions.md`.
