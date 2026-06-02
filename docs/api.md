@@ -22,7 +22,9 @@ Healthcheck. No requiere DB.
 ## Eventos (entidad central · datos reales de `init.sql`)
 
 > Modelo alineado con la tabla `events` de [../backend/src/models/init.sql](../backend/src/models/init.sql)
-> (shape real, snake_case). Runtime **mock en memoria** todavía (sin PostgreSQL; ADR-0001).
+> (shape real, snake_case). **Fuente runtime actual: Prisma/PostgreSQL** cuando la DB local
+> está levantada; ver [features/backend-events-prisma-runtime.md](features/backend-events-prisma-runtime.md).
+> **Contrato público estable** — los campos, filtros y códigos HTTP no cambian respecto al mock.
 > Los eventos **no** tienen estado de moderación: `GET /api/events` devuelve todos.
 
 ### `GET /api/events`
