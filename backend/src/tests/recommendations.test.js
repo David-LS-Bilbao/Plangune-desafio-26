@@ -54,4 +54,16 @@ describe('GET /api/recommendations', () => {
       expect(Array.isArray(item.reasons)).toBe(true);
     }
   });
+
+  it('con una query familiar, el top result es explicable (tiene reasons)', async () => {
+    const res = await request(app).get(
+      '/api/recommendations?childrenAges=2&strollerFriendly=true&rainSuitable=true&budget=40&municipality=Bilbao',
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThan(0);
+    // Explicabilidad: el plan mejor puntuado debe justificar por qué se recomienda.
+    // Aserción no frágil: comprobamos que hay al menos una razón, sin fijar scores.
+    expect(res.body[0].reasons.length).toBeGreaterThan(0);
+  });
 });
