@@ -28,12 +28,12 @@ export const listEvents = asyncHandler(async (req, res) => {
     fecha_hasta,
   };
 
-  res.status(200).json(getEvents(filters));
+  res.status(200).json(await getEvents(filters));
 });
 
 /** GET /api/events/:id → detalle (404 si no existe). */
 export const getEvent = asyncHandler(async (req, res) => {
-  res.status(200).json(getEventById(Number(req.params.id)));
+  res.status(200).json(await getEventById(Number(req.params.id)));
 });
 
 export default { listEvents, getEvent };

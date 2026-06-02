@@ -1,10 +1,63 @@
-import { describe, it, expect } from 'vitest';
+/**
+ * Tests de /api/events.
+ *
+ * El repository (Prisma) se mockea con vi.mock para que los tests no requieran
+ * una base de datos real. El mock replica el filtrado sobre mockEvents, actuando
+ * como la "DB en memoria" de pruebas. La lógica real del service (serialización,
+ * 404, parseo de filtros) y la capa HTTP (validación, routing) se prueban de verdad.
+ *
+ * vi.mock debe declararse ANTES de cualquier import que cargue el service, ya que
+ * Vitest hoista automáticamente las llamadas vi.mock al inicio del módulo.
+ */
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+
+// Mock del repository — declarado primero para que el hoisting de Vitest lo aplique
+// antes de que se cargue event.service.js (que importa event.repository.js).
+vi.mock('../repositories/event.repository.js', () => ({
+  findEvents:    vi.fn(),
+  findEventById: vi.fn(),
+}));
+
 import request from 'supertest';
 
 import { createApp } from '../app.js';
 import { mockEvents } from '../seed/mockEvents.js';
+import { findEvents, findEventById } from '../repositories/event.repository.js';
 
 const app = createApp();
+
+// ---------------------------------------------------------------------------
+// Implementación de filtrado en memoria para el mock del repository.
+// Replica la semántica que construye buildWhere() en el repository real.
+// ---------------------------------------------------------------------------
+function filterMockEvents(filters = {}) {
+  return mockEvents.filter((ev) => {
+    if (filters.municipio   && ev.municipio?.toLowerCase()   !== filters.municipio.toLowerCase())   return false;
+    if (filters.territorio  && ev.territorio?.toLowerCase()  !== filters.territorio.toLowerCase())  return false;
+    if (filters.categoria   && ev.categoria?.toLowerCase()   !== filters.categoria.toLowerCase())   return false;
+    if (filters.tipo_evento && ev.tipo_evento?.toLowerCase() !== filters.tipo_evento.toLowerCase()) return false;
+
+    if (filters.es_lluvia    !== undefined && ev.es_lluvia    !== filters.es_lluvia)    return false;
+    if (filters.es_carrito   !== undefined && ev.es_carrito   !== filters.es_carrito)   return false;
+    if (filters.es_cambiador !== undefined && ev.es_cambiador !== filters.es_cambiador) return false;
+
+    if (filters.edad !== undefined && (ev.edad_minima ?? 0) > filters.edad) return false;
+
+    if (filters.fecha_desde && new Date(ev.fecha_inicio) < new Date(filters.fecha_desde)) return false;
+    if (filters.fecha_hasta && new Date(ev.fecha_inicio) > new Date(filters.fecha_hasta)) return false;
+
+    return true;
+  });
+}
+
+beforeEach(() => {
+  findEvents.mockImplementation(async (filters) => filterMockEvents(filters));
+  findEventById.mockImplementation(async (id) => mockEvents.find((ev) => ev.id === id) ?? null);
+});
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
 
 describe('GET /api/events', () => {
   it('responde 200 y un array de eventos', async () => {

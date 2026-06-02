@@ -62,8 +62,14 @@ npm run prisma:studio   --workspace backend    # abre la GUI de la DB (opcional)
 ```
 
 > El `schema.prisma` ya modela las **tablas reales** de `data/schema-real/init.sql` (ver
-> "Modelo de datos" más abajo), pero el **runtime sigue en mock** y **no se han ejecutado
-> migraciones** todavía.
+> "Modelo de datos" más abajo) y **no se han ejecutado migraciones** todavía.
+>
+> **Estado del runtime por endpoint:**
+> - `GET /api/events`, `GET /api/events/:id` → **Prisma/PostgreSQL** cuando la DB local
+>   está levantada y sembrada (ver [features/backend-events-prisma-runtime.md](features/backend-events-prisma-runtime.md)).
+> - Resto de endpoints (`/api/activities`, `/api/recommendations`, `/api/reviews`,
+>   `/api/incidents`, `/api/favorites`, `/api/assistant`) → **mock en memoria** todavía.
+> - La base real sigue siendo `data/schema-real/init.sql` (ADR-0004).
 
 ## Seed Prisma (MVP)
 
