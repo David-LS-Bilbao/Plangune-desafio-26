@@ -1,6 +1,13 @@
-import React from 'react';
+import React, { useState } from "react";
 
 function AdminDashboard() {
+  const [reviewMessage, setReviewMessage] = useState("");
+
+  const handleApprove = () =>
+    setReviewMessage("La solicitud ha sido aprobada.");
+  const handleReject = () =>
+    setReviewMessage("La solicitud ha sido rechazada.");
+
   return (
     <main className="admin-dashboard-main">
       {/* Page Title */}
@@ -62,19 +69,39 @@ function AdminDashboard() {
                   <span className="time-ago">hace 2 horas</span>
                 </div>
                 <h4 className="pending-title">Taller de cuentos</h4>
-                <p className="pending-by">Enviado por: Biblioteca Central Bilbao</p>
+                <p className="pending-by">
+                  Enviado por: Biblioteca Central Bilbao
+                </p>
                 <div className="pending-tags">
                   <span className="pending-tag">
-                    <span className="material-symbols-outlined">child_care</span> 3-6 años
+                    <span className="material-symbols-outlined">
+                      child_care
+                    </span>{" "}
+                    3-6 años
                   </span>
                   <span className="pending-tag">
-                    <span className="material-symbols-outlined">location_on</span> Interior
+                    <span className="material-symbols-outlined">
+                      location_on
+                    </span>{" "}
+                    Interior
                   </span>
                 </div>
               </div>
               <div className="pending-actions">
-                <button className="btn-reject">Rechazar</button>
-                <button className="btn-approve">Aprobar</button>
+                <button
+                  className="btn-reject"
+                  type="button"
+                  onClick={handleReject}
+                >
+                  Rechazar
+                </button>
+                <button
+                  className="btn-approve"
+                  type="button"
+                  onClick={handleApprove}
+                >
+                  Aprobar
+                </button>
               </div>
             </div>
           </div>
@@ -94,7 +121,7 @@ function AdminDashboard() {
                 <div className="filter-bar-row">
                   <span className="rank">#1</span>
                   <div className="bar-container">
-                    <div className="bar-fill" style={{ width: '85%' }}></div>
+                    <div className="bar-fill" style={{ width: "85%" }}></div>
                     <span className="bar-label">Cambiador</span>
                   </div>
                   <span className="bar-pct">85%</span>
@@ -102,7 +129,7 @@ function AdminDashboard() {
                 <div className="filter-bar-row">
                   <span className="rank">#2</span>
                   <div className="bar-container">
-                    <div className="bar-fill" style={{ width: '62%' }}></div>
+                    <div className="bar-fill" style={{ width: "62%" }}></div>
                     <span className="bar-label">Interior</span>
                   </div>
                   <span className="bar-pct">62%</span>
@@ -110,7 +137,7 @@ function AdminDashboard() {
                 <div className="filter-bar-row">
                   <span className="rank">#3</span>
                   <div className="bar-container">
-                    <div className="bar-fill" style={{ width: '45%' }}></div>
+                    <div className="bar-fill" style={{ width: "45%" }}></div>
                     <span className="bar-label">Gratis</span>
                   </div>
                   <span className="bar-pct">45%</span>
@@ -135,6 +162,7 @@ function AdminDashboard() {
           </div>
         </div>
       </div>
+      {reviewMessage && <p className="status-message">{reviewMessage}</p>}
     </main>
   );
 }

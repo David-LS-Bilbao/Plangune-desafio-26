@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 
 function BusinessStrategy() {
+  const [strategyOptimized, setStrategyOptimized] = useState(false);
+
+  const handleOptimize = () => {
+    setStrategyOptimized(true);
+  };
+
   return (
     <main className="business-strategy-main">
       <section className="strategy-header">
@@ -65,8 +71,17 @@ function BusinessStrategy() {
             Aumenta tu visibilidad con las funciones seleccionadas y maximiza la
             conversión de tus actividades.
           </p>
+          {strategyOptimized && (
+            <p className="section-note">Estrategia optimizada correctamente.</p>
+          )}
         </div>
-        <button className="btn-primary-full">Optimizar estrategia</button>
+        <button
+          className="btn-primary-full"
+          type="button"
+          onClick={handleOptimize}
+        >
+          Optimizar estrategia
+        </button>
       </section>
     </main>
   );

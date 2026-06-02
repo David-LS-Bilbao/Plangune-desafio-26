@@ -1,10 +1,18 @@
-import { create } from 'zustand';
-import { mockPlans, MOCK_USERS } from '../mocks/data';
+import { create } from "zustand";
+import { mockPlans, MOCK_USERS } from "../mocks/data";
 
 // --- AUTH STORE ---
 export const useAuthStore = create((set) => ({
   user: null, // null when not logged in
-  login: (role) => set({ user: MOCK_USERS[role] }),
+  login: (payload) => {
+    if (typeof payload === "string") {
+      set({ user: MOCK_USERS[payload] });
+    } else {
+      set({ user: payload });
+    }
+  },
+  updateUser: (partial) =>
+    set((state) => ({ user: { ...state.user, ...partial } })),
   logout: () => set({ user: null }),
 }));
 
@@ -14,7 +22,7 @@ export const useUserStore = create((set, get) => ({
   toggleFavorite: (planId) => {
     const { favorites } = get();
     if (favorites.includes(planId)) {
-      set({ favorites: favorites.filter(id => id !== planId) });
+      set({ favorites: favorites.filter((id) => id !== planId) });
     } else {
       set({ favorites: [...favorites, planId] });
     }
@@ -25,10 +33,10 @@ export const useUserStore = create((set, get) => ({
 // --- PLANS STORE (Search, Filters, Data) ---
 export const usePlansStore = create((set, get) => ({
   allPlans: mockPlans,
-  searchQuery: '',
+  searchQuery: "",
   setSearchQuery: (query) => set({ searchQuery: query }),
-  
-  activeCategory: 'Todos',
+
+  activeCategory: "Todos",
   setActiveCategory: (category) => set({ activeCategory: category }),
 
   // Derived state: get filtered plans
@@ -36,15 +44,16 @@ export const usePlansStore = create((set, get) => ({
     const { allPlans, searchQuery, activeCategory } = get();
     let filtered = allPlans;
 
-    if (activeCategory !== 'Todos') {
-      filtered = filtered.filter(plan => plan.category === activeCategory);
+    if (activeCategory !== "Todos") {
+      filtered = filtered.filter((plan) => plan.category === activeCategory);
     }
 
-    if (searchQuery.trim() !== '') {
+    if (searchQuery.trim() !== "") {
       const q = searchQuery.toLowerCase();
-      filtered = filtered.filter(plan => 
-        plan.title.toLowerCase().includes(q) || 
-        plan.location.toLowerCase().includes(q)
+      filtered = filtered.filter(
+        (plan) =>
+          plan.title.toLowerCase().includes(q) ||
+          plan.location.toLowerCase().includes(q),
       );
     }
 
@@ -52,6 +61,6 @@ export const usePlansStore = create((set, get) => ({
   },
 
   getPlanById: (id) => {
-    return get().allPlans.find(p => p.id === parseInt(id));
-  }
+    return get().allPlans.find((p) => p.id === parseInt(id));
+  },
 }));

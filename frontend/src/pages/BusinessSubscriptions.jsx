@@ -1,6 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 
 function BusinessSubscriptions() {
+  const [selectedPlan, setSelectedPlan] = useState(null);
+
+  const handleSelectPlan = (planName) => {
+    setSelectedPlan(planName);
+  };
+
   return (
     <main className="business-subscriptions-main">
       <section className="subscriptions-header">
@@ -9,6 +15,9 @@ function BusinessSubscriptions() {
         <p className="page-subtitle">
           Elige el plan que mejor impulse tus promociones y resultados.
         </p>
+        {selectedPlan && (
+          <p className="section-note">Plan seleccionado: {selectedPlan}</p>
+        )}
       </section>
 
       <section className="subscriptions-grid">
@@ -22,7 +31,13 @@ function BusinessSubscriptions() {
             <li>2 ofertas patrocinadas</li>
             <li>Acceso a estadísticas simples</li>
           </ul>
-          <button className="btn-primary-full">Seleccionar plan</button>
+          <button
+            className="btn-primary-full"
+            type="button"
+            onClick={() => handleSelectPlan("Base")}
+          >
+            Seleccionar plan
+          </button>
         </article>
 
         <article className="subscription-card featured">
@@ -36,7 +51,13 @@ function BusinessSubscriptions() {
             <li>Filtro patrocinado activado</li>
             <li>Mailing mensual a familias</li>
           </ul>
-          <button className="btn-primary-full">Seleccionar plan</button>
+          <button
+            className="btn-primary-full"
+            type="button"
+            onClick={() => handleSelectPlan("Pro")}
+          >
+            Seleccionar plan
+          </button>
         </article>
 
         <article className="subscription-card">
@@ -49,7 +70,13 @@ function BusinessSubscriptions() {
             <li>Campañas de mailing personalizadas</li>
             <li>Soporte prioritario</li>
           </ul>
-          <button className="btn-primary-full">Seleccionar plan</button>
+          <button
+            className="btn-primary-full"
+            type="button"
+            onClick={() => handleSelectPlan("Premium")}
+          >
+            Seleccionar plan
+          </button>
         </article>
       </section>
     </main>

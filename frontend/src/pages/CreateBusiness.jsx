@@ -9,6 +9,7 @@ function CreateBusiness() {
     businessName: "",
     category: "",
     address: "",
+    nif: "",
     phone: "",
     email: "",
     password: "",
@@ -21,7 +22,15 @@ function CreateBusiness() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    login("business");
+    login({
+      role: "business",
+      id: `biz_${Date.now()}`,
+      name: form.businessName || "Negocio Txiki",
+      email: form.email,
+      nif: form.nif,
+      address: form.address,
+      avatar: "TP",
+    });
     navigate("/negocio/dashboard");
   };
 
@@ -80,6 +89,22 @@ function CreateBusiness() {
               value={form.address}
               onChange={handleChange}
               placeholder="Calle Mayor 12"
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label" htmlFor="nif">
+              NIF
+            </label>
+            <input
+              id="nif"
+              name="nif"
+              type="text"
+              className="form-input"
+              value={form.nif}
+              onChange={handleChange}
+              placeholder="A12345678"
+              required
             />
           </div>
 

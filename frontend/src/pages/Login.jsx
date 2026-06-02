@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../store";
 import LoginForm from "../components/auth/LoginForm";
 
 function Login() {
   const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
   const [registerRole, setRegisterRole] = useState("family");
 
   const handleRegister = () => {
@@ -45,7 +47,14 @@ function Login() {
 
           {/* Social Buttons */}
           <div className="social-buttons">
-            <button className="btn-social">
+            <button
+              className="btn-social"
+              type="button"
+              onClick={() => {
+                login("family");
+                navigate("/planes");
+              }}
+            >
               <img
                 src="https://www.svgrepo.com/show/475656/google-color.svg"
                 alt="Google"

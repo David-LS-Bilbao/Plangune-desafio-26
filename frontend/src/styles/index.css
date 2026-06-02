@@ -6081,7 +6081,8 @@ body {
 }
 
 .favorites-main,
-.create-account-main {
+.create-account-main,
+.business-profile-main {
   width: 100%;
   max-width: var(--spacing-container-max);
   margin: 0 auto;

@@ -20,7 +20,7 @@ function BusinessOverview() {
         <button
           className="action-card primary col-span-2 md:col-span-1"
           type="button"
-          onClick={() => navigate("/negocio/crear-oferta")}
+          onClick={() => navigate("/negocio")}
         >
           <div className="action-icon">
             <span className="material-symbols-outlined fill">add_circle</span>
@@ -33,7 +33,11 @@ function BusinessOverview() {
         </button>
 
         {/* Action 2: Secondary Focus */}
-        <button className="action-card secondary">
+        <button
+          className="action-card secondary"
+          type="button"
+          onClick={() => navigate("/negocio/crear-oferta")}
+        >
           <div className="action-icon">
             <span className="material-symbols-outlined">sell</span>
           </div>
@@ -80,7 +84,7 @@ function BusinessOverview() {
         <button
           className="action-card utility"
           type="button"
-          onClick={() => navigate("/negocio")}
+          onClick={() => navigate("/negocio/perfil")}
         >
           <div className="action-icon-utility text-primary">
             <span className="material-symbols-outlined">edit</span>
@@ -113,7 +117,11 @@ function BusinessOverview() {
       <section className="kpis-section">
         <div className="kpis-header">
           <h3 className="kpis-title">Rendimiento Actual</h3>
-          <button className="btn-link">
+          <button
+            className="btn-link"
+            type="button"
+            onClick={() => navigate("/negocio/rendimiento")}
+          >
             Ver informe detallado
             <span className="material-symbols-outlined text-sm">
               arrow_forward

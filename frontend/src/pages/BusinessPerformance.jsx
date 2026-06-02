@@ -1,11 +1,16 @@
-import React from 'react';
+import React, { useState } from "react";
 
 function BusinessPerformance() {
+  const [showFullReport, setShowFullReport] = useState(false);
+
   return (
     <main className="business-performance-main">
       <div className="performance-header">
         <h2 className="performance-title">Resumen de Rendimiento</h2>
-        <p className="performance-subtitle">Consulta el impacto de tus actividades y ofertas en los últimos 30 días.</p>
+        <p className="performance-subtitle">
+          Consulta el impacto de tus actividades y ofertas en los últimos 30
+          días.
+        </p>
       </div>
 
       {/* BENTO GRID: METRICS */}
@@ -13,9 +18,13 @@ function BusinessPerformance() {
         {/* KPI 1: Visualizaciones */}
         <div className="metric-card">
           <div className="metric-header">
-            <span className="material-symbols-outlined icon-secondary">visibility</span>
+            <span className="material-symbols-outlined icon-secondary">
+              visibility
+            </span>
             <div className="trend-badge positive">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
+              <span className="material-symbols-outlined text-sm">
+                trending_up
+              </span>
               <span>+12%</span>
             </div>
           </div>
@@ -28,9 +37,13 @@ function BusinessPerformance() {
         {/* KPI 2: Clics */}
         <div className="metric-card">
           <div className="metric-header">
-            <span className="material-symbols-outlined icon-primary">ads_click</span>
+            <span className="material-symbols-outlined icon-primary">
+              ads_click
+            </span>
             <div className="trend-badge positive">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
+              <span className="material-symbols-outlined text-sm">
+                trending_up
+              </span>
               <span>+8%</span>
             </div>
           </div>
@@ -43,9 +56,13 @@ function BusinessPerformance() {
         {/* KPI 3: Guardadas */}
         <div className="metric-card">
           <div className="metric-header">
-            <span className="material-symbols-outlined icon-tertiary">bookmark</span>
+            <span className="material-symbols-outlined icon-tertiary">
+              bookmark
+            </span>
             <div className="trend-badge positive">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
+              <span className="material-symbols-outlined text-sm">
+                trending_up
+              </span>
               <span>+15%</span>
             </div>
           </div>
@@ -58,7 +75,9 @@ function BusinessPerformance() {
         {/* KPI 4: Valoración */}
         <div className="metric-card gradient">
           <div className="metric-header">
-            <span className="material-symbols-outlined icon-star fill">star</span>
+            <span className="material-symbols-outlined icon-star fill">
+              star
+            </span>
             <span className="badge-neutral">Media Global</span>
           </div>
           <div className="metric-content">
@@ -77,9 +96,22 @@ function BusinessPerformance() {
         <div className="chart-section col-span-2">
           <div className="chart-header">
             <h3 className="chart-title">Interacción Semanal</h3>
-            <button className="btn-link-sm">Ver reporte completo</button>
+            <button
+              className="btn-link-sm"
+              type="button"
+              onClick={() => setShowFullReport(true)}
+            >
+              Ver reporte completo
+            </button>
           </div>
-          
+          {showFullReport && (
+            <div className="report-note">
+              <p>
+                Mostrando datos extendidos y recomendaciones de optimización.
+              </p>
+            </div>
+          )}
+
           {/* CSS Bar Chart Representation */}
           <div className="bar-chart-container">
             <div className="chart-bar-group">
@@ -148,7 +180,10 @@ function BusinessPerformance() {
                   </div>
                 </div>
               </div>
-              <p className="review-text">"El taller de cerámica fue increíble, los niños se lo pasaron genial. Muy bien organizado."</p>
+              <p className="review-text">
+                "El taller de cerámica fue increíble, los niños se lo pasaron
+                genial. Muy bien organizado."
+              </p>
             </div>
 
             {/* Review 2 */}
@@ -166,7 +201,10 @@ function BusinessPerformance() {
                   </div>
                 </div>
               </div>
-              <p className="review-text">"Buen precio usando la oferta de la app. El local estaba un poco lleno, pero la atención fue rápida."</p>
+              <p className="review-text">
+                "Buen precio usando la oferta de la app. El local estaba un poco
+                lleno, pero la atención fue rápida."
+              </p>
             </div>
 
             {/* Review 3 */}
@@ -184,7 +222,10 @@ function BusinessPerformance() {
                   </div>
                 </div>
               </div>
-              <p className="review-text">"Instalaciones muy limpias y adaptadas para carritos. Volveremos seguro el próximo fin de semana."</p>
+              <p className="review-text">
+                "Instalaciones muy limpias y adaptadas para carritos. Volveremos
+                seguro el próximo fin de semana."
+              </p>
             </div>
           </div>
         </div>

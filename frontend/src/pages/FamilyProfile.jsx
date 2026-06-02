@@ -3,6 +3,7 @@ import { useAuthStore } from "../store";
 
 function FamilyProfile() {
   const user = useAuthStore((state) => state.user);
+  const updateUser = useAuthStore((state) => state.updateUser);
   const [preferences, setPreferences] = useState({
     carrito: true,
     cambiador: true,
@@ -10,17 +11,53 @@ function FamilyProfile() {
     presupuesto: true,
     tranquilos: false,
   });
+  const [children, setChildren] = useState([
+    { id: 1, type: "Bebé", age: "8 meses" },
+    { id: 2, type: "Niño/a", age: "3 años" },
+  ]);
+  const [avatar, setAvatar] = useState(user?.avatar || "FA");
+  const [saved, setSaved] = useState(false);
 
   const togglePreference = (key) => {
     setPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleAvatarEdit = () => {
+    const newAvatar = window.prompt("Introduce tus iniciales", avatar);
+    if (newAvatar) {
+      setAvatar(newAvatar.toUpperCase().slice(0, 2));
+      updateUser({ avatar: newAvatar.toUpperCase().slice(0, 2) });
+    }
+  };
+
+  const handleAddChild = () => {
+    const nextId = children.length + 1;
+    setChildren((prev) => [
+      ...prev,
+      { id: nextId, type: "Niño/a", age: "0-2 años" },
+    ]);
+  };
+
+  const handleRemoveChild = (id) => {
+    setChildren((prev) => prev.filter((child) => child.id !== id));
+  };
+
+  const handleSaveProfile = () => {
+    updateUser({ preferences });
+    setSaved(true);
+    window.setTimeout(() => setSaved(false), 2000);
   };
 
   return (
     <main className="family-profile-main">
       <section className="profile-header-section">
         <div className="avatar-wrapper">
-          <div className="profile-avatar">{user?.avatar || "FA"}</div>
-          <button className="btn-edit-avatar" type="button">
+          <div className="profile-avatar">{avatar}</div>
+          <button
+            className="btn-edit-avatar"
+            type="button"
+            onClick={handleAvatarEdit}
+          >
             <span className="material-symbols-outlined text-sm">edit</span>
           </button>
         </div>
@@ -49,42 +86,37 @@ function FamilyProfile() {
       <section className="profile-section">
         <div className="section-header">
           <h2 className="section-label mb-0">Edades de los peques</h2>
-          <button className="btn-text-primary" type="button">
+          <button
+            className="btn-text-primary"
+            type="button"
+            onClick={handleAddChild}
+          >
             <span className="material-symbols-outlined text-sm">add</span>{" "}
             Añadir
           </button>
         </div>
 
         <div className="children-list">
-          <div className="child-item">
-            <div className="child-info">
-              <div className="child-icon bg-primary-light">
-                <span className="material-symbols-outlined">child_care</span>
+          {children.map((child) => (
+            <div key={child.id} className="child-item">
+              <div className="child-info">
+                <div className="child-icon bg-primary-light">
+                  <span className="material-symbols-outlined">child_care</span>
+                </div>
+                <div className="child-details">
+                  <p className="child-type">{child.type}</p>
+                  <p className="child-age">{child.age}</p>
+                </div>
               </div>
-              <div className="child-details">
-                <p className="child-type">Bebé</p>
-                <p className="child-age">8 meses</p>
-              </div>
+              <button
+                className="btn-icon-danger"
+                type="button"
+                onClick={() => handleRemoveChild(child.id)}
+              >
+                <span className="material-symbols-outlined">delete</span>
+              </button>
             </div>
-            <button className="btn-icon-danger" type="button">
-              <span className="material-symbols-outlined">delete</span>
-            </button>
-          </div>
-
-          <div className="child-item">
-            <div className="child-info">
-              <div className="child-icon bg-secondary-light">
-                <span className="material-symbols-outlined">face</span>
-              </div>
-              <div className="child-details">
-                <p className="child-type">Niño/a</p>
-                <p className="child-age">3 años</p>
-              </div>
-            </div>
-            <button className="btn-icon-danger" type="button">
-              <span className="material-symbols-outlined">delete</span>
-            </button>
-          </div>
+          ))}
         </div>
       </section>
 
@@ -179,9 +211,16 @@ function FamilyProfile() {
       </section>
 
       <section className="profile-actions">
-        <button className="btn-primary-full" type="button">
+        <button
+          className="btn-primary-full"
+          type="button"
+          onClick={handleSaveProfile}
+        >
           Guardar perfil
         </button>
+        {saved && (
+          <p className="status-message">Perfil guardado correctamente.</p>
+        )}
       </section>
     </main>
   );
