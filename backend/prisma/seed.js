@@ -5,7 +5,7 @@
  * Solo para desarrollo/demo local. NO usar contra entornos compartidos o producción.
  *
  * Orden de ejecución:
- *   1. seedUsers()      — 5 usuarios demo de tipo 'business' (IDs explícitos 1–5)
+ *   1. seedUsers()      — 5 usuarios demo 'business' (IDs 1–5) + 1 usuario 'family' (ID 100)
  *   2. seedBusinesses() — 5 negocios demo vinculados a esos usuarios (IDs explícitos 1–5)
  *   3. seedEvents()     — eventos de mockEvents.js (IDs explícitos del mock)
  *   4. syncSequences()  — resincroniza las secuencias SERIAL para evitar choques
@@ -35,6 +35,17 @@ const demoUsers = [
   { id: 4, email: 'negocio4@demo.eus', password: 'seed-demo-no-real-4', role: 'business' },
   { id: 5, email: 'negocio5@demo.eus', password: 'seed-demo-no-real-5', role: 'business' },
 ];
+
+/**
+ * Usuario family demo (ID 100) para favoritos mientras no exista auth.
+ * Lo usa favorite.service.js como MOCK_FAMILY_USER_ID. No es un negocio (1–5).
+ */
+const demoFamilyUser = {
+  id: 100,
+  email: 'familia@demo.eus',
+  password: 'seed-demo-no-real-family',
+  role: 'family',
+};
 
 /** 5 negocios demo. IDs 1–5 coinciden con los business_id referenciados por mockEvents. */
 const demoBusinesses = [
@@ -68,7 +79,7 @@ function prepareEventForPrisma({ fecha_inicio, fecha_fin, ...rest }) {
 
 async function seedUsers() {
   let count = 0;
-  for (const user of demoUsers) {
+  for (const user of [...demoUsers, demoFamilyUser]) {
     const { id, ...data } = user;
     await prisma.user.upsert({
       where:  { id },
@@ -136,7 +147,7 @@ async function syncSequences() {
 
 async function main() {
   const users     = await seedUsers();
-  console.log(`  ✔ users      : ${users} registros (upsert)`);
+  console.log(`  ✔ users      : ${users} registros (upsert) — 5 business + 1 family (id 100)`);
 
   const businesses = await seedBusinesses();
   console.log(`  ✔ businesses : ${businesses} registros (upsert)`);
