@@ -32,6 +32,7 @@ export function getRecommendations(context = {}) {
     let score = 50;
     const reasons = [];
 
+    // Criterios positivos simples: edad, carrito, lluvia, presupuesto y cercanía.
     if (childrenAges.length > 0 && coversAges(activity, childrenAges)) {
       score += 20;
       reasons.push(
@@ -69,5 +70,6 @@ export function getRecommendations(context = {}) {
   });
 
   scored.sort((a, b) => b.score - a.score);
+  // El contrato público limita la respuesta a tres recomendaciones.
   return scored.slice(0, 3);
 }

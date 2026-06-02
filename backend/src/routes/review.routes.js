@@ -9,6 +9,7 @@ const router = Router();
 // Montado bajo /api/reviews desde routes/index.js
 router.post(
   '/',
+  // Validaciones de contrato: reseña vinculada a actividad y rating acotado.
   [
     body('activityId').notEmpty().withMessage('activityId es obligatorio'),
     body('rating')

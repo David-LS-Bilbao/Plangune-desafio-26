@@ -9,6 +9,7 @@ const router = Router();
 // Montado bajo /api/assistant desde routes/index.js
 router.post(
   '/family-plan',
+  // Validación mínima del payload antes de construir el fallback familiar.
   [
     body('message')
       .optional()

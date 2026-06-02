@@ -27,6 +27,7 @@ function parseContext(query) {
 
 /** GET /api/recommendations — hasta 3 planes con Family Score. */
 export const getRecommendationsHandler = asyncHandler(async (req, res) => {
+  // La query string llega como texto; el parser deja tipos simples para el service.
   const context = parseContext(req.query);
   res.status(200).json(getRecommendations(context));
 });

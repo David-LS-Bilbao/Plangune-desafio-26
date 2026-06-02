@@ -9,6 +9,7 @@ const router = Router();
 // Montado bajo /api/incidents desde routes/index.js
 router.post(
   '/',
+  // Validaciones de contrato: la incidencia siempre apunta a una actividad y tiene tipo.
   [
     body('activityId').notEmpty().withMessage('activityId es obligatorio'),
     body('type').notEmpty().withMessage('type es obligatorio'),

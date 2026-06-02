@@ -8,6 +8,7 @@ const app = createApp();
 const activityId = getAllActivities()[0].id;
 
 describe('POST /api/reviews', () => {
+  // Cubre creación, rango de rating y referencia a actividad inexistente.
   it('crea una reseña (201) para una actividad existente', async () => {
     const res = await request(app)
       .post('/api/reviews')
