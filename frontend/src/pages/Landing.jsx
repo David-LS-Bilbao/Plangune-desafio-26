@@ -1,8 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/common/Navbar';
 
 function Landing() {
   return (
+    <>
+    <Navbar />
     <main className="landing-main">
       {/* Hero Section */}
       <section className="hero-section">
@@ -12,25 +15,7 @@ function Landing() {
           <div className="hero-overlay"></div>
         </div>
         
-        {/* Floating Badges */}
-        <div className="floating-badges">
-          <div className="badge badge-1">
-            <span className="material-symbols-outlined icon-primary">stroller</span>
-            <span>Carrito</span>
-          </div>
-          <div className="badge badge-2">
-            <span className="material-symbols-outlined icon-secondary">baby_changing_station</span>
-            <span>Cambiador</span>
-          </div>
-          <div className="badge badge-3">
-            <span className="material-symbols-outlined icon-tertiary">umbrella</span>
-            <span>Plan de lluvia</span>
-          </div>
-          <div className="badge badge-4">
-            <span className="material-symbols-outlined icon-primary">spa</span>
-            <span>Bajo estrés</span>
-          </div>
-        </div>
+        
 
         {/* Content Card Overlay */}
         <div className="hero-card">
@@ -199,6 +184,7 @@ function Landing() {
         </div>
       </section>
     </main>
+    </>
   );
 }
 
