@@ -243,27 +243,34 @@ Respuesta `201`: objeto incidencia con `id`, `status: "open"` y `createdAt`.
 
 ## Favoritos
 
-> Sin auth: un único usuario mock. Operaciones idempotentes.
+> **Fuente runtime actual:** Prisma/PostgreSQL sobre la tabla real `user_favorite_events`
+> (favoritos de **events reales**). Sin auth todavía: usuario family mock fijo (id 100, creado
+> por el seed). Operaciones idempotentes. Ver
+> [features/backend-favorites-events-runtime.md](features/backend-favorites-events-runtime.md).
+>
+> **Transición de clave:** la ruta usa `:activityId` y la respuesta incluye `activityId`,
+> pero es un **alias legacy temporal** de `eventId` (la clave canónica nueva). El parámetro se
+> trata internamente como id de evento (entero). No retirar `activityId` hasta que el frontend migre.
 
 ### `GET /api/favorites`
-Lista las actividades marcadas como favoritas (array de actividades).
+Lista los **eventos** marcados como favoritos (array de eventos reales, shape de la tabla `events`).
 
 ### `POST /api/favorites/:activityId`
-Añade a favoritos. `404` si la actividad no existe.
+Añade a favoritos. `:activityId` = id de evento (entero). `404` si el evento no existe. Idempotente.
 
 Respuesta `201`:
 
 ```json
-{ "activityId": "act-001", "favorited": true }
+{ "eventId": 1, "activityId": 1, "favorited": true }
 ```
 
 ### `DELETE /api/favorites/:activityId`
-Quita de favoritos.
+Quita de favoritos. Idempotente (no falla si no estaba: `removed: false`).
 
 Respuesta `200`:
 
 ```json
-{ "activityId": "act-001", "favorited": false, "removed": true }
+{ "eventId": 1, "activityId": 1, "favorited": false, "removed": true }
 ```
 
 ---

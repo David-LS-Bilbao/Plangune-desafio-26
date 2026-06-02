@@ -97,8 +97,8 @@ sin la conversión, el seed falla con "premature end of input · expected ISO-86
 
 ### Pasos del seed (en orden)
 
-1. **`seedUsers`** — 5 usuarios demo de tipo `'business'` (IDs explícitos 1–5, passwords placeholders).
-2. **`seedBusinesses`** — 5 negocios demo vinculados a esos usuarios (IDs explícitos 1–5, necesarios como FK de `events`).
+1. **`seedUsers`** — 5 usuarios demo `'business'` (IDs 1–5) **+ 1 usuario `'family'` (id 100)**. El usuario family es el que usan los **favoritos** mientras no exista auth (`MOCK_FAMILY_USER_ID = 100` en `favorite.service.js`); ver [features/backend-favorites-events-runtime.md](features/backend-favorites-events-runtime.md). Passwords son placeholders.
+2. **`seedBusinesses`** — 5 negocios demo vinculados a los usuarios business 1–5 (necesarios como FK de `events`).
 3. **`seedEvents`** — 10 eventos de `mockEvents.js`; las fechas se convierten a `new Date(...)` antes del upsert.
 4. **`syncSequences`** — resincroniza las secuencias SERIAL de `users`, `businesses` y `events` al `MAX(id)` actual, para que futuros inserts sin ID explícito no choquen con los IDs ya ocupados.
 
