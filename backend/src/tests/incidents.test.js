@@ -8,6 +8,7 @@ const app = createApp();
 const activityId = getAllActivities()[0].id;
 
 describe('POST /api/incidents', () => {
+  // Cubre creación, validación de payload y referencia a actividad inexistente.
   it('crea una incidencia (201) para una actividad existente', async () => {
     const res = await request(app)
       .post('/api/incidents')

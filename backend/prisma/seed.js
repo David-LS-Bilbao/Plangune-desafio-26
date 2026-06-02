@@ -33,6 +33,7 @@ async function seedActivities() {
 }
 
 async function main() {
+  // Orquesta el seed para mantener el manejo de errores en un único punto.
   const count = await seedActivities();
   console.log(`✅ Seed completado: ${count} actividades (upsert idempotente).`);
 }

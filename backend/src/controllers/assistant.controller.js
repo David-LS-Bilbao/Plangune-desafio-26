@@ -5,6 +5,7 @@ import { getFamilyPlanFallback } from '../services/assistant.service.js';
 export const familyPlanHandler = asyncHandler(async (req, res) => {
   const { childrenAges, strollerFriendly, rainSuitable, budget, municipality } = req.body;
 
+  // Normaliza solo los campos que usa el recomendador; el texto del usuario queda fuera del MVP.
   const context = {
     childrenAges: Array.isArray(childrenAges) ? childrenAges : [],
     strollerFriendly,
