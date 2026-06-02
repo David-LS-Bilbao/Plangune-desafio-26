@@ -1,21 +1,31 @@
-import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { usePlansStore, useUserStore } from '../store';
+import React, { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { usePlansStore, useUserStore } from "../store";
 
 function PlanDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  
-  const plan = usePlansStore(state => state.getPlanById(id));
-  
-  const isFavorite = useUserStore(state => state.isFavorite(parseInt(id)));
-  const toggleFavorite = useUserStore(state => state.toggleFavorite);
+  const [reportStatus, setReportStatus] = useState("");
+
+  const plan = usePlansStore((state) => state.getPlanById(id));
+
+  const isFavorite = useUserStore((state) => state.isFavorite(parseInt(id)));
+  const toggleFavorite = useUserStore((state) => state.toggleFavorite);
 
   if (!plan) {
     return (
-      <main className="plan-detail-main" style={{ padding: '2rem', textAlign: 'center' }}>
+      <main
+        className="plan-detail-main"
+        style={{ padding: "2rem", textAlign: "center" }}
+      >
         <h2>Plan no encontrado</h2>
-        <button onClick={() => navigate('/planes')} className="btn-primary" style={{ marginTop: '1rem', padding: '0.5rem 1rem' }}>Volver</button>
+        <button
+          onClick={() => navigate("/planes")}
+          className="btn-primary"
+          style={{ marginTop: "1rem", padding: "0.5rem 1rem" }}
+        >
+          Volver
+        </button>
       </main>
     );
   }
@@ -40,8 +50,15 @@ function PlanDetail() {
         </button>
       </div>
 
-      <div style={{ padding: '0 var(--spacing-margin-mobile)' }}>
-        <p style={{ marginTop: '1rem', color: 'var(--on-surface-variant)', fontSize: '16px', lineHeight: '1.5' }}>
+      <div style={{ padding: "0 var(--spacing-margin-mobile)" }}>
+        <p
+          style={{
+            marginTop: "1rem",
+            color: "var(--on-surface-variant)",
+            fontSize: "16px",
+            lineHeight: "1.5",
+          }}
+        >
           {plan.description}
         </p>
       </div>
@@ -84,7 +101,9 @@ function PlanDetail() {
           </div>
           <div className="info-text">
             <span className="info-label">Carrito</span>
-            <span className="info-value">{plan.tags?.includes('Apto Carrito') ? 'Sí' : 'No'}</span>
+            <span className="info-value">
+              {plan.tags?.includes("Apto Carrito") ? "Sí" : "No"}
+            </span>
           </div>
         </div>
 
@@ -94,38 +113,66 @@ function PlanDetail() {
           </div>
           <div className="info-text">
             <span className="info-label">Recomendado</span>
-            <span className="info-value">{plan.isIdeal ? 'Ideal para ti' : 'Buen plan'}</span>
+            <span className="info-value">
+              {plan.isIdeal ? "Ideal para ti" : "Buen plan"}
+            </span>
           </div>
         </div>
       </section>
 
       {/* Main Actions */}
       <section className="main-actions">
-        <button className="btn-primary-large">
+        <button
+          className="btn-primary-large"
+          type="button"
+          onClick={() =>
+            window.open(
+              `https://www.google.com/maps/search/${encodeURIComponent(plan.location)}`,
+              "_blank",
+            )
+          }
+        >
           <span className="material-symbols-outlined">directions</span>
           Cómo llegar
         </button>
-        <button 
-          className="btn-outline-large" 
+        <button
+          className="btn-outline-large"
           onClick={() => toggleFavorite(parseInt(id))}
-          style={{ 
-            backgroundColor: isFavorite ? 'var(--primary-container)' : 'transparent',
-            borderColor: isFavorite ? 'var(--primary-container)' : 'var(--outline-variant)',
-            color: isFavorite ? 'var(--on-primary-container)' : 'var(--on-surface)'
+          style={{
+            backgroundColor: isFavorite
+              ? "var(--primary-container)"
+              : "transparent",
+            borderColor: isFavorite
+              ? "var(--primary-container)"
+              : "var(--outline-variant)",
+            color: isFavorite
+              ? "var(--on-primary-container)"
+              : "var(--on-surface)",
           }}
         >
-          <span className={`material-symbols-outlined ${isFavorite ? 'fill' : 'outline'}`}>favorite</span>
-          {isFavorite ? 'Guardado' : 'Favorito'}
+          <span
+            className={`material-symbols-outlined ${isFavorite ? "fill" : "outline"}`}
+          >
+            favorite
+          </span>
+          {isFavorite ? "Guardado" : "Favorito"}
         </button>
       </section>
 
       {/* Report Button */}
       <div className="report-action">
-        <button className="btn-report">
+        <button
+          className="btn-report"
+          type="button"
+          onClick={() =>
+            setReportStatus("Tu reporte ha sido enviado. Gracias.")
+          }
+        >
           <span className="material-symbols-outlined text-lg">report</span>
           <span>Reportar incidencia</span>
         </button>
       </div>
+      {reportStatus && <p className="status-message">{reportStatus}</p>}
 
       {/* Reviews Section */}
       <section className="reviews-section">
@@ -150,7 +197,8 @@ function PlanDetail() {
             </div>
           </div>
           <p className="review-text">
-            "Excelente plan para el fin de semana. Muy bien acondicionado para carritos."
+            "Excelente plan para el fin de semana. Muy bien acondicionado para
+            carritos."
           </p>
         </div>
       </section>

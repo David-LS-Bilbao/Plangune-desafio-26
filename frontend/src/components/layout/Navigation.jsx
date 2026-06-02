@@ -1,66 +1,97 @@
-import React from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../../store';
+import React from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { useAuthStore } from "../../store";
 
 function Navigation() {
-  const user = useAuthStore(state => state.user);
+  const user = useAuthStore((state) => state.user);
   const location = useLocation();
+  const hideRoutes = ["/", "/login", "/crear-familia", "/crear-negocio"];
 
-  // Hide navigation on landing and login pages
-  if (location.pathname === '/' || location.pathname === '/login') {
+  if (hideRoutes.includes(location.pathname)) {
     return null;
   }
 
-  // Admin Navigation
-  if (user?.role === 'admin') {
+  const linkClass = ({ isActive }) => `nav-link${isActive ? " active" : ""}`;
+
+  if (user?.role === "admin") {
     return (
-      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: 'var(--surface-container)', display: 'flex', justifyContent: 'space-around', padding: '0.5rem 0', borderTop: '1px solid var(--outline-variant)', zIndex: 50 }}>
-        <NavLink to="/admin" style={({isActive}) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' })}>
-          <span className={`material-symbols-outlined ${location.pathname === '/admin' ? 'fill' : ''}`}>dashboard</span>
-          <span style={{ fontSize: '12px', fontWeight: 500, marginTop: '2px' }}>Panel</span>
+      <nav className="bottom-nav">
+        <NavLink to="/admin" className={linkClass} end>
+          <span
+            className={`material-symbols-outlined ${location.pathname === "/admin" ? "fill" : ""}`}
+          >
+            dashboard
+          </span>
+          <span className="nav-label">Panel</span>
         </NavLink>
-        <NavLink to="/admin/data" style={({isActive}) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' })}>
-          <span className={`material-symbols-outlined ${location.pathname === '/admin/data' ? 'fill' : ''}`}>analytics</span>
-          <span style={{ fontSize: '12px', fontWeight: 500, marginTop: '2px' }}>Datos</span>
+        <NavLink to="/admin/data" className={linkClass} end>
+          <span
+            className={`material-symbols-outlined ${location.pathname === "/admin/data" ? "fill" : ""}`}
+          >
+            analytics
+          </span>
+          <span className="nav-label">Datos</span>
         </NavLink>
       </nav>
     );
   }
 
-  // Business Navigation
-  if (user?.role === 'business') {
+  if (user?.role === "business") {
     return (
-      <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: 'var(--surface-container)', display: 'flex', justifyContent: 'space-around', padding: '0.5rem 0', borderTop: '1px solid var(--outline-variant)', zIndex: 50 }}>
-        <NavLink to="/negocio/dashboard" style={({isActive}) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' })}>
-          <span className={`material-symbols-outlined ${location.pathname === '/negocio/dashboard' ? 'fill' : ''}`}>home</span>
-          <span style={{ fontSize: '12px', fontWeight: 500, marginTop: '2px' }}>Inicio</span>
+      <nav className="bottom-nav">
+        <NavLink to="/negocio/dashboard" className={linkClass} end>
+          <span
+            className={`material-symbols-outlined ${location.pathname === "/negocio/dashboard" ? "fill" : ""}`}
+          >
+            home
+          </span>
+          <span className="nav-label">Inicio</span>
         </NavLink>
-        <NavLink to="/negocio/ofertas" style={({isActive}) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' })}>
-          <span className={`material-symbols-outlined ${location.pathname === '/negocio/ofertas' ? 'fill' : ''}`}>local_offer</span>
-          <span style={{ fontSize: '12px', fontWeight: 500, marginTop: '2px' }}>Ofertas</span>
+        <NavLink to="/negocio/ofertas" className={linkClass} end>
+          <span
+            className={`material-symbols-outlined ${location.pathname === "/negocio/ofertas" ? "fill" : ""}`}
+          >
+            local_offer
+          </span>
+          <span className="nav-label">Ofertas</span>
         </NavLink>
-        <NavLink to="/negocio" style={({isActive}) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' })}>
-          <span className={`material-symbols-outlined ${location.pathname === '/negocio' ? 'fill' : ''}`}>add_circle</span>
-          <span style={{ fontSize: '12px', fontWeight: 500, marginTop: '2px' }}>Actividad</span>
+        <NavLink to="/negocio" className={linkClass} end>
+          <span
+            className={`material-symbols-outlined ${location.pathname === "/negocio" ? "fill" : ""}`}
+          >
+            add_circle
+          </span>
+          <span className="nav-label">Actividad</span>
         </NavLink>
       </nav>
     );
   }
 
-  // Family Navigation (Default)
   return (
-    <nav style={{ position: 'fixed', bottom: 0, left: 0, right: 0, backgroundColor: 'var(--surface-container)', display: 'flex', justifyContent: 'space-around', padding: '0.5rem 0', borderTop: '1px solid var(--outline-variant)', zIndex: 50 }}>
-      <NavLink to="/planes" style={({isActive}) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' })}>
-        <span className={`material-symbols-outlined ${location.pathname === '/planes' ? 'fill' : ''}`}>search</span>
-        <span style={{ fontSize: '12px', fontWeight: 500, marginTop: '2px' }}>Explorar</span>
+    <nav className="bottom-nav">
+      <NavLink to="/planes" className={linkClass} end={false}>
+        <span
+          className={`material-symbols-outlined ${location.pathname.startsWith("/planes") ? "fill" : ""}`}
+        >
+          search
+        </span>
+        <span className="nav-label">Explorar</span>
       </NavLink>
-      <NavLink to="/perfil" style={({isActive}) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' })}>
-        <span className={`material-symbols-outlined ${location.pathname === '/perfil' ? 'fill' : ''}`}>favorite</span>
-        <span style={{ fontSize: '12px', fontWeight: 500, marginTop: '2px' }}>Guardados</span>
+      <NavLink to="/favoritos" className={linkClass} end>
+        <span
+          className={`material-symbols-outlined ${location.pathname === "/favoritos" ? "fill" : ""}`}
+        >
+          favorite
+        </span>
+        <span className="nav-label">Guardados</span>
       </NavLink>
-      <NavLink to="/perfil" style={({isActive}) => ({ display: 'flex', flexDirection: 'column', alignItems: 'center', textDecoration: 'none', color: isActive ? 'var(--primary)' : 'var(--on-surface-variant)' })}>
-        <span className={`material-symbols-outlined ${location.pathname === '/perfil' ? 'fill' : ''}`}>account_circle</span>
-        <span style={{ fontSize: '12px', fontWeight: 500, marginTop: '2px' }}>Perfil</span>
+      <NavLink to="/perfil" className={linkClass} end>
+        <span
+          className={`material-symbols-outlined ${location.pathname === "/perfil" ? "fill" : ""}`}
+        >
+          account_circle
+        </span>
+        <span className="nav-label">Perfil</span>
       </NavLink>
     </nav>
   );

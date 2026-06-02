@@ -1,6 +1,32 @@
-import React from 'react';
+import React, { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 function BusinessDashboard() {
+  const navigate = useNavigate();
+  const [activityName, setActivityName] = useState("");
+  const [category, setCategory] = useState("");
+  const [services, setServices] = useState(["Carrito", "Cambiador"]);
+  const [message, setMessage] = useState("");
+  const formRef = useRef(null);
+
+  const handleCreateActivity = () => {
+    formRef.current?.scrollIntoView({ behavior: "smooth" });
+    setMessage("Listo para añadir una nueva actividad.");
+  };
+
+  const handleServiceRemove = (serviceToRemove) => {
+    setServices((prev) =>
+      prev.filter((service) => service !== serviceToRemove),
+    );
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setMessage("Tu actividad se ha enviado a revisión.");
+    setActivityName("");
+    setCategory("");
+  };
+
   return (
     <main className="business-dashboard-main">
       {/* Header */}
@@ -17,12 +43,16 @@ function BusinessDashboard() {
             <span className="stat-value text-primary">2</span>
           </div>
           <div className="stat-icon bg-primary-container text-on-primary-container">
-            <span className="material-symbols-outlined fill">event_available</span>
+            <span className="material-symbols-outlined fill">
+              event_available
+            </span>
           </div>
         </div>
 
         <div className="stat-card">
-          <span className="material-symbols-outlined text-tertiary mb-2">pending_actions</span>
+          <span className="material-symbols-outlined text-tertiary mb-2">
+            pending_actions
+          </span>
           <div className="stat-info">
             <span className="stat-value block">1</span>
             <span className="stat-label">Pendiente</span>
@@ -30,7 +60,9 @@ function BusinessDashboard() {
         </div>
 
         <div className="stat-card">
-          <span className="material-symbols-outlined text-secondary mb-2 fill">star</span>
+          <span className="material-symbols-outlined text-secondary mb-2 fill">
+            star
+          </span>
           <div className="stat-info">
             <span className="stat-value block">12</span>
             <span className="stat-label">Reseñas</span>
@@ -39,60 +71,103 @@ function BusinessDashboard() {
       </section>
 
       {/* Primary Action */}
-      <button className="btn-primary-large mt-4 w-full">
+      <button
+        className="btn-primary-large mt-4 w-full"
+        type="button"
+        onClick={handleCreateActivity}
+      >
         <span className="material-symbols-outlined">add_circle</span>
         Crear actividad
       </button>
 
+      {message && <p className="status-message">{message}</p>}
+
       <div className="divider"></div>
 
       {/* New Activity Form */}
-      <section className="new-activity-section">
+      <section className="new-activity-section" ref={formRef}>
         <h2 className="section-title">Nueva actividad</h2>
-        
-        <form className="activity-form">
+
+        <form className="activity-form" onSubmit={handleSubmit}>
           {/* Field: Nombre */}
           <div className="form-group">
-            <label htmlFor="nombre" className="form-label">Nombre actividad</label>
-            <input type="text" id="nombre" className="form-input" placeholder="Ej: Taller de cuentos" />
+            <label htmlFor="nombre" className="form-label">
+              Nombre actividad
+            </label>
+            <input
+              type="text"
+              id="nombre"
+              className="form-input"
+              placeholder="Ej: Taller de cuentos"
+              value={activityName}
+              onChange={(e) => setActivityName(e.target.value)}
+              required
+            />
           </div>
 
           {/* Field: Categoría / Edad / Zona */}
           <div className="form-group">
-            <label htmlFor="categoria" className="form-label">Categoría / edad / zona</label>
+            <label htmlFor="categoria" className="form-label">
+              Categoría / edad / zona
+            </label>
             <div className="input-with-icon">
-              <select id="categoria" className="form-select" defaultValue="">
-                <option value="" disabled>Selecciona una opción...</option>
-                <option value="1">Interior · 0-3 años · Bilbao</option>
-                <option value="2">Exterior · 3-6 años · Getxo</option>
-                <option value="3">Museo · Todas · Barakaldo</option>
+              <select
+                id="categoria"
+                className="form-select"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+              >
+                <option value="" disabled>
+                  Selecciona una opción...
+                </option>
+                <option value="Interior · 0-3 años · Bilbao">
+                  Interior · 0-3 años · Bilbao
+                </option>
+                <option value="Exterior · 3-6 años · Getxo">
+                  Exterior · 3-6 años · Getxo
+                </option>
+                <option value="Museo · Todas · Barakaldo">
+                  Museo · Todas · Barakaldo
+                </option>
               </select>
-              <span className="material-symbols-outlined icon pointer-events-none">expand_more</span>
+              <span className="material-symbols-outlined icon pointer-events-none">
+                expand_more
+              </span>
             </div>
           </div>
 
           {/* Field: Servicios */}
           <div className="form-group">
-            <label htmlFor="servicios" className="form-label">Servicios</label>
+            <label htmlFor="servicios" className="form-label">
+              Servicios
+            </label>
             <div className="input-with-icon">
-              <input type="text" id="servicios" className="form-input pr-10" placeholder="Ej: carrito, cambiador, menú infantil..." />
+              <input
+                type="text"
+                id="servicios"
+                className="form-input pr-10"
+                placeholder="Ej: carrito, cambiador, menú infantil..."
+              />
               <span className="material-symbols-outlined icon">add</span>
             </div>
-            
+
             {/* Chips context */}
             <div className="chips-container mt-2">
-              <span className="chip">
-                Carrito 
-                <button type="button" className="btn-chip-delete">
-                  <span className="material-symbols-outlined text-sm">close</span>
-                </button>
-              </span>
-              <span className="chip">
-                Cambiador 
-                <button type="button" className="btn-chip-delete">
-                  <span className="material-symbols-outlined text-sm">close</span>
-                </button>
-              </span>
+              {services.map((service) => (
+                <span key={service} className="chip">
+                  {service}
+                  <button
+                    type="button"
+                    className="btn-chip-delete"
+                    onClick={() => handleServiceRemove(service)}
+                  >
+                    <span className="material-symbols-outlined text-sm">
+                      close
+                    </span>
+                  </button>
+                </span>
+              ))}
             </div>
           </div>
 
