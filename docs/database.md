@@ -1,8 +1,10 @@
 # PostgreSQL local · DESAFIO-26
 
 > **Fuente de verdad del schema:** [`docs/data/schema-real/init.sql`](data/schema-real/init.sql)
-> · `backend/prisma/schema.prisma` es su espejo fiel (11 modelos) · **Runtime: mock en memoria**
-> (sin migraciones ejecutadas todavía). Ver [ADR-0004](adr/0004-real-schema-source-of-truth.md).
+> · `backend/prisma/schema.prisma` es su espejo fiel (11 modelos).
+> · **La migración inicial existe** en `backend/prisma/migrations/` y debe aplicarse antes del seed.
+> · **Runtime de `/api/events`:** Prisma/PostgreSQL (cuando la DB está levantada).
+> · **Resto de endpoints:** mock en memoria todavía. Ver [ADR-0004](adr/0004-real-schema-source-of-truth.md).
 >
 > `docs/data/BBDD.sql` es referencia histórica, **no el contrato activo**.
 
@@ -57,12 +59,14 @@ Con el contenedor activo y `backend/.env` configurado:
 
 ```bash
 npm run prisma:generate --workspace backend   # genera el cliente Prisma
-npm run prisma:migrate  --workspace backend    # aplica las migraciones
+npm run prisma:migrate  --workspace backend    # aplica las migraciones (crea las tablas)
 npm run prisma:studio   --workspace backend    # abre la GUI de la DB (opcional)
 ```
 
-> El `schema.prisma` ya modela las **tablas reales** de `data/schema-real/init.sql` (ver
-> "Modelo de datos" más abajo) y **no se han ejecutado migraciones** todavía.
+> **Migración disponible:** la carpeta `backend/prisma/migrations/` contiene la migración
+> `20260602221433_init_real_schema_from_init_sql` que crea las 11 tablas del schema real.
+> **Debe estar versionada en el repo** para que cualquier miembro del equipo pueda recrear
+> la DB local con `prisma migrate` sin necesidad de construir el schema manualmente.
 >
 > **Estado del runtime por endpoint:**
 > - `GET /api/events`, `GET /api/events/:id` → **Prisma/PostgreSQL** cuando la DB local
@@ -71,16 +75,34 @@ npm run prisma:studio   --workspace backend    # abre la GUI de la DB (opcional)
 >   `/api/incidents`, `/api/favorites`, `/api/assistant`) → **mock en memoria** todavía.
 > - La base real sigue siendo `data/schema-real/init.sql` (ADR-0004).
 
-## Seed Prisma (MVP)
+## Seed Prisma (desarrollo local / demo)
 
-Existe un seed Prisma en [../backend/prisma/seed.js](../backend/prisma/seed.js) que inserta
-los eventos en PostgreSQL.
+Existe un seed en [../backend/prisma/seed.js](../backend/prisma/seed.js) que popula la DB
+local con datos de prueba. **Solo para desarrollo/demo. No usar en entornos compartidos.**
 
-- Usa **los mismos datos base** que el mock MVP (`backend/src/seed/mockEvents.js`):
-  los importa para no duplicar (shape 1:1 con el modelo `Event`).
-- Es **idempotente** (`upsert` por `id`): se puede ejecutar varias veces sin duplicar.
-- **Todavía no sustituye los services en memoria**: el backend sigue sirviendo el mock en
-  runtime. El seed se ejecutará cuando haya **DB local disponible**.
+### Por qué el seed crea users y businesses además de events
+
+La tabla `events` tiene una FK opcional `business_id → businesses.id`, y `businesses`
+tiene FK obligatoria `user_id → users.id`. Si `users` o `businesses` están vacíos cuando
+se insertan los eventos con `business_id` 1–5, PostgreSQL rechaza la inserción con error
+de clave foránea. El seed respeta la cadena de dependencias:
+
+```
+users  ←  businesses  ←  events
+```
+
+Además, `fecha_inicio` y `fecha_fin` en `mockEvents.js` son strings sin timezone
+(`"2026-06-10T10:00:00"`). Prisma requiere objetos `Date` o strings ISO-8601 completos;
+sin la conversión, el seed falla con "premature end of input · expected ISO-8601 DateTime".
+
+### Pasos del seed (en orden)
+
+1. **`seedUsers`** — 5 usuarios demo de tipo `'business'` (IDs explícitos 1–5, passwords placeholders).
+2. **`seedBusinesses`** — 5 negocios demo vinculados a esos usuarios (IDs explícitos 1–5, necesarios como FK de `events`).
+3. **`seedEvents`** — 10 eventos de `mockEvents.js`; las fechas se convierten a `new Date(...)` antes del upsert.
+4. **`syncSequences`** — resincroniza las secuencias SERIAL de `users`, `businesses` y `events` al `MAX(id)` actual, para que futuros inserts sin ID explícito no choquen con los IDs ya ocupados.
+
+Todos los upserts son **idempotentes**: puede ejecutarse varias veces sin duplicar.
 
 El seed está **registrado** en `backend/package.json`:
 
@@ -105,13 +127,56 @@ npm run db:seed --workspace backend
 #   node prisma/seed.js           (ejecución directa)
 ```
 
-> El seed **no cambia todavía el runtime de la API**: los services siguen sirviendo el mock
-> en memoria. Sembrar la DB no afecta a las respuestas de los endpoints por ahora.
+> **Después del seed**, `/api/events` y `/api/events/:id` consultan PostgreSQL directamente.
+> El resto de endpoints (`/api/activities`, `/api/recommendations`, `/api/reviews`,
+> `/api/incidents`, `/api/favorites`, `/api/assistant`) siguen usando mock en memoria y
+> no se ven afectados por el seed.
 >
-> **Siguiente paso futuro:** migrar los services de memoria a Prisma (lectura/escritura real),
-> manteniendo el contrato de endpoints intacto.
+> **Siguiente paso futuro:** migrar el resto de services de memoria a Prisma, manteniendo
+> el contrato de endpoints intacto.
+>
+> ⚠️ **Riesgo timezone:** `mockEvents.js` usa strings sin timezone (`"2026-06-10T10:00:00"`).
+> `new Date(string)` los interpreta en la timezone local del servidor, por lo que la hora
+> almacenada en PostgreSQL puede diferir de la prevista (p. ej. UTC+2 → 2h antes en UTC).
+> Para el MVP de desarrollo es aceptable. Si se necesita hora exacta de evento, añadir `Z`
+> o el offset explícito a las fechas del mock/seed antes de pasar a producción.
 
-## 5. Parar el contenedor
+## 5. Setup completo desde cero (todos los pasos validados)
+
+Secuencia completa para tener el backend con `/api/events` funcionando contra PostgreSQL real:
+
+```bash
+# 1. Copiar variables de entorno (solo la primera vez)
+cp backend/.env.example backend/.env
+
+# 2. Levantar PostgreSQL
+docker compose up -d postgres
+docker compose exec postgres pg_isready -U desafio26 -d desafio26_dev
+
+# 3. Generar el cliente Prisma
+npm run prisma:generate --workspace backend
+
+# 4. Crear las tablas (aplica la migración del repo)
+npm run prisma:migrate --workspace backend
+
+# 5. Poblar con datos de prueba (users demo + businesses demo + events)
+npm run db:seed --workspace backend
+
+# 6. Arrancar el backend
+npm run dev:backend
+
+# 7. Verificar endpoints
+curl http://localhost:3000/api/events                                      # array de 10 eventos
+curl http://localhost:3000/api/events/1                                    # evento id=1
+curl "http://localhost:3000/api/events?municipio=Bilbao&es_carrito=true"   # 2 eventos
+curl "http://localhost:3000/api/events?fecha_desde=2026-07-01&fecha_hasta=2026-07-31"
+curl http://localhost:3000/api/events/999999                               # 404
+```
+
+> **Nota:** los tests (`npm run test:backend`) no requieren PostgreSQL — el repository
+> se mockea con `vi.mock`. Pueden ejecutarse en cualquier momento sin levantar Docker.
+
+## 6. Parar el contenedor
 
 ```bash
 # Para el contenedor pero conserva los datos del volumen
@@ -166,8 +231,8 @@ El `schema.prisma` ([../backend/prisma/schema.prisma](../backend/prisma/schema.p
 **espejo completo** de la base de datos real [data/schema-real/init.sql](data/schema-real/init.sql)
 (11 tablas). Campos en **snake_case** (= columnas reales) y `@@map` a cada tabla.
 
-> **Runtime mock**: los services siguen sirviendo datos en memoria; el schema es
-> modelo/preparación. **No** se han ejecutado migraciones (`prisma migrate`).
+> **Migración inicial aplicada** (`20260602221433_init_real_schema_from_init_sql`).
+> `GET /api/events` usa Prisma/PostgreSQL. El resto de services siguen en mock en memoria.
 
 ### Modelos
 

@@ -1,17 +1,21 @@
 /**
- * Seed Prisma (MVP) · DESAFIO-26
+ * Seed de desarrollo · DESAFIO-26
  *
- * Inserta en PostgreSQL los mismos eventos que el mock en memoria
- * (`backend/src/seed/mockEvents.js`), reutilizando esos datos para no duplicar.
- * El shape del mock coincide 1:1 con el modelo `Event` (tabla `events` de init.sql).
+ * Pobla la DB local con datos de prueba suficientes para demostrar los endpoints.
+ * Solo para desarrollo/demo local. NO usar contra entornos compartidos o producción.
  *
- * - Idempotente: usa `upsert` por `id`, así que se puede ejecutar varias veces.
+ * Orden de ejecución:
+ *   1. seedUsers()      — 5 usuarios demo de tipo 'business' (IDs explícitos 1–5)
+ *   2. seedBusinesses() — 5 negocios demo vinculados a esos usuarios (IDs explícitos 1–5)
+ *   3. seedEvents()     — eventos de mockEvents.js (IDs explícitos del mock)
+ *   4. syncSequences()  — resincroniza las secuencias SERIAL para evitar choques
+ *                         en futuros inserts sin ID explícito
  *
- * IMPORTANTE: este seed todavía NO se usa en runtime. Los services siguen usando
- * memoria/mock. Ejecutarlo requiere una DB local disponible (ver docs/database.md).
+ * Todos los upserts son idempotentes: puede ejecutarse varias veces sin duplicar.
  *
- * Ejecución (con DB local levantada y cliente Prisma generado):
- *   node prisma/seed.js            # desde el workspace backend
+ * Ejecución (requiere DB local levantada y cliente Prisma generado):
+ *   npm run db:seed --workspace backend
+ *   # o bien: node prisma/seed.js   (desde backend/)
  */
 import { PrismaClient } from '@prisma/client';
 
@@ -19,27 +23,136 @@ import { mockEvents } from '../src/seed/mockEvents.js';
 
 const prisma = new PrismaClient();
 
-/** Upsert idempotente de cada evento mock. */
+// ---------------------------------------------------------------------------
+// Datos demo (inline — no se duplican en otros archivos)
+// ---------------------------------------------------------------------------
+
+/** 5 usuarios demo de tipo 'business'. Passwords son placeholders, no hashes reales. */
+const demoUsers = [
+  { id: 1, email: 'negocio1@demo.eus', password: 'seed-demo-no-real-1', role: 'business' },
+  { id: 2, email: 'negocio2@demo.eus', password: 'seed-demo-no-real-2', role: 'business' },
+  { id: 3, email: 'negocio3@demo.eus', password: 'seed-demo-no-real-3', role: 'business' },
+  { id: 4, email: 'negocio4@demo.eus', password: 'seed-demo-no-real-4', role: 'business' },
+  { id: 5, email: 'negocio5@demo.eus', password: 'seed-demo-no-real-5', role: 'business' },
+];
+
+/** 5 negocios demo. IDs 1–5 coinciden con los business_id referenciados por mockEvents. */
+const demoBusinesses = [
+  { id: 1, user_id: 1, name: 'Negocio Demo 1 (museo Bilbao)' },
+  { id: 2, user_id: 2, name: 'Negocio Demo 2 (taller Bilbao)' },
+  { id: 3, user_id: 3, name: 'Negocio Demo 3 (acuario Donostia)' },
+  { id: 4, user_id: 4, name: 'Negocio Demo 4 (teatro Vitoria)' },
+  { id: 5, user_id: 5, name: 'Negocio Demo 5 (granja Karrantza)' },
+];
+
+// ---------------------------------------------------------------------------
+// Helper de conversión de fechas
+// ---------------------------------------------------------------------------
+
+/**
+ * Prepara un evento mock para insertar en Prisma.
+ * Convierte strings ISO sin timezone a objetos Date que Prisma acepta.
+ * lat/lng/edad_minima/multiplicador son números JS: Prisma los acepta como Decimal.
+ */
+function prepareEventForPrisma({ fecha_inicio, fecha_fin, ...rest }) {
+  return {
+    ...rest,
+    fecha_inicio: new Date(fecha_inicio),
+    fecha_fin: fecha_fin ? new Date(fecha_fin) : null,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Seed functions
+// ---------------------------------------------------------------------------
+
+async function seedUsers() {
+  let count = 0;
+  for (const user of demoUsers) {
+    const { id, ...data } = user;
+    await prisma.user.upsert({
+      where:  { id },
+      update: {}, // no sobreescribir si ya existe
+      create: { id, ...data },
+    });
+    count++;
+  }
+  return count;
+}
+
+async function seedBusinesses() {
+  let count = 0;
+  for (const business of demoBusinesses) {
+    const { id, ...data } = business;
+    await prisma.business.upsert({
+      where:  { id },
+      update: {}, // no sobreescribir si ya existe
+      create: { id, ...data },
+    });
+    count++;
+  }
+  return count;
+}
+
 async function seedEvents() {
-  for (const { id, ...data } of mockEvents) {
+  let count = 0;
+  for (const event of mockEvents) {
+    const { id, ...raw } = event;
+    const data = prepareEventForPrisma(raw);
     await prisma.event.upsert({
-      where: { id },
+      where:  { id },
       update: data,
       create: { id, ...data },
     });
+    count++;
   }
-  return mockEvents.length;
+  return count;
 }
 
+/**
+ * Resincroniza las secuencias SERIAL de users, businesses y events.
+ *
+ * Cuando se insertan IDs explícitos en columnas SERIAL, PostgreSQL no avanza
+ * automáticamente la secuencia. Si luego se hace un insert sin ID explícito,
+ * la secuencia puede generar un ID ya ocupado (conflicto de PK).
+ *
+ * Esta función actualiza cada secuencia al valor máximo de id actual,
+ * de modo que el próximo insert automático obtendrá max(id) + 1.
+ *
+ * Usa `pg_get_serial_sequence` para no depender del nombre exacto de la secuencia.
+ */
+async function syncSequences() {
+  const tables = ['users', 'businesses', 'events'];
+  for (const table of tables) {
+    await prisma.$executeRawUnsafe(
+      `SELECT setval(pg_get_serial_sequence('${table}', 'id'), COALESCE(MAX(id), 0), true) FROM "${table}"`,
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Orquestador principal
+// ---------------------------------------------------------------------------
+
 async function main() {
-  // Orquesta el seed para mantener el manejo de errores en un único punto.
-  const count = await seedEvents();
-  console.log(`✅ Seed completado: ${count} eventos (upsert idempotente).`);
+  const users     = await seedUsers();
+  console.log(`  ✔ users      : ${users} registros (upsert)`);
+
+  const businesses = await seedBusinesses();
+  console.log(`  ✔ businesses : ${businesses} registros (upsert)`);
+
+  const events    = await seedEvents();
+  console.log(`  ✔ events     : ${events} registros (upsert)`);
+
+  await syncSequences();
+  console.log(`  ✔ secuencias SERIAL resincronizadas (users, businesses, events)`);
+
+  console.log('\n✅ Seed completado. DB lista para /api/events.');
 }
 
 main()
   .catch((error) => {
-    console.error('❌ Error en el seed:', error);
+    console.error('\n❌ Error en el seed:', error.message ?? error);
     process.exitCode = 1;
   })
   .finally(async () => {
