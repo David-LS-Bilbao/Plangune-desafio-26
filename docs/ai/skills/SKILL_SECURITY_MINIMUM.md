@@ -20,13 +20,6 @@ Medidas de seguridad base para DESAFIO-26. Objetivo: no introducir agujeros obvi
 - Tokens JWT con `jsonwebtoken`, secreto fuerte en `JWT_SECRET`, expiración corta.
 - Proteger rutas admin con middleware de rol.
 
-## Control de acceso (Broken Access Control / IDOR)
-
-- Cada endpoint comprueba **permisos** antes de actuar (no confiar en que la UI oculte la acción).
-- En operaciones por `:id`, validar que el recurso **pertenece o es accesible** al usuario autenticado antes de leer/modificar (evitar **IDOR**).
-- Negar por defecto: si no hay regla explícita que permita el acceso, denegar.
-- Checklist de auditoría en [../prompts/SECURITY_REVIEWER.md](../prompts/SECURITY_REVIEWER.md).
-
 ## Validación y saneo
 
 - Validar **todas** las entradas de usuario con `express-validator`.

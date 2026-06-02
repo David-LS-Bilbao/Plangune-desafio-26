@@ -23,7 +23,9 @@ Este proyecto se desarrolla dentro del **Desafío de Tripulaciones 2026**.
 
 ## Estado del proyecto
 
-Proyecto en desarrollo del MVP. Producto y documentación inicial:
+Proyecto en fase inicial de bootstrap.
+
+Actualmente existen:
 
 * Brief oficial del desafío.
 * Investigación inicial de producto y competencia.
@@ -31,31 +33,6 @@ Proyecto en desarrollo del MVP. Producto y documentación inicial:
 * Dosier preliminar de objetivos.
 * Carpeta Drive organizada por verticales.
 * Plan inicial de arquitectura Full Stack.
-
-### Backend MVP
-
-El backend expone una **API REST bajo `/api`** con **datos mock en memoria**.
-PostgreSQL/Prisma están preparados (modelos MVP + seed) pero **aún no son runtime**:
-los services siguen sirviendo el mock hasta una migración posterior.
-
-Endpoints actuales:
-
-* `GET /api/health`
-* `GET /api/activities` · `GET /api/activities/:id` (solo `approved`)
-* `GET /api/recommendations` (hasta 3 planes con Family Score reglado y explicable)
-* `POST /api/assistant/family-plan` (fallback sin IA)
-* `POST /api/reviews` · `POST /api/incidents`
-* `GET/POST/DELETE /api/favorites`
-
-Arranque y tests (monorepo npm workspaces):
-
-```bash
-npm install
-npm run dev:backend     # API en http://localhost:3000
-npm run test:backend    # tests con Vitest + Supertest
-```
-
-Contrato detallado en [docs/api.md](docs/api.md) · base de datos y seed en [docs/database.md](docs/database.md) · seguridad en [docs/security.md](docs/security.md) · calidad y cobertura en [docs/quality/](docs/quality/).
 
 ---
 
