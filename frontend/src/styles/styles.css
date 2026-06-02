@@ -1,6 +1,36 @@
 
+/* =============== IMPORTED FONTS =============== */
 
+@font-face {
+    font-family: 'Fredoka One';
+    src: url('../assets/fonts/FredokaOne-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
 
+@font-face {
+    font-family: 'Varela Round';
+    src: url('../assets/fonts/VarelaRound-Regular.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('../assets/fonts/Poppins-ExtraBold.woff2') format('woff2');
+    font-weight: 800;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Poppins';
+    src: url('../assets/fonts/Poppins-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
 
 /* =============== VARIABLES =============== */
 
@@ -10,8 +40,15 @@
     --secondary-color: #163a4a;
     --tertiary-color: #efe54f;
     --accent-color: #d35230;
+    --accent-color-dark: #d03307;
     --white: #f6f5f2;
     --black: #222222;
+    --font-varela: 'Varela Round', sans-serif;
+    --font-poppins: 'Poppins', sans-serif;
+    --font-fredoka: 'Fredoka One', sans-serif;
+
+
+
 
 
 
@@ -82,9 +119,11 @@
   --font-display: 'Montserrat', sans-serif;
 }
 
-*,
-*::before,
-*::after {
+
+
+/* =============== GENERAL STYLES =============== */
+
+* {
   box-sizing: border-box;
 }
 
@@ -93,3 +132,5 @@ body {
   margin: 0;
   padding: 0;
 }
+
+

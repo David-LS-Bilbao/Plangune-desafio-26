@@ -1,26 +1,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import '../styles/landing.css';
 import Navbar from '../components/common/Navbar';
+import heroImage from '../assets/hero-image.webp';
 
 function Landing() {
   return (
     <>
     <Navbar />
     <main className="landing-main">
-      {/* Hero Section */}
       <section className="hero-section">
-        {/* Background Image */}
         <div className="hero-background">
-          <img alt="Hero background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQG-ycexXZnzatzU5jXTdl0J-rKTyVu4FbMw23ojP9V5YAa7rf844DU4Eo2Qjwg2ibyjgaNb_6qTzrbzZh5pEmFpox3o7TMjrMBPLld1IJqE6LVseF71mvfO7844pz-j5mBcOAyTwAgacvhO8279NvPzidkDqmrgajs-mS9VbeHYYM20QBkTjhiblpnt_vBJGa4U3nhuwqTI6507pCSi1_UCLROw2dF9i4YcMUuH6XWSPFhe4m3QsGx79E1ZW--tI08n86MC3OEJS1" />
+          <img src={heroImage} alt="Hero background"/>
           <div className="hero-overlay"></div>
         </div>
         
-        
-
-        {/* Content Card Overlay */}
         <div className="hero-card">
-          <h1 className="hero-title">Planes fáciles para familias con peques</h1>
-          <p className="hero-subtitle">Encuentra actividades cómodas, seguras y sin complicaciones en Euskadi.</p>
+          <h1>Haz planes y disfruta con tus peques</h1>
+          <p>Las actividades más seguras, cómodas y divertidas de Euskadi al alcance de tu mano.</p>
           <div className="hero-actions">
             <Link to="/planes" className="btn-primary">
               <span className="material-symbols-outlined">search</span>
