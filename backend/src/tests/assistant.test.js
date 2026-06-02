@@ -1,9 +1,29 @@
-import { describe, it, expect } from 'vitest';
+/**
+ * Tests de POST /api/assistant/family-plan.
+ *
+ * El assistant reutiliza getRecommendations, que ahora consulta Prisma/PostgreSQL.
+ * Se mockea event.repository.js para que los tests no requieran DB real.
+ *
+ * vi.mock debe declararse ANTES de cualquier import que cargue el service.
+ */
+import { vi, describe, it, expect, beforeEach } from 'vitest';
+
+vi.mock('../repositories/event.repository.js', () => ({
+  findEvents:    vi.fn(),
+  findEventById: vi.fn(),
+}));
+
 import request from 'supertest';
 
 import { createApp } from '../app.js';
+import { mockEvents } from '../seed/mockEvents.js';
+import { findEvents } from '../repositories/event.repository.js';
 
 const app = createApp();
+
+beforeEach(() => {
+  findEvents.mockResolvedValue(mockEvents);
+});
 
 describe('POST /api/assistant/family-plan', () => {
   it('responde 200 con un plan en modo fallback', async () => {
@@ -25,6 +45,7 @@ describe('POST /api/assistant/family-plan', () => {
     expect(res.body.recommendations.length).toBeLessThanOrEqual(3);
     for (const item of res.body.recommendations) {
       expect(item).toHaveProperty('activity');
+      expect(item).toHaveProperty('event');
       expect(typeof item.score).toBe('number');
       expect(Array.isArray(item.reasons)).toBe(true);
     }

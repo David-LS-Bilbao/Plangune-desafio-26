@@ -123,6 +123,9 @@ Ejemplo de actividad:
 ### `GET /api/recommendations`
 Devuelve **como máximo 3** planes ordenados por Family Score (scoring reglado y explicable).
 
+> **Fuente runtime actual:** Prisma/PostgreSQL vía tabla `events` reales.
+> **Contrato estable.** Ver [features/backend-recommendations-events-runtime.md](features/backend-recommendations-events-runtime.md).
+
 Contexto opcional por **query string**:
 
 | Parámetro | Tipo | Ejemplo | Descripción |
@@ -138,16 +141,32 @@ Respuesta (array de recomendaciones con explicación):
 ```json
 [
   {
-    "activity": { "id": "act-003", "title": "Parque de Doña Casilda" },
-    "score": 75,
+    "event": {
+      "id": 1,
+      "title": "Exposición interactiva en el museo",
+      "municipio": "Bilbao",
+      "es_carrito": true,
+      "es_lluvia": true,
+      "edad_minima": 0,
+      "price": "Gratis"
+    },
+    "activity": { "...alias legacy de event — mismo objeto..." },
+    "score": 100,
     "reasons": [
-      "Apto para la edad de tus peques (0–10 años)",
+      "Apto para la edad de tus peques (edad mínima: 0 años)",
       "Accesible con carrito",
-      "Cerca de Bilbao"
+      "Buen plan si llueve (a cubierto)",
+      "Cerca de Bilbao",
+      "Dentro de tu presupuesto (Gratis)"
     ]
   }
 ]
 ```
+
+> **Transición de clave:**
+> - `event` es la **clave principal nueva** con el shape real de `events` (snake_case).
+> - `activity` es un **alias temporal legacy** del mismo objeto, mantenido para no romper el
+>   frontend hasta que migre. **No retirar** hasta confirmación del equipo frontend.
 
 ## Asistente
 
