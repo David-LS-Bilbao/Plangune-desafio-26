@@ -1,7 +1,12 @@
 # ADR-0003 · Divergencia entre la propuesta SQL de Data y el modelo Prisma MVP
 
 - Fecha: 2026-06-02
-- Estado: aceptada (pendiente de reconciliación)
+- Estado: **SUPERADO por [ADR-0004](0004-real-schema-source-of-truth.md) — Real schema source of truth.**
+
+> Estado: SUPERADO por ADR-0004 — Real schema source of truth.
+> Este ADR documentaba una divergencia previa. La decisión vigente pasa a ser que
+> `docs/data/schema-real/init.sql` es la fuente de verdad actual para backend/Prisma.
+> Conservado como referencia histórica.
 
 ## Contexto
 
