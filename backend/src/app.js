@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 import router from './routes/index.js';
+import { notFoundHandler, errorHandler } from './middlewares/error.middleware.js';
 
 /**
  * Construye la aplicación Express (sin abrir puerto).
@@ -26,10 +27,9 @@ export function createApp() {
   // Rutas de la API
   app.use('/api', router);
 
-  // 404 por defecto
-  app.use((req, res) => {
-    res.status(404).json({ error: 'Not Found' });
-  });
+  // 404 para rutas no definidas y manejador central de errores
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 
   return app;
 }

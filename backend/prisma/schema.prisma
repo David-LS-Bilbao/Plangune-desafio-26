@@ -1,7 +1,13 @@
 // Prisma schema · DESAFIO-26 (PostgreSQL)
 //
-// BOOTSTRAP: aún SIN modelos reales. Los modelos (User, Activity, Business, ...)
-// llegarán en ramas posteriores. Este archivo solo deja preparada la conexión.
+// Modelo alineado con la base de datos REAL recibida en backend/src/models/init.sql.
+// La entidad central es Event (tabla `events`). Espejo fiel de las columnas de init.sql
+// (snake_case) para que el shape mock == futuro runtime Prisma == DB, sin fricción.
+//
+// PRIMERA INTEGRACIÓN SEGURA (ver tarea): solo se modela `Event`. El runtime sigue en
+// MOCK (no se consulta PostgreSQL todavía, ADR-0001). El resto de tablas de init.sql
+// (businesses, users, families, plans, offers, favoritos...) se modelarán en pasos
+// posteriores; por eso `business_id` se deja como escalar (sin relación todavía).
 
 generator client {
   provider = "prisma-client-js"
@@ -12,5 +18,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// TODO(features): definir aquí los modelos de datos.
-// Placeholder intencional: no crear modelos reales todavía.
+/// Evento / plan familiar. Espejo de la tabla `events` de init.sql.
+/// `id` es autoincremental (serial). Los nombres de campo replican las columnas reales.
+model Event {
+  id              Int       @id @default(autoincrement())
+  business_id     Int? // FK a businesses (relación se modelará en un paso posterior)
+  fuente          String?   @db.VarChar(20)
+  external_id     String?
+  title           String    @db.VarChar(150)
+  description     String?
+  categoria       String?   @db.VarChar(50)
+  tipo_plantilla  String?   @db.VarChar(100)
+  municipio       String?   @db.VarChar(100)
+  territorio      String?   @db.VarChar(30)
+  address         String?
+  lat             Decimal?  @db.Decimal(9, 6)
+  lng             Decimal?  @db.Decimal(9, 6)
+  telefono        String?   @db.VarChar(30)
+  email           String?   @db.VarChar(100)
+  website         String?
+  es_lluvia       Boolean   @default(false)
+  es_carrito      Boolean   @default(false)
+  es_cambiador    Boolean   @default(false)
+  es_silla_ruedas Boolean   @default(false)
+  es_mascotas     Boolean   @default(false)
+  edad_minima     Decimal?  @db.Decimal
+  multiplicador   Decimal?  @default(1.00) @db.Decimal(3, 2)
+  fecha_inicio    DateTime  @db.Timestamp(6)
+  fecha_fin       DateTime? @db.Timestamp(6)
+  lugar           String?   @db.VarChar(255)
+  price           String?   @db.VarChar
+  imagen_url      String?
+  tipo_evento     String?   @db.VarChar(100)
+
+  // Índices declarativos para los filtros más usados (no migrados todavía).
+  @@index([municipio])
+  @@index([territorio])
+  @@index([categoria])
+  @@index([tipo_evento])
+  @@index([fecha_inicio])
+  @@map("events")
+}
