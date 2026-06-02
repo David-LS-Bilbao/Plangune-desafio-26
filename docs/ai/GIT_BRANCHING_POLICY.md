@@ -88,4 +88,10 @@ git commit -m "feat: descripción breve en imperativo"
 git push -u origin feat/mi-feature
 ```
 
+## Incidencias conocidas de historial Git
+
+El 02/06/2026 se produjo una integración accidental de backend en `dev` mediante PR #17. La incidencia está documentada en [../git/incidents/2026-06-02-accidental-dev-merge.md](../git/incidents/2026-06-02-accidental-dev-merge.md). Antes de integrar `feature/backend` en `dev`, revisar esa nota.
+
+---
+
 Ver también: [SKILL_GIT_SAFE_WORKFLOW.md](skills/SKILL_GIT_SAFE_WORKFLOW.md).
