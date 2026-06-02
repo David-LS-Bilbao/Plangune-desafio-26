@@ -2,6 +2,8 @@
 
 Revisar antes de abrir y antes de mergear un Pull Request. El **destino del PR depende del origen** (ver [GIT_BRANCHING_POLICY.md](GIT_BRANCHING_POLICY.md)): frontend → `frontend`, backend → `backend`, docs/test globales → `dev`. La integración de `frontend`/`backend` en `dev` y de `dev` en `main` la hace una **persona**.
 
+> Antes de abrir el PR, pasa el **quality gate post-código**: [skills/SKILL_QUALITY.md](skills/SKILL_QUALITY.md) (estado Git, alcance, tests por área, seguridad mínima, clasificación P0/P1/P2 e informe final).
+
 ## Git e higiene
 
 - [ ] La rama sale de la integración correcta (frontend de `frontend`, backend de `backend`, docs/test de `dev`) y sigue la convención (`feat/*`, `fix/*`, `docs/*`, `test/*`).
