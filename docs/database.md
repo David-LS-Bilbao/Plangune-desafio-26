@@ -55,16 +55,17 @@ npm run prisma:migrate  --workspace backend    # aplica las migraciones
 npm run prisma:studio   --workspace backend    # abre la GUI de la DB (opcional)
 ```
 
-> En el bootstrap aún no hay modelos Prisma reales. `prisma:migrate` creará la base
-> de datos vacía. Los modelos llegan en ramas posteriores.
+> El `schema.prisma` ya modela las **tablas reales** de `data/schema-real/init.sql` (ver
+> "Modelo de datos" más abajo), pero el **runtime sigue en mock** y **no se han ejecutado
+> migraciones** todavía.
 
 ## Seed Prisma (MVP)
 
 Existe un seed Prisma en [../backend/prisma/seed.js](../backend/prisma/seed.js) que inserta
-las actividades en PostgreSQL.
+los eventos en PostgreSQL.
 
-- Usa **los mismos datos base** que el mock MVP (`backend/src/seed/mockActivities.js`):
-  los importa para no duplicar, conserva los IDs `act-001…` e incluye la actividad `pending`.
+- Usa **los mismos datos base** que el mock MVP (`backend/src/seed/mockEvents.js`):
+  los importa para no duplicar (shape 1:1 con el modelo `Event`).
 - Es **idempotente** (`upsert` por `id`): se puede ejecutar varias veces sin duplicar.
 - **Todavía no sustituye los services en memoria**: el backend sigue sirviendo el mock en
   runtime. El seed se ejecutará cuando haya **DB local disponible**.
@@ -147,50 +148,44 @@ Existe una propuesta de esquema SQL aportada por Data Science en
 > Es una **propuesta documental, no ejecutable**: no es la fuente de verdad del backend
 > y está **pendiente de alineación** con el modelo Prisma MVP. No ejecutarla ni migrarla.
 
-## Modelo de datos (MVP)
+## Modelo de datos (real · `init.sql`)
 
-Los modelos mínimos viven en [backend/prisma/schema.prisma](../backend/prisma/schema.prisma) y
-están alineados con el contrato documentado en [api.md](api.md). Objetivo: poder sustituir
-**progresivamente** el almacenamiento mock en memoria **sin cambiar URLs ni el shape de las
-respuestas**.
+El `schema.prisma` ([../backend/prisma/schema.prisma](../backend/prisma/schema.prisma)) es ahora
+**espejo completo** de la base de datos real [data/schema-real/init.sql](data/schema-real/init.sql)
+(11 tablas). Campos en **snake_case** (= columnas reales) y `@@map` a cada tabla.
+
+> **Runtime mock**: los services siguen sirviendo datos en memoria; el schema es
+> modelo/preparación. **No** se han ejecutado migraciones (`prisma migrate`).
 
 ### Modelos
 
-| Modelo     | Propósito                                  | Relaciones                       |
-| ---------- | ------------------------------------------ | -------------------------------- |
-| `Activity` | Actividad / plan familiar                  | 1—N `Review`, `Incident`, `Favorite` |
-| `Review`   | Reseña de una actividad (entra `pending`)  | N—1 `Activity`                   |
-| `Incident` | Incidencia sobre una actividad (entra `open`) | N—1 `Activity`                |
-| `Favorite` | Favorito de un usuario (mock por ahora)    | N—1 `Activity`                   |
-
-### Enums
-
-| Enum             | Valores                          | Notas                                    |
-| ---------------- | -------------------------------- | ---------------------------------------- |
-| `ActivityStatus` | `pending` `approved` `rejected`  | El contrato expone `"approved"`          |
-| `ReviewStatus`   | `pending` `approved` `rejected`  | Reseñas entran como `pending`            |
-| `IncidentStatus` | `open` `in_review` `resolved`    | Incidencias entran como `open`           |
-| `PriceType`      | `free` `low` `medium` `high`     | El contrato expone `"medium"`            |
+| Modelo | Tabla | PK | Relaciones (onDelete) |
+| --- | --- | --- | --- |
+| `User` | `users` | `id` | 1:1 `Business`; 1:N `Family`, `Plan` (creator), favoritos y recomendaciones |
+| `Family` | `families` | `id` | N:1 `User` (Cascade); 1:N `FamilyMember` |
+| `FamilyMember` | `family_members` | `id` | N:1 `Family` (Cascade) |
+| `Business` | `businesses` | `id` | N:1 `User` (Cascade, `user_id` único → 1:1); 1:N `Event`, `Offer` |
+| `Event` | `events` | `id` | N:1 `Business` (**SetNull**); 1:N `PlanEvent`, favoritos, recomendaciones |
+| `Offer` | `offers` | `id` | N:1 `Business` (Cascade) |
+| `Plan` | `plans` | `id` | N:1 `User` (creator, **SetNull**); 1:N `PlanEvent`, `UserFavoritePlan` |
+| `PlanEvent` | `plan_events` | `plan_id + event_id` | N:1 `Plan`, `Event` (Cascade) |
+| `UserFavoriteEvent` | `user_favorite_events` | `user_id + event_id` | N:1 `User`, `Event` (Cascade) |
+| `UserFavoritePlan` | `user_favorite_plans` | `user_id + plan_id` | N:1 `User`, `Plan` (Cascade) |
+| `UserSelectedRecommendation` | `user_selected_recommendations` | `user_id + event_id` | N:1 `User`, `Event` (Cascade) |
 
 ### Decisiones de modelo
 
-- **Valores de enum en minúscula**: coinciden 1:1 con el JSON del contrato actual
-  (`api.md`), para no cambiar el shape de respuesta al migrar del mock a Prisma.
-- **`Activity.id` es `String`**: conserva los identificadores legibles del mock
-  (`"act-001"`) cuando se prepare el seed; evita exponer enteros autoincrementales.
-- **`averageRating` se mantiene como campo denormalizado** en `Activity` (no se calcula
-  en vivo): refleja el contrato actual y mantiene KISS. Recalcularlo desde `Review`
-  queda para una rama posterior.
-- **`Favorite` sin modelo `User` todavía**: se usa `userId String @default("mock-user")`
-  y `@@unique([userId, activityId])` para idempotencia. Cuando exista auth real, ese
-  `userId` pasará a referenciar el modelo `User`. No se crea `User` en esta rama (KISS).
-- **`category` y `Incident.type` son `String`** (no enum): son conjuntos abiertos que
-  conviene no congelar todavía.
-- **`onDelete: Cascade`** en las relaciones hijas: al borrar una actividad se limpian sus
-  reseñas, incidencias y favoritos.
-- **Índices mínimos**: `Activity.status`, `Activity(province, municipality)` y las claves
-  foráneas, pensando en los filtros del recomendador (Family Score).
+- **snake_case** en los campos (= columnas reales); sin `@map` por campo. `@@map` para el nombre de tabla.
+- **PKs compuestas** con `@@id([...])` en las 4 tablas puente (`plan_events`, `user_favorite_events`,
+  `user_favorite_plans`, `user_selected_recommendations`).
+- **`onDelete`** fiel a init.sql: `Cascade` salvo `events.business_id` y `plans.creator_id` → `SetNull`.
+  `onUpdate` (NO ACTION en init.sql) se deja en el valor por defecto de Prisma; la tarea solo exige `onDelete`.
+- **`businesses.plan`** es un `Int?` suelto (en init.sql **no** es FK).
+- **Índices de filtro de `Event`** (`municipio`, `territorio`, `categoria`, `tipo_evento`,
+  `fecha_inicio`) se mantienen para `/api/events`; no están en init.sql.
+- **Sin `reviews`/`incidents`**: no existen en init.sql. La API mock previa de reviews/incidents/
+  activities sigue en runtime hasta su migración/retirada.
 
-> **Pendiente (no incluido en esta rama):** el seed equivalente a los datos mock y la
-> sustitución de los services. Ver notas en el resumen de la rama `feat/backend-prisma-models`.
-> No se han ejecutado migraciones (`prisma migrate`) todavía: requiere decisión humana y DB local.
+> **Pendiente (no en esta rama):** migrar los services de memoria a Prisma runtime y ejecutar
+> migraciones (`prisma migrate`) con DB local. Detalle en
+> [features/backend-prisma-real-schema.md](features/backend-prisma-real-schema.md).
