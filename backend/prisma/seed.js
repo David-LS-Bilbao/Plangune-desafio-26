@@ -1,12 +1,11 @@
 /**
  * Seed Prisma (MVP) · DESAFIO-26
  *
- * Inserta en PostgreSQL las mismas actividades que el mock en memoria
- * (`backend/src/seed/mockActivities.js`), reutilizando esos datos para no duplicar.
+ * Inserta en PostgreSQL los mismos eventos que el mock en memoria
+ * (`backend/src/seed/mockEvents.js`), reutilizando esos datos para no duplicar.
+ * El shape del mock coincide 1:1 con el modelo `Event` (tabla `events` de init.sql).
  *
  * - Idempotente: usa `upsert` por `id`, así que se puede ejecutar varias veces.
- * - Conserva los IDs legibles (`act-001`, ...) y la actividad `pending`,
- *   manteniendo la misma lógica de filtrado que el MVP.
  *
  * IMPORTANTE: este seed todavía NO se usa en runtime. Los services siguen usando
  * memoria/mock. Ejecutarlo requiere una DB local disponible (ver docs/database.md).
@@ -16,26 +15,26 @@
  */
 import { PrismaClient } from '@prisma/client';
 
-import { mockActivities } from '../src/seed/mockActivities.js';
+import { mockEvents } from '../src/seed/mockEvents.js';
 
 const prisma = new PrismaClient();
 
-/** Upsert idempotente de cada actividad mock. */
-async function seedActivities() {
-  for (const { id, ...data } of mockActivities) {
-    await prisma.activity.upsert({
+/** Upsert idempotente de cada evento mock. */
+async function seedEvents() {
+  for (const { id, ...data } of mockEvents) {
+    await prisma.event.upsert({
       where: { id },
       update: data,
       create: { id, ...data },
     });
   }
-  return mockActivities.length;
+  return mockEvents.length;
 }
 
 async function main() {
   // Orquesta el seed para mantener el manejo de errores en un único punto.
-  const count = await seedActivities();
-  console.log(`✅ Seed completado: ${count} actividades (upsert idempotente).`);
+  const count = await seedEvents();
+  console.log(`✅ Seed completado: ${count} eventos (upsert idempotente).`);
 }
 
 main()

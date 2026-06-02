@@ -19,7 +19,73 @@ Healthcheck. No requiere DB.
 { "status": "ok", "service": "DESAFIO-26 API" }
 ```
 
+## Eventos (entidad central · datos reales de `init.sql`)
+
+> Modelo alineado con la tabla `events` de [../backend/src/models/init.sql](../backend/src/models/init.sql)
+> (shape real, snake_case). Runtime **mock en memoria** todavía (sin PostgreSQL; ADR-0001).
+> Los eventos **no** tienen estado de moderación: `GET /api/events` devuelve todos.
+
+### `GET /api/events`
+Lista eventos. Responde un **array**. Admite filtros opcionales por query string:
+
+| Filtro | Tipo | Ejemplo | Semántica |
+|---|---|---|---|
+| `municipio` | string | `Bilbao` | igualdad (case-insensitive) |
+| `territorio` | string | `Bizkaia` | igualdad |
+| `categoria` | string | `museo` | igualdad |
+| `tipo_evento` | string | `taller` | igualdad |
+| `es_lluvia` | boolean | `true` | plan a cubierto / apto si llueve |
+| `es_carrito` | boolean | `true` | accesible con carrito |
+| `es_cambiador` | boolean | `true` | dispone de cambiador |
+| `edad` | entero | `2` | apto si `edad_minima <= edad` |
+| `fecha_desde` | ISO 8601 | `2026-07-01` | `fecha_inicio >= fecha_desde` |
+| `fecha_hasta` | ISO 8601 | `2026-07-31` | `fecha_inicio <= fecha_hasta` |
+
+Filtros inválidos (booleano mal formado, `edad` no numérica, fecha no ISO) → **422**.
+
+### `GET /api/events/:id`
+Detalle de un evento por `id` (entero). `404` si no existe.
+
+Ejemplo de evento (shape real de `events`):
+
+```json
+{
+  "id": 1,
+  "business_id": 1,
+  "fuente": "manual",
+  "external_id": null,
+  "title": "Exposición interactiva en el museo",
+  "description": "Sala sensorial para peques con zona de juego y cuentacuentos.",
+  "categoria": "museo",
+  "tipo_plantilla": null,
+  "municipio": "Bilbao",
+  "territorio": "Bizkaia",
+  "address": "Plaza del Museo, 2",
+  "lat": 43.2645,
+  "lng": -2.9342,
+  "telefono": "944000001",
+  "email": null,
+  "website": null,
+  "es_lluvia": true,
+  "es_carrito": true,
+  "es_cambiador": true,
+  "es_silla_ruedas": true,
+  "es_mascotas": false,
+  "edad_minima": 0,
+  "multiplicador": 1.0,
+  "fecha_inicio": "2026-06-10T10:00:00",
+  "fecha_fin": "2026-06-10T13:00:00",
+  "lugar": "Museo de Bellas Artes",
+  "price": "Gratis",
+  "imagen_url": null,
+  "tipo_evento": "exposicion"
+}
+```
+
 ## Actividades
+
+> Endpoints **mock previos** (entidad `Activity`). Se mantienen mientras se migra a `events`;
+> se retirarán/migrarán en pasos posteriores.
 
 ### `GET /api/activities`
 Lista las actividades aprobadas. Responde un **array** de actividades.
@@ -186,7 +252,9 @@ Respuesta `200`:
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/api/health` | Healthcheck |
-| GET | `/api/activities` | Lista de actividades aprobadas |
+| GET | `/api/events` | Lista de eventos (filtros: municipio, territorio, categoria, tipo_evento, es_lluvia, es_carrito, es_cambiador, edad, fecha_desde, fecha_hasta) |
+| GET | `/api/events/:id` | Detalle de evento |
+| GET | `/api/activities` | Lista de actividades aprobadas (mock previo) |
 | GET | `/api/activities/:id` | Detalle de actividad |
 | GET | `/api/recommendations` | Hasta 3 planes con Family Score |
 | POST | `/api/assistant/family-plan` | Plan familiar (fallback sin IA) |
