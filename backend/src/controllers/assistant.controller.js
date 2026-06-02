@@ -14,5 +14,5 @@ export const familyPlanHandler = asyncHandler(async (req, res) => {
     municipality,
   };
 
-  res.status(200).json(getFamilyPlanFallback(context));
+  res.status(200).json(await getFamilyPlanFallback(context));
 });
