@@ -1,4 +1,5 @@
 import { findEvents } from '../repositories/event.repository.js';
+import { serializeEvent, toNumberOrNull } from '../utils/serializeEvent.js';
 
 /**
  * Recomendador reglado, determinista y explicable — Family Score.
@@ -20,32 +21,7 @@ import { findEvents } from '../repositories/event.repository.js';
  *   Retirar cuando el frontend confirme migración a la clave `event`.
  */
 
-// ---------------------------------------------------------------------------
-// Helpers de serialización (mismo patrón que event.service.js)
-// ---------------------------------------------------------------------------
-
-function toNum(v) {
-  if (v == null) return null;
-  return typeof v === 'number' ? v : Number(v.toString());
-}
-
-function toISO(v) {
-  if (v == null) return null;
-  return v instanceof Date ? v.toISOString() : v;
-}
-
-/** Normaliza un objeto evento crudo (Prisma o mock) al shape público estable. */
-function serializeEvent(ev) {
-  return {
-    ...ev,
-    lat:           toNum(ev.lat),
-    lng:           toNum(ev.lng),
-    edad_minima:   toNum(ev.edad_minima),
-    multiplicador: toNum(ev.multiplicador),
-    fecha_inicio:  toISO(ev.fecha_inicio),
-    fecha_fin:     toISO(ev.fecha_fin),
-  };
-}
+// Serialización de eventos: helper común en utils/serializeEvent.js.
 
 // ---------------------------------------------------------------------------
 // Helper de presupuesto
@@ -82,7 +58,7 @@ function scoreEvent(event, context) {
   // Edad: apto si edad_minima <= el más pequeño de los peques
   if (childrenAges.length > 0) {
     const minAge = Math.min(...childrenAges);
-    const edadMinima = toNum(event.edad_minima) ?? 0;
+    const edadMinima = toNumberOrNull(event.edad_minima) ?? 0;
     if (edadMinima <= minAge) {
       score += 20;
       reasons.push(`Apto para la edad de tus peques (edad mínima: ${edadMinima} años)`);
