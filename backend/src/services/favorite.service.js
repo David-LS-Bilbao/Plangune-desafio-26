@@ -1,4 +1,5 @@
 import { findEventById } from '../repositories/event.repository.js';
+import { serializeEvent } from '../utils/serializeEvent.js';
 import {
   listFavoriteEventsByUser,
   addFavoriteEvent,
@@ -38,27 +39,7 @@ function parseEventId(rawId) {
   return eventId;
 }
 
-// --- Serialización (mismo patrón que event.service.js / recommendation.service.js).
-//     Duplicación menor aceptada para no tocar otros services; candidata a extraer a utils/.
-function toNum(v) {
-  if (v == null) return null;
-  return typeof v === 'number' ? v : Number(v.toString());
-}
-function toISO(v) {
-  if (v == null) return null;
-  return v instanceof Date ? v.toISOString() : v;
-}
-function serializeEvent(ev) {
-  return {
-    ...ev,
-    lat:           toNum(ev.lat),
-    lng:           toNum(ev.lng),
-    edad_minima:   toNum(ev.edad_minima),
-    multiplicador: toNum(ev.multiplicador),
-    fecha_inicio:  toISO(ev.fecha_inicio),
-    fecha_fin:     toISO(ev.fecha_fin),
-  };
-}
+// Serialización de eventos: helper común en utils/serializeEvent.js.
 
 /**
  * Añade un evento a favoritos del usuario mock. Idempotente.

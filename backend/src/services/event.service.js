@@ -1,4 +1,5 @@
 import { findEvents, findEventById } from '../repositories/event.repository.js';
+import { serializeEvent } from '../utils/serializeEvent.js';
 
 /**
  * Capa de negocio de eventos.
@@ -6,8 +7,8 @@ import { findEvents, findEventById } from '../repositories/event.repository.js';
  * Delega el acceso a datos en event.repository.js (Prisma/PostgreSQL).
  * Responsabilidades:
  *  - Llamar al repository con los filtros parseados.
- *  - Serializar campos Prisma (Decimal → number, Date → ISO string) para mantener
- *    el shape público estable independientemente del origen de datos.
+ *  - Serializar campos Prisma (Decimal → number, Date → ISO string) vía el helper común
+ *    `serializeEvent`, para mantener el shape público estable.
  *  - Lanzar 404 cuando el evento no existe.
  *
  * El contrato público (nombres de campos, tipos JSON) es idéntico al runtime mock previo.
@@ -18,42 +19,6 @@ function httpError(status, message) {
   const err = new Error(message);
   err.status = status;
   return err;
-}
-
-/**
- * Convierte un valor a number de forma segura.
- * Acepta número nativo, Prisma Decimal o string numérico.
- */
-function toNum(v) {
-  if (v == null) return null;
-  if (typeof v === 'number') return v;
-  return Number(v.toString());
-}
-
-/**
- * Convierte un valor a ISO string de forma segura.
- * Acepta Date de Prisma o string ISO del mock.
- */
-function toISO(v) {
-  if (v == null) return null;
-  return v instanceof Date ? v.toISOString() : v;
-}
-
-/**
- * Normaliza un evento crudo de Prisma al shape público estable.
- * Seguro tanto para objetos Prisma reales (Decimal/Date) como para
- * plain-objects del mock (tipos ya nativos → operación no destructiva).
- */
-function serializeEvent(ev) {
-  return {
-    ...ev,
-    lat:           toNum(ev.lat),
-    lng:           toNum(ev.lng),
-    edad_minima:   toNum(ev.edad_minima),
-    multiplicador: toNum(ev.multiplicador),
-    fecha_inicio:  toISO(ev.fecha_inicio),
-    fecha_fin:     toISO(ev.fecha_fin),
-  };
 }
 
 /**
