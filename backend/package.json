@@ -14,11 +14,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "prisma:format": "prisma format",
-    "db:seed": "prisma db seed"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
+    "prisma:format": "prisma format"
   },
   "dependencies": {
     "@prisma/client": "^6.1.0",

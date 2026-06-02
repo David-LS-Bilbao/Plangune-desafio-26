@@ -1,26 +1,14 @@
 # Reglas para agentes de IA · DESAFIO-26
 
-Estas reglas aplican a cualquier agente de IA (Codex, Claude, ChatGPT/Chat Director) que genere código o documentación en este repo. Subordinadas a [../../AGENTS.md](../../AGENTS.md).
-
-## 0. Roles y principio rector
-
-> **Humano decide → IA ejecuta → Humano valida.**
-
-- **ChatGPT / Chat Director**: planifica, define alcance, redacta prompts, valida.
-- **Codex**: implementación controlada de tareas acotadas.
-- **Claude**: review/auditoría; documentación solo cuando se le encarga explícitamente.
-- **Humano**: aprobador final de commits, push, PR y merge.
-
-Los **prompts se versionan y revisan como código** ("Prompt ≈ Código"): ver [prompts/](prompts/) y [AGENT_WORKFLOW.md](AGENT_WORKFLOW.md).
+Estas reglas aplican a cualquier agente de IA (Codex, Claude, etc.) que genere código o documentación en este repo.
 
 ## 1. Git seguro
 
-- Nunca trabajar en `main`, `dev`, `frontend` ni `backend` (solo integración humana).
-- Crear ramas de trabajo desde la rama de integración correcta: frontend sale de `frontend`, backend de `backend`, docs/test globales de `dev`. Detalle en [GIT_BRANCHING_POLICY.md](GIT_BRANCHING_POLICY.md).
-- **Prohibido `git add .`** y `git add -A`. Añadir archivos uno a uno tras revisar.
+- Nunca trabajar en `main` ni en `dev`.
+- Crear ramas desde `dev`: `feat/*`, `fix/*`, `docs/*`, `test/*`.
+- **Prohibido `git add .`**. Añadir archivos uno a uno tras revisar.
 - Antes de cada commit: `git status --short` y `git diff --name-only`.
-- **Nunca ejecutar `commit`, `push`, `merge`, `rebase`, `reset`, `clean` ni `force push` sin que una persona lo pida explícitamente.**
-- **Claude Code no ejecuta commits en este repositorio.** Puede preparar cambios, staged files y proponer mensajes, pero el commit final lo hace siempre una persona desde Git local para que Claude no aparezca como colaborador ni autor en el historial.
+- No hacer commit/push sin que la persona lo pida explícitamente.
 - Commits pequeños, descriptivos y en imperativo (`feat: ...`, `fix: ...`, `docs: ...`).
 
 ## 2. Alcance y prioridades
@@ -32,10 +20,8 @@ Los **prompts se versionan y revisan como código** ("Prompt ≈ Código"): ver 
 ## 3. Seguridad
 
 - Nunca commitear `.env` ni secretos. Solo `.env.example` con valores ficticios.
-- No almacenar datos sensibles de menores (producto para familias con niños pequeños).
+- No almacenar datos sensibles de menores.
 - Validar y sanear entradas de usuario en el backend.
-- Cuando exista auth/roles: control de acceso por middleware y revisión de **Broken Access Control / IDOR**.
-- Todo código generado por IA pasa por **auditoría humana** antes de integrarse. Ver [prompts/SECURITY_REVIEWER.md](prompts/SECURITY_REVIEWER.md) y [skills/SKILL_SECURITY_MINIMUM.md](skills/SKILL_SECURITY_MINIMUM.md).
 
 ## 4. Calidad
 

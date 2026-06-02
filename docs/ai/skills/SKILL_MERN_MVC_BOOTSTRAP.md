@@ -2,7 +2,7 @@
 
 Cómo está montado el monorepo DESAFIO-26 y cómo extenderlo.
 
-> **Nota legacy (pendiente de renombrar):** el nombre del archivo conserva "MERN" por motivos históricos, pero el stack **no es MERN**: la base de datos es **PostgreSQL con Prisma**, no MongoDB (decisión de equipo; MongoDB/Mongoose se descartó). No se renombra el archivo en este ciclo para no romper enlaces; renombrarlo a `SKILL_MONOREPO_MVC_BOOTSTRAP.md` queda como tarea futura.
+> Nota: aunque el nombre del archivo conserva "MERN", el stack **no es MERN estricto**: la base de datos es **PostgreSQL con Prisma**, no MongoDB (decisión de equipo).
 
 ## Estructura del monorepo
 
