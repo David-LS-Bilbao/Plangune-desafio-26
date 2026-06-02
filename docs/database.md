@@ -1,5 +1,11 @@
 # PostgreSQL local · DESAFIO-26
 
+> **Fuente de verdad del schema:** [`docs/data/schema-real/init.sql`](data/schema-real/init.sql)
+> · `backend/prisma/schema.prisma` es su espejo fiel (11 modelos) · **Runtime: mock en memoria**
+> (sin migraciones ejecutadas todavía). Ver [ADR-0004](adr/0004-real-schema-source-of-truth.md).
+>
+> `docs/data/BBDD.sql` es referencia histórica, **no el contrato activo**.
+
 Guía para levantar y usar PostgreSQL local con Docker Compose y conectarlo con Prisma.
 
 > **Credenciales de desarrollo local** (no son reales; son ficticias para uso local).
