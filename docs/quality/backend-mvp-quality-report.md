@@ -34,27 +34,27 @@ Contrato detallado en [../api.md](../api.md).
 
 ### Incorporados en `feature/backend` (cobertura real hoy)
 
-**24 tests · 7 suites · verdes.**
+**29 tests · 8 suites · verdes.**
 
 | Suite | Tests | Zona |
 |---|---|---|
 | `health.test.js` | 1 | 80 |
 | `error.test.js` | 4 | 80 (404/500/422) |
 | `activities.test.js` | 5 | 100 contrato (solo `approved`, 404 de no-aprobada) |
-| `recommendations.test.js` | 5 | 100 core (Family Score: máx 3, shape, orden, sin `pending`) |
+| `recommendations.test.js` | 6 | 100 core (Family Score: máx 3, shape, orden, sin `pending`, explicabilidad) |
 | `reviews.test.js` | 3 | 80 (201/422/404) |
 | `incidents.test.js` | 3 | 80 (201/422/404) |
 | `favorites.test.js` | 3 | 80 (add/list/remove + 404) |
+| `assistant.test.js` | 4 | 80 (fallback: `mode`, ≤3 con shape, body vacío, `message`>500→422) |
 
-### Propuestos / pendientes de PR (NO contados como cobertura incorporada)
+### Integrado desde `test/backend-assistant-fallback`
 
-En la rama `test/backend-assistant-fallback` (commit `894b06b`), **aún no integrada** en `feature/backend`:
+La rama `test/backend-assistant-fallback` (commit `894b06b`) ya está **integrada** en `feature/backend` (PR #14, merge `c167b5a`):
 
 - `assistant.test.js` (**+4**): 200 + `mode:"fallback"`; `recommendations` array ≤3 con shape; body vacío → 200; `message`>500 → 422.
 - `recommendations.test.js` (**+1**): explicabilidad no frágil (top result con `reasons.length > 0`).
 
-> Una vez integrada esa rama (PR `test/backend-assistant-fallback → feature/backend`), la
-> cobertura incorporada pasará a **29 tests · 8 suites**. Hasta entonces, se cuentan como pendientes.
+> Con esta integración, la cobertura incorporada es de **29 tests · 8 suites**.
 
 Estrategia y criterios en [README.md](README.md) (100/80/0).
 
@@ -78,7 +78,7 @@ Estrategia y criterios en [README.md](README.md) (100/80/0).
 
 ## Qué falta antes de integrar con frontend
 
-1. Integrar la rama de tests (`assistant.test.js` + refuerzo) en `feature/backend`.
+1. ✅ Hecho: rama de tests del asistente (`assistant.test.js` + refuerzo de explicabilidad) integrada en `feature/backend` (PR #14).
 2. Definir `VITE_API_URL` y un cliente axios central en frontend; alinear el shape de los mocks del frontend con `docs/api.md` (o mapear en la capa de servicios).
 3. Conectar pantallas críticas en orden: `/planes` y `/planes/:id` (lectura) → recomendaciones → favoritos/reseñas/incidencias (escritura).
 4. Decidir `CLIENT_URL` para CORS en el entorno de integración.
@@ -87,5 +87,5 @@ Estrategia y criterios en [README.md](README.md) (100/80/0).
 ## Nota final
 
 Este es un **informe de calidad**, no un PR. **No se propone, prepara ni sugiere merge a `dev`.**
-Las ramas de este ciclo (`docs/backend-mvp-quality`, `test/backend-assistant-fallback`) vuelven,
-en su momento y a decisión humana, a `feature/backend`.
+Las ramas de este ciclo (`docs/backend-mvp-quality`, `test/backend-assistant-fallback`) ya se
+integraron, por decisión humana, en `feature/backend` (PR #15 y #14).

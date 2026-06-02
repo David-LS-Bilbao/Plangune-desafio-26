@@ -19,13 +19,13 @@ No se exige 100 % de cobertura global. No se convierten Playwright, Sentry, Swag
 | 100 contrato | `/api/activities` solo `approved`; detalle de no-aprobada → 404 | ✅ cubierto |
 | 80 flujos | reviews (201/422/404), incidents (201/422/404), favorites (add/list/remove + 404) | ✅ cubierto |
 | 80 flujos | error handler central (404/500/422) y health | ✅ cubierto |
-| 80 flujos | asistente fallback (`/api/assistant/family-plan`) | 🟡 propuesto (rama `test/backend-assistant-fallback`) |
+| 80 flujos | asistente fallback (`/api/assistant/family-plan`) | ✅ cubierto |
 | 0 | estilos, wrappers, config | sin tests (intencional) |
 
-### Cobertura incorporada vs propuesta
+### Cobertura incorporada
 
-- **Incorporada en `feature/backend`**: 24 tests (7 suites) — health, error, activities, recommendations, reviews, incidents, favorites.
-- **Propuesta / pendiente de PR**: `assistant.test.js` + refuerzo de explicabilidad en `recommendations.test.js` (rama `test/backend-assistant-fallback`). **No** se cuentan como cobertura incorporada hasta su integración en `feature/backend`.
+- **Incorporada en `feature/backend`**: **29 tests (8 suites)** — health, error, activities, recommendations, reviews, incidents, favorites y assistant.
+- La rama `test/backend-assistant-fallback` (`assistant.test.js` + refuerzo de explicabilidad en `recommendations.test.js`) ya está **integrada** en `feature/backend` (PR #14, commit `c167b5a`).
 
 ## Cómo ejecutar
 
