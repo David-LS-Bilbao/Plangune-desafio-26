@@ -1,11 +1,13 @@
 // Prisma schema · DESAFIO-26 (PostgreSQL)
 //
-// Modelos mínimos del MVP, alineados con el contrato documentado en docs/api.md.
-// Objetivo: preparar la sustitución progresiva del almacenamiento mock en memoria
-// SIN cambiar las URLs de endpoints ni el shape de las respuestas.
+// Modelo alineado con la base de datos REAL recibida en backend/src/models/init.sql.
+// La entidad central es Event (tabla `events`). Espejo fiel de las columnas de init.sql
+// (snake_case) para que el shape mock == futuro runtime Prisma == DB, sin fricción.
 //
-// Los valores de los enums se escriben en minúscula para coincidir EXACTAMENTE con
-// el JSON del contrato actual (p. ej. "approved", "pending", "open", "medium").
+// PRIMERA INTEGRACIÓN SEGURA (ver tarea): solo se modela `Event`. El runtime sigue en
+// MOCK (no se consulta PostgreSQL todavía, ADR-0001). El resto de tablas de init.sql
+// (businesses, users, families, plans, offers, favoritos...) se modelarán en pasos
+// posteriores; por eso `business_id` se deja como escalar (sin relación todavía).
 
 generator client {
   provider = "prisma-client-js"
@@ -16,105 +18,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ── Enums ────────────────────────────────────────────────────────────────────
+/// Evento / plan familiar. Espejo de la tabla `events` de init.sql.
+/// `id` es autoincremental (serial). Los nombres de campo replican las columnas reales.
+model Event {
+  id              Int       @id @default(autoincrement())
+  business_id     Int? // FK a businesses (relación se modelará en un paso posterior)
+  fuente          String?   @db.VarChar(20)
+  external_id     String?
+  title           String    @db.VarChar(150)
+  description     String?
+  categoria       String?   @db.VarChar(50)
+  tipo_plantilla  String?   @db.VarChar(100)
+  municipio       String?   @db.VarChar(100)
+  territorio      String?   @db.VarChar(30)
+  address         String?
+  lat             Decimal?  @db.Decimal(9, 6)
+  lng             Decimal?  @db.Decimal(9, 6)
+  telefono        String?   @db.VarChar(30)
+  email           String?   @db.VarChar(100)
+  website         String?
+  es_lluvia       Boolean   @default(false)
+  es_carrito      Boolean   @default(false)
+  es_cambiador    Boolean   @default(false)
+  es_silla_ruedas Boolean   @default(false)
+  es_mascotas     Boolean   @default(false)
+  edad_minima     Decimal?  @db.Decimal
+  multiplicador   Decimal?  @default(1.00) @db.Decimal(3, 2)
+  fecha_inicio    DateTime  @db.Timestamp(6)
+  fecha_fin       DateTime? @db.Timestamp(6)
+  lugar           String?   @db.VarChar(255)
+  price           String?   @db.VarChar
+  imagen_url      String?
+  tipo_evento     String?   @db.VarChar(100)
 
-enum ActivityStatus {
-  pending
-  approved
-  rejected
-}
-
-enum ReviewStatus {
-  pending
-  approved
-  rejected
-}
-
-enum IncidentStatus {
-  open
-  in_review
-  resolved
-}
-
-enum PriceType {
-  free
-  low
-  medium
-  high
-}
-
-// ── Modelos ──────────────────────────────────────────────────────────────────
-
-/// Actividad / plan familiar. `id` es String para conservar los identificadores
-/// legibles del contrato mock (p. ej. "act-001") al migrar el seed.
-model Activity {
-  id                  String         @id @default(cuid())
-  title               String
-  category            String
-  province            String
-  municipality        String
-  recommendedAgeMin   Int            @default(0)
-  recommendedAgeMax   Int            @default(99)
-  priceType           PriceType      @default(medium)
-  estimatedFamilyCost Int            @default(0)
-  isIndoor            Boolean        @default(false)
-  rainSuitable        Boolean        @default(false)
-  strollerFriendly    Boolean        @default(false)
-  hasToilet           Boolean        @default(false)
-  hasChangingTable    Boolean        @default(false)
-  averageRating       Float          @default(0)
-  status              ActivityStatus @default(pending)
-
-  reviews   Review[]
-  incidents Incident[]
-  favorites Favorite[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([status])
-  @@index([province, municipality])
-}
-
-/// Reseña de una actividad. Entra como `pending` (moderación pendiente).
-model Review {
-  id         String       @id @default(cuid())
-  activityId String
-  activity   Activity     @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  rating     Int
-  comment    String?
-  status     ReviewStatus @default(pending)
-
-  createdAt DateTime @default(now())
-
-  @@index([activityId])
-}
-
-/// Incidencia reportada sobre una actividad. Entra como `open`.
-model Incident {
-  id          String         @id @default(cuid())
-  activityId  String
-  activity    Activity       @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  type        String
-  description String?
-  status      IncidentStatus @default(open)
-
-  createdAt DateTime @default(now())
-
-  @@index([activityId])
-}
-
-/// Favorito. Sin auth todavía: se usa un `userId` placeholder ("mock-user") para
-/// no introducir un modelo User aún. La pareja (userId, activityId) es única para
-/// que la operación sea idempotente, como en el contrato actual.
-model Favorite {
-  id         String   @id @default(cuid())
-  userId     String   @default("mock-user")
-  activityId String
-  activity   Activity @relation(fields: [activityId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([userId, activityId])
-  @@index([activityId])
+  // Índices declarativos para los filtros más usados (no migrados todavía).
+  @@index([municipio])
+  @@index([territorio])
+  @@index([categoria])
+  @@index([tipo_evento])
+  @@index([fecha_inicio])
+  @@map("events")
 }
