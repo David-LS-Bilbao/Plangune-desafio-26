@@ -49,11 +49,11 @@ const demoFamilyUser = {
 
 /** 5 negocios demo. IDs 1–5 coinciden con los business_id referenciados por mockEvents. */
 const demoBusinesses = [
-  { id: 1, user_id: 1, name: 'Negocio Demo 1 (museo Bilbao)' },
-  { id: 2, user_id: 2, name: 'Negocio Demo 2 (taller Bilbao)' },
-  { id: 3, user_id: 3, name: 'Negocio Demo 3 (acuario Donostia)' },
-  { id: 4, user_id: 4, name: 'Negocio Demo 4 (teatro Vitoria)' },
-  { id: 5, user_id: 5, name: 'Negocio Demo 5 (granja Karrantza)' },
+  { id: 1, user_id: 1, name: 'Negocio Demo 1 (museo Bilbao)', nif: 'B00000001' },
+  { id: 2, user_id: 2, name: 'Negocio Demo 2 (taller Bilbao)', nif: 'B00000002' },
+  { id: 3, user_id: 3, name: 'Negocio Demo 3 (acuario Donostia)', nif: 'B00000003' },
+  { id: 4, user_id: 4, name: 'Negocio Demo 4 (teatro Vitoria)', nif: 'B00000004' },
+  { id: 5, user_id: 5, name: 'Negocio Demo 5 (granja Karrantza)', nif: 'B00000005' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -97,7 +97,7 @@ async function seedBusinesses() {
     const { id, ...data } = business;
     await prisma.business.upsert({
       where:  { id },
-      update: {}, // no sobreescribir si ya existe
+      update: { nif: data.nif }, // rellena nif en DBs ya existentes; no toca otros campos
       create: { id, ...data },
     });
     count++;

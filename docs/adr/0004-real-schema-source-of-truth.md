@@ -66,6 +66,10 @@ qué fichero manda.
   la migración incremental `move_rating_from_plans_to_user_selected_recommendations` (sin tocar
   la migración inicial). Detalle en
   [../features/db-move-rating-to-selected-recommendations.md](../features/db-move-rating-to-selected-recommendations.md).
+- **2026-06-03 · `nif` en `businesses`**: nueva columna `nif character varying(20)` nullable +
+  unique para el NIF/CIF/NIE del negocio (rol negocio/alta futura). Reflejado en `init.sql`,
+  `schema.prisma` y la migración incremental `add_nif_to_businesses`. Detalle en
+  [../features/db-add-business-nif.md](../features/db-add-business-nif.md).
 
 ## Relacionado
 
