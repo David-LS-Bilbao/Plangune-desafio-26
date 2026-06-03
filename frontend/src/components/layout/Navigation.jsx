@@ -7,94 +7,48 @@ function Navigation() {
   const location = useLocation();
   const hideRoutes = ["/", "/login", "/crear-familia", "/crear-negocio"];
 
-  if (hideRoutes.includes(location.pathname)) {
-    return null;
-  }
+  if (hideRoutes.includes(location.pathname)) return null;
 
   const linkClass = ({ isActive }) => `nav-link${isActive ? " active" : ""}`;
 
-  if (user?.role === "admin") {
-    return (
-      <nav className="bottom-nav">
-        <NavLink to="/admin" className={linkClass} end>
-          <span
-            className={`material-symbols-outlined ${location.pathname === "/admin" ? "fill" : ""}`}
-          >
-            dashboard
-          </span>
-          <span className="nav-label">Panel</span>
-        </NavLink>
-        <NavLink to="/admin/data" className={linkClass} end>
-          <span
-            className={`material-symbols-outlined ${location.pathname === "/admin/data" ? "fill" : ""}`}
-          >
-            analytics
-          </span>
-          <span className="nav-label">Datos</span>
-        </NavLink>
-      </nav>
-    );
-  }
+  const getIconClass = (path, exact = true) => {
+    const isActive = exact
+      ? location.pathname === path
+      : location.pathname.startsWith(path);
+    return `material-symbols-outlined ${isActive ? "fill" : ""}`;
+  };
 
-  if (user?.role === "business") {
-    return (
-      <nav className="bottom-nav">
-        <NavLink to="/negocio/dashboard" className={linkClass} end>
-          <span
-            className={`material-symbols-outlined ${location.pathname === "/negocio/dashboard" ? "fill" : ""}`}
-          >
-            home
-          </span>
-          <span className="nav-label">Inicio</span>
-        </NavLink>
-        <NavLink to="/negocio/ofertas" className={linkClass} end>
-          <span
-            className={`material-symbols-outlined ${location.pathname === "/negocio/ofertas" ? "fill" : ""}`}
-          >
-            local_offer
-          </span>
-          <span className="nav-label">Ofertas</span>
-        </NavLink>
-        <NavLink to="/negocio" className={linkClass} end>
-          <span
-            className={`material-symbols-outlined ${location.pathname === "/negocio" ? "fill" : ""}`}
-          >
-            add_circle
-          </span>
-          <span className="nav-label">Actividad</span>
-        </NavLink>
-      </nav>
-    );
-  }
-
-  return (
+  const renderNav = (links) => (
     <nav className="bottom-nav">
-      <NavLink to="/planes" className={linkClass} end={false}>
-        <span
-          className={`material-symbols-outlined ${location.pathname.startsWith("/planes") ? "fill" : ""}`}
-        >
-          search
-        </span>
-        <span className="nav-label">Explorar</span>
-      </NavLink>
-      <NavLink to="/favoritos" className={linkClass} end>
-        <span
-          className={`material-symbols-outlined ${location.pathname === "/favoritos" ? "fill" : ""}`}
-        >
-          favorite
-        </span>
-        <span className="nav-label">Guardados</span>
-      </NavLink>
-      <NavLink to="/perfil" className={linkClass} end>
-        <span
-          className={`material-symbols-outlined ${location.pathname === "/perfil" ? "fill" : ""}`}
-        >
-          account_circle
-        </span>
-        <span className="nav-label">Perfil</span>
-      </NavLink>
+      {links.map(({ to, icon, label, exact = true }) => (
+        <NavLink key={to} to={to} className={linkClass} end={exact}>
+          <span className={getIconClass(to, exact)}>{icon}</span>
+          <span className="nav-label">{label}</span>
+        </NavLink>
+      ))}
     </nav>
   );
+
+  const adminLinks = [
+    { to: "/admin", icon: "dashboard", label: "Panel" },
+    { to: "/admin/data", icon: "analytics", label: "Datos" },
+  ];
+
+  const businessLinks = [
+    { to: "/negocio/dashboard", icon: "home", label: "Inicio" },
+    { to: "/negocio/ofertas", icon: "local_offer", label: "Ofertas" },
+    { to: "/negocio", icon: "add_circle", label: "Actividad" },
+  ];
+
+  const defaultLinks = [
+    { to: "/planes", icon: "search", label: "Explorar", exact: false },
+    { to: "/favoritos", icon: "favorite", label: "Guardados" },
+    { to: "/perfil", icon: "account_circle", label: "Perfil" },
+  ];
+
+  if (user?.role === "admin") return renderNav(adminLinks);
+  if (user?.role === "business") return renderNav(businessLinks);
+  return renderNav(defaultLinks);
 }
 
 export default Navigation;
