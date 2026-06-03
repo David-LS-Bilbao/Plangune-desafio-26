@@ -1,0 +1,22 @@
+# Dependencias (se reinstalan dentro de la imagen)
+node_modules
+
+# Variables de entorno locales (en Docker se pasan vía compose). El example sí se conserva.
+.env
+.env.*
+!.env.example
+
+# Logs y temporales
+*.log
+npm-debug.log*
+
+# Tests y cobertura (no necesarios en runtime del contenedor)
+coverage
+
+# Sistema operativo / editor
+.DS_Store
+.vscode
+
+# Git
+.git
+.gitignore

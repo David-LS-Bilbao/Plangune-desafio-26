@@ -1,6 +1,6 @@
-# compose.yaml — PostgreSQL local de desarrollo para DESAFIO-26
-# Uso: docker compose up -d postgres
-# Ver instrucciones completas en docs/database.md
+# compose.yaml — PostgreSQL + backend local de desarrollo para DESAFIO-26
+# Uso: docker compose up -d postgres backend
+# Ver instrucciones completas en docs/docker-backend.md y docs/database.md
 
 services:
   postgres:
@@ -21,6 +21,26 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: desafio26_backend
+    restart: unless-stopped
+    # Espera a que PostgreSQL esté healthy antes de arrancar.
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      # IMPORTANTE: dentro de Docker el host de la DB es `postgres` (nombre del servicio),
+      # NO `localhost`. Credenciales de desarrollo local (no secretos reales).
+      DATABASE_URL: "postgresql://desafio26:desafio26_dev_password@postgres:5432/desafio26_dev?schema=public"
+      CLIENT_URL: "http://localhost:5173"
+    ports:
+      - "3000:3000"
 
 volumes:
   desafio26_postgres_data:

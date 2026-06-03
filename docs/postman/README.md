@@ -49,6 +49,11 @@ npm run dev:backend
 El backend queda en `http://localhost:3000`. El seed crea: 5 usuarios `business`, **1 usuario
 `family` con id 100** (el que usan los favoritos), 5 negocios y 10 eventos.
 
+> **Backend local o Docker:** esta colección se puede ejecutar tanto contra el backend en el host
+> (`npm run dev:backend`) como contra el **backend en Docker** (`docker compose up -d postgres backend`).
+> En ambos casos `baseUrl` sigue siendo `http://localhost:3000/api`. Para el backend Docker, ver
+> [../docker-backend.md](../docker-backend.md).
+
 ## 5. Importar en Postman
 
 1. **Import** → arrastra `DESAFIO-26-backend-runtime.postman_collection.json`.
