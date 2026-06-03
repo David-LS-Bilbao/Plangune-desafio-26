@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useBusinessStore } from "../store";
 
 function BusinessDashboard() {
   const navigate = useNavigate();
@@ -8,6 +9,8 @@ function BusinessDashboard() {
   const [services, setServices] = useState(["Carrito", "Cambiador"]);
   const [message, setMessage] = useState("");
   const formRef = useRef(null);
+
+  const addOffer = useBusinessStore((state) => state.addOffer);
 
   const handleCreateActivity = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -22,6 +25,13 @@ function BusinessDashboard() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    addOffer({
+      title: activityName,
+      category,
+      tags: services,
+      price: 'Consultar',
+      location: 'Bilbao'
+    });
     setMessage("Tu actividad se ha enviado a revisión.");
     setActivityName("");
     setCategory("");

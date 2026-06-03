@@ -1,8 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useBusinessStore } from "../store";
 
 function BusinessOverview() {
   const navigate = useNavigate();
+  const { offers, stats } = useBusinessStore();
 
   return (
     <main className="business-overview-main">
@@ -142,7 +144,7 @@ function BusinessOverview() {
               <span className="kpi-label">Activas</span>
             </div>
             <div className="kpi-value-row z-10">
-              <span className="kpi-value">2</span>
+              <span className="kpi-value">{offers.length}</span>
               <span className="kpi-subtext">Actividades</span>
             </div>
           </div>
