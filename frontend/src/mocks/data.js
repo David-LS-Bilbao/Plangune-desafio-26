@@ -11,6 +11,7 @@ export const mockPlans = [
     ageRange: '4-12 años',
     tags: ['Apto Carrito', 'Cambiador', 'Interior'],
     isIdeal: true,
+    subscriptionTier: 'Premium',
     description: 'El Museo Guggenheim Bilbao ofrece una experiencia única para los más pequeños con talleres creativos y recorridos diseñados específicamente para familias. Una oportunidad perfecta para introducir el arte contemporáneo de forma lúdica.',
     image: 'https://images.unsplash.com/photo-1543325164-9ed3ebc18221?q=80&w=600&auto=format&fit=crop'
   },
@@ -26,6 +27,7 @@ export const mockPlans = [
     ageRange: 'Todas las edades',
     tags: ['Aire Libre', 'Apto Carrito', 'Columpios'],
     isIdeal: false,
+    subscriptionTier: 'None',
     description: 'El pulmón verde del centro de Bilbao. Cuenta con amplias zonas de juegos infantiles, el estanque de los patos y mucho espacio para correr y disfrutar en familia.',
     image: 'https://images.unsplash.com/photo-1601000678887-b935cd4d7d0a?q=80&w=600&auto=format&fit=crop'
   },
@@ -41,6 +43,7 @@ export const mockPlans = [
     ageRange: '5+ años',
     tags: ['Creativo', 'Interior', 'A cubierto'],
     isIdeal: true,
+    subscriptionTier: 'Pro',
     description: 'Ven a ensuciarte las manos en nuestro taller de cerámica de 2 horas. Padres e hijos crearán su propia taza o cuenco que luego hornearemos para vosotros.',
     image: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=600&auto=format&fit=crop'
   },
@@ -56,6 +59,7 @@ export const mockPlans = [
     ageRange: '3+ años',
     tags: ['Naturaleza', 'Aire Libre', 'Senderismo'],
     isIdeal: false,
+    subscriptionTier: 'Base',
     description: 'Una excursión mágica por el bosque pintado de Oma. Descubrid las formas geométricas y animales que se esconden entre los árboles en esta obra de arte al aire libre.',
     image: 'https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=600&auto=format&fit=crop'
   },
@@ -71,6 +75,7 @@ export const mockPlans = [
     ageRange: '0-10 años',
     tags: ['Comida', 'Txikipark', 'Cambiador', 'Trona'],
     isIdeal: true,
+    subscriptionTier: 'Premium',
     description: 'El único restaurante de la zona donde los niños tienen su propio txikipark vigilado mientras los adultos disfrutan de nuestra carta de autor de comida tradicional vasca.',
     image: 'https://images.unsplash.com/photo-1519340241574-2cefa556ec4b?q=80&w=600&auto=format&fit=crop'
   }
