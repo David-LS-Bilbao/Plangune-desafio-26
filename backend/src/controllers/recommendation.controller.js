@@ -9,7 +9,20 @@ function parseBool(value) {
 
 /** Construye el contexto del recomendador a partir de la query string. */
 function parseContext(query) {
-  const { childrenAges, strollerFriendly, rainSuitable, budget, municipality } = query;
+  const {
+    // Filtros existentes (no se rompe el contrato actual)
+    childrenAges,
+    strollerFriendly,
+    rainSuitable,
+    budget,
+    municipality,
+    // Filtros adicionales para la API de Data
+    changingTable,
+    wheelchairAccessible,
+    petsAllowed,
+    includeKulturklik,
+    limit,
+  } = query;
 
   return {
     childrenAges: childrenAges
@@ -22,6 +35,12 @@ function parseContext(query) {
     rainSuitable: parseBool(rainSuitable),
     budget: budget !== undefined ? Number(budget) : undefined,
     municipality: municipality || undefined,
+    // Adicionales (Data): se mapean en el service. Opcionales; undefined si no vienen.
+    changingTable: parseBool(changingTable),
+    wheelchairAccessible: parseBool(wheelchairAccessible),
+    petsAllowed: parseBool(petsAllowed),
+    includeKulturklik: parseBool(includeKulturklik),
+    limit: limit !== undefined ? Number(limit) : undefined,
   };
 }
 

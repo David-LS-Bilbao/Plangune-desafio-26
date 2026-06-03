@@ -37,7 +37,7 @@ function filterMockEvents(filters = {}) {
     if (filters.categoria   && ev.categoria?.toLowerCase()   !== filters.categoria.toLowerCase())   return false;
     if (filters.tipo_evento && ev.tipo_evento?.toLowerCase() !== filters.tipo_evento.toLowerCase()) return false;
 
-    if (filters.es_lluvia    !== undefined && ev.es_lluvia    !== filters.es_lluvia)    return false;
+    if (filters.es_interior    !== undefined && ev.es_interior    !== filters.es_interior)    return false;
     if (filters.es_carrito   !== undefined && ev.es_carrito   !== filters.es_carrito)   return false;
     if (filters.es_cambiador !== undefined && ev.es_cambiador !== filters.es_cambiador) return false;
 
@@ -91,6 +91,14 @@ describe('GET /api/events', () => {
     expect(res.status).toBe(200);
     expect(res.body.length).toBeGreaterThan(0);
     expect(res.body.every((ev) => ev.es_carrito === true)).toBe(true);
+  });
+
+  it('filtra por es_interior=true (plan a cubierto)', async () => {
+    const res = await request(app).get('/api/events?es_interior=true');
+
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body.every((ev) => ev.es_interior === true)).toBe(true);
   });
 
   it('filtra por edad (apto si edad_minima <= edad)', async () => {

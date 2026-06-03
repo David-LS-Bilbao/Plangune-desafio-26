@@ -36,7 +36,7 @@ Lista eventos. Responde un **array**. Admite filtros opcionales por query string
 | `territorio` | string | `Bizkaia` | igualdad |
 | `categoria` | string | `museo` | igualdad |
 | `tipo_evento` | string | `taller` | igualdad |
-| `es_lluvia` | boolean | `true` | plan a cubierto / apto si llueve |
+| `es_interior` | boolean | `true` | plan a cubierto / apto si llueve |
 | `es_carrito` | boolean | `true` | accesible con carrito |
 | `es_cambiador` | boolean | `true` | dispone de cambiador |
 | `edad` | entero | `2` | apto si `edad_minima <= edad` |
@@ -68,7 +68,7 @@ Ejemplo de evento (shape real de `events`):
   "telefono": "944000001",
   "email": null,
   "website": null,
-  "es_lluvia": true,
+  "es_interior": true,
   "es_carrito": true,
   "es_cambiador": true,
   "es_silla_ruedas": true,
@@ -118,13 +118,20 @@ Ejemplo de actividad:
 }
 ```
 
-## Recomendaciones (Family Score)
+## Recomendaciones (Data primary + fallback local)
 
 ### `GET /api/recommendations`
-Devuelve **como máximo 3** planes ordenados por Family Score (scoring reglado y explicable).
+Devuelve **como máximo 3 planes por defecto**, o el número indicado por `limit`.
 
-> **Fuente runtime actual:** Prisma/PostgreSQL vía tabla `events` reales.
-> **Contrato estable.** Ver [features/backend-recommendations-events-runtime.md](features/backend-recommendations-events-runtime.md).
+> **Fuente runtime:** la **API de Data (Flask)** es el recomendador **principal** cuando
+> `DATA_RECOMMENDER_ENABLED=true`; si está deshabilitada o falla, se usa el **recomendador local**
+> (Family Score sobre `events` de Prisma/PostgreSQL) como **fallback**.
+> El frontend **siempre** consume este Express, nunca Flask directamente.
+> **Contrato estable**, con un campo nuevo `source` por item.
+> Ver [features/backend-data-recommender-primary.md](features/backend-data-recommender-primary.md).
+>
+> Cada item incluye **`source`**: `"data-api"` (recomendación de Data) o `"local-fallback"`
+> (recomendador local). `activity` sigue siendo **alias legacy** de `event`.
 
 Contexto opcional por **query string**:
 
@@ -133,8 +140,15 @@ Contexto opcional por **query string**:
 | `childrenAges` | lista | `2,5` | Edades de los peques (separadas por comas) |
 | `strollerFriendly` | boolean | `true` | Se necesita acceso con carrito |
 | `rainSuitable` | boolean | `true` | Llueve / se busca plan a cubierto |
-| `budget` | número | `30` | Coste familiar máximo (€) |
+| `budget` | número | `30` | Coste familiar máximo (€) — solo recomendador local |
 | `municipality` | string | `Bilbao` | Municipio de referencia (cercanía) |
+| `limit` | número | `5` | Máximo de recomendaciones a devolver (por defecto 3) |
+
+> Filtros adicionales aceptados (se reenvían a Data): `changingTable`, `wheelchairAccessible`,
+> `petsAllowed`, `includeKulturklik` (booleanos).
+>
+> Aunque el campo interno de DB actual es `events.es_interior`, Express mantiene `rainSuitable`
+> como query pública y lo reenvía a Data como `lluvia`, que es el contrato vigente de `GET /planes`.
 
 Respuesta (array de recomendaciones con explicación):
 
@@ -146,7 +160,7 @@ Respuesta (array de recomendaciones con explicación):
       "title": "Exposición interactiva en el museo",
       "municipio": "Bilbao",
       "es_carrito": true,
-      "es_lluvia": true,
+      "es_interior": true,
       "edad_minima": 0,
       "price": "Gratis"
     },
@@ -158,10 +172,14 @@ Respuesta (array de recomendaciones con explicación):
       "Buen plan si llueve (a cubierto)",
       "Cerca de Bilbao",
       "Dentro de tu presupuesto (Gratis)"
-    ]
+    ],
+    "source": "local-fallback"
   }
 ]
 ```
+
+> `source` es `"data-api"` cuando la recomendación procede de la API de Data, o
+> `"local-fallback"` cuando procede del recomendador local.
 
 > **Transición de clave:**
 > - `event` es la **clave principal nueva** con el shape real de `events` (snake_case).
@@ -280,11 +298,11 @@ Respuesta `200`:
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/api/health` | Healthcheck |
-| GET | `/api/events` | Lista de eventos (filtros: municipio, territorio, categoria, tipo_evento, es_lluvia, es_carrito, es_cambiador, edad, fecha_desde, fecha_hasta) |
+| GET | `/api/events` | Lista de eventos (filtros: municipio, territorio, categoria, tipo_evento, es_interior, es_carrito, es_cambiador, edad, fecha_desde, fecha_hasta) |
 | GET | `/api/events/:id` | Detalle de evento |
 | GET | `/api/activities` | Lista de actividades aprobadas (mock previo) |
 | GET | `/api/activities/:id` | Detalle de actividad |
-| GET | `/api/recommendations` | Hasta 3 planes con Family Score |
+| GET | `/api/recommendations` | Recomendaciones Data primary con fallback local (por defecto hasta 3, o `limit`) |
 | POST | `/api/assistant/family-plan` | Plan familiar (fallback sin IA) |
 | POST | `/api/reviews` | Crear reseña |
 | POST | `/api/incidents` | Reportar incidencia |

@@ -30,7 +30,7 @@ function httpError(status, message) {
  * @param {string}  [filters.territorio]
  * @param {string}  [filters.categoria]
  * @param {string}  [filters.tipo_evento]
- * @param {boolean} [filters.es_lluvia]
+ * @param {boolean} [filters.es_interior]
  * @param {boolean} [filters.es_carrito]
  * @param {boolean} [filters.es_cambiador]
  * @param {number}  [filters.edad]          apto si edad_minima <= edad

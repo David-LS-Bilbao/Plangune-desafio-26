@@ -34,9 +34,19 @@ Proyecto en desarrollo del MVP. Producto y documentación inicial:
 
 ### Backend MVP
 
-El backend expone una **API REST bajo `/api`** con **datos mock en memoria**.
-PostgreSQL/Prisma están preparados (modelos MVP + seed) pero **aún no son runtime**:
-los services siguen sirviendo el mock hasta una migración posterior.
+El backend Express expone la **API REST pública bajo `/api`**. El frontend consume siempre
+Express; no llama directamente a servicios internos como la API Flask de Data.
+
+Estado actual:
+
+* `/api/events`, `/api/recommendations` y `/api/favorites` usan datos reales vía PostgreSQL/Prisma.
+* `/api/recommendations` usa **Data Flask** como recomendador principal cuando
+  `DATA_RECOMMENDER_ENABLED=true`.
+* Si Data está deshabilitada, falla o agota timeout, Express usa el recomendador local
+  Prisma/PostgreSQL como fallback.
+* El campo actual para planes interiores/a cubierto es `events.es_interior`.
+* Existe una migración incremental segura para renombrar `es_lluvia` a `es_interior`.
+* Tests backend actuales: **10 suites · 67/67 verdes**.
 
 Endpoints actuales:
 
@@ -46,6 +56,16 @@ Endpoints actuales:
 * `POST /api/assistant/family-plan` (fallback sin IA)
 * `POST /api/reviews` · `POST /api/incidents`
 * `GET/POST/DELETE /api/favorites`
+
+Variables Data (`backend/.env.example`):
+
+```bash
+DATA_RECOMMENDER_ENABLED=false
+DATA_API_URL=http://localhost:5000
+DATA_API_TIMEOUT_MS=2000
+```
+
+Pendiente técnico: dockerizar `data-api` en Compose para activar Data en local de forma reproducible.
 
 Arranque y tests (monorepo npm workspaces):
 
@@ -821,4 +841,3 @@ Proyecto multidisciplinar con participación de:
 * Prioridad absoluta: MVP funcional antes que funcionalidades avanzadas.
 * KISS: primero que funcione, luego se mejora.
 * La demo final manda sobre las ideas secundarias.
-

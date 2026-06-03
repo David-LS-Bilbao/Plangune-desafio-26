@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS public.events
     telefono character varying(30) COLLATE pg_catalog."default",
     email character varying(100) COLLATE pg_catalog."default",
     website text COLLATE pg_catalog."default",
-    es_lluvia boolean DEFAULT false,
+    es_interior boolean DEFAULT false,
     es_carrito boolean DEFAULT false,
     es_cambiador boolean DEFAULT false,
     es_silla_ruedas boolean DEFAULT false,

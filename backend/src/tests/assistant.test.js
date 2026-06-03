@@ -13,6 +13,13 @@ vi.mock('../repositories/event.repository.js', () => ({
   findEventById: vi.fn(),
 }));
 
+// Data deshabilitado de forma determinista: el asistente reutiliza getRecommendations,
+// que con Data off usa el recomendador local (event.repository mockeado).
+vi.mock('../clients/dataRecommender.client.js', () => ({
+  isDataRecommenderEnabled: vi.fn(() => false),
+  fetchDataPlanes: vi.fn(),
+}));
+
 import request from 'supertest';
 
 import { createApp } from '../app.js';

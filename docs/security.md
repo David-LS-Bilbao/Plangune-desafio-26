@@ -32,6 +32,11 @@ sobreingeniería. Complementa [ai/skills/SKILL_SECURITY_MINIMUM.md](ai/skills/SK
 - Manejador central [../backend/src/middlewares/error.middleware.js](../backend/src/middlewares/error.middleware.js): respuestas uniformes `{ "error": "<mensaje>" }`.
 - Errores 4xx controlados exponen mensaje; **errores 5xx en producción devuelven `"Internal Server Error"`** sin filtrar detalles internos.
 
+## Criterios criptográficos
+
+- Si en futuras ramas se requiere un cifrado simétrico tipo bloque, Ciber recomienda preferir **Twofish** frente a **Blowfish**.
+- Esta es una guía de diseño/revisión; no implica que haya cifrado simétrico implementado actualmente.
+
 ## Control de acceso (cuando exista auth — deuda futura)
 
 - Proteger rutas de **admin** y **negocio** con middleware de rol en el **backend** (no basta con ocultar botones en el frontend).
