@@ -6,6 +6,19 @@ function PlanDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [reportStatus, setReportStatus] = useState("");
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newReviewText, setNewReviewText] = useState("");
+  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [reviews, setReviews] = useState([
+    {
+      id: 1,
+      author: "Familia Agirre",
+      avatar: "FA",
+      time: "Hace 2 semanas",
+      text: "Excelente plan para el fin de semana. Muy bien acondicionado para carritos.",
+      rating: 5,
+    }
+  ]);
 
   const plan = usePlansStore((state) => state.getPlanById(id));
 
@@ -190,31 +203,92 @@ function PlanDetail() {
 
       {/* Reviews Section */}
       <section className="reviews-section">
-        <div className="reviews-header">
-          <h3 className="reviews-title">Reseñas familiares</h3>
-          <div className="overall-rating">
-            <span className="rating-score">{plan.rating}</span>
-            <span className="material-symbols-outlined fill text-sm">star</span>
-            <span className="material-symbols-outlined fill text-sm">star</span>
-            <span className="material-symbols-outlined fill text-sm">star</span>
-            <span className="material-symbols-outlined fill text-sm">star</span>
-            <span className="material-symbols-outlined text-sm">star_half</span>
-          </div>
-        </div>
-
-        <div className="review-card">
-          <div className="review-author">
-            <div className="author-avatar">FA</div>
-            <div className="author-info">
-              <span className="author-name">Familia Agirre</span>
-              <span className="review-time">Hace 2 semanas</span>
+        <div className="reviews-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h3 className="reviews-title">Reseñas familiares</h3>
+            <div className="overall-rating">
+              <span className="rating-score">{plan.rating}</span>
+              <span className="material-symbols-outlined fill text-sm">star</span>
+              <span className="material-symbols-outlined fill text-sm">star</span>
+              <span className="material-symbols-outlined fill text-sm">star</span>
+              <span className="material-symbols-outlined fill text-sm">star</span>
+              <span className="material-symbols-outlined text-sm">star_half</span>
             </div>
           </div>
-          <p className="review-text">
-            "Excelente plan para el fin de semana. Muy bien acondicionado para
-            carritos."
-          </p>
+          <button 
+            className="btn-primary" 
+            style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+            onClick={() => setShowReviewForm(!showReviewForm)}
+          >
+            {showReviewForm ? "Cancelar" : "Añadir reseña"}
+          </button>
         </div>
+
+        {showReviewForm && (
+          <div className="review-form" style={{ marginBottom: "1.5rem", padding: "1rem", backgroundColor: "var(--surface-container-lowest)", borderRadius: "12px", border: "1px solid var(--outline-variant)" }}>
+            <h4 style={{ marginBottom: "0.5rem" }}>Tu valoración</h4>
+            <div style={{ display: "flex", gap: "4px", marginBottom: "1rem" }}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span 
+                  key={star} 
+                  className={`material-symbols-outlined ${newReviewRating >= star ? "fill" : ""}`}
+                  style={{ cursor: "pointer", color: "var(--md-sys-color-primary)" }}
+                  onClick={() => setNewReviewRating(star)}
+                >
+                  star
+                </span>
+              ))}
+            </div>
+            <textarea 
+              value={newReviewText}
+              onChange={(e) => setNewReviewText(e.target.value)}
+              placeholder="Cuéntanos tu experiencia..."
+              style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--outline)", marginBottom: "1rem", minHeight: "80px", backgroundColor: "transparent", color: "var(--on-surface)", fontFamily: "inherit" }}
+            />
+            <button 
+              className="btn-primary-full" 
+              onClick={() => {
+                if (newReviewText.trim()) {
+                  setReviews([{
+                    id: Date.now(),
+                    author: "Tú",
+                    avatar: "TU",
+                    time: "Justo ahora",
+                    text: newReviewText,
+                    rating: newReviewRating
+                  }, ...reviews]);
+                  setNewReviewText("");
+                  setNewReviewRating(5);
+                  setShowReviewForm(false);
+                }
+              }}
+            >
+              Publicar reseña
+            </button>
+          </div>
+        )}
+
+        {reviews.map(review => (
+          <div className="review-card" key={review.id} style={{ marginBottom: "1rem" }}>
+            <div className="review-author" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                <div className="author-avatar">{review.avatar}</div>
+                <div className="author-info">
+                  <span className="author-name">{review.author}</span>
+                  <span className="review-time">{review.time}</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: "2px" }}>
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} className={`material-symbols-outlined text-sm ${i < review.rating ? "fill" : ""}`} style={{ color: "var(--primary)" }}>
+                    star
+                  </span>
+                ))}
+              </div>
+            </div>
+            <p className="review-text">"{review.text}"</p>
+          </div>
+        ))}
       </section>
     </main>
   );
