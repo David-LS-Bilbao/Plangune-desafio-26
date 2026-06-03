@@ -1,0 +1,515 @@
+{
+  "info": {
+    "_postman_id": "desafio26-backend-runtime",
+    "name": "DESAFIO-26 · Backend runtime",
+    "description": "Validación manual del estado actual del backend DESAFIO-26.\n\n- Endpoints Prisma/PostgreSQL real: /events, /recommendations, /favorites.\n- Endpoints mock/legacy: /activities, /reviews, /incidents.\n- Assistant: fallback reglado (sin IA externa real).\n\nUsa el environment 'DESAFIO-26 Local' (baseUrl = http://localhost:3000/api).\nVer docs/postman/README.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('es JSON con status ok', () => pm.expect(body.status).to.eql('ok'));",
+                  "pm.test('service contiene DESAFIO-26', () => pm.expect(body.service).to.include('DESAFIO-26'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 Events (Prisma/PostgreSQL)",
+      "item": [
+        {
+          "name": "GET /events",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('respuesta es array', () => pm.expect(body).to.be.an('array'));",
+                  "pm.test('hay eventos', () => pm.expect(body.length).to.be.above(0));",
+                  "pm.test('shape de event (snake_case)', () => {",
+                  "  const e = body[0];",
+                  "  pm.expect(e).to.have.property('id');",
+                  "  pm.expect(e).to.have.property('title');",
+                  "  pm.expect(e).to.have.property('municipio');",
+                  "  pm.expect(e).to.have.property('es_carrito');",
+                  "});",
+                  "pm.test('lat serializado como number o null (no string)', () => {",
+                  "  const lat = body[0].lat;",
+                  "  pm.expect(lat === null || typeof lat === 'number').to.be.true;",
+                  "});",
+                  "// NOTA: /events no garantiza orden; no se asume body[0].id === 1."
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"]
+            }
+          }
+        },
+        {
+          "name": "GET /events/1",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const e = pm.response.json();",
+                  "pm.test('id === 1', () => pm.expect(e.id).to.eql(1));",
+                  "pm.test('tiene title', () => pm.expect(e).to.have.property('title'));",
+                  "pm.test('id es numérico', () => pm.expect(e.id).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["events", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET /events?municipio=Bilbao&es_carrito=true",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('respuesta es array', () => pm.expect(body).to.be.an('array'));",
+                  "pm.test('todos cumplen el filtro (Bilbao + es_carrito)', () => {",
+                  "  body.forEach((e) => {",
+                  "    pm.expect(String(e.municipio).toLowerCase()).to.eql('bilbao');",
+                  "    pm.expect(e.es_carrito).to.eql(true);",
+                  "  });",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events?municipio=Bilbao&es_carrito=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["events"],
+              "query": [
+                { "key": "municipio", "value": "Bilbao" },
+                { "key": "es_carrito", "value": "true" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 Recommendations (Prisma/PostgreSQL sobre events)",
+      "item": [
+        {
+          "name": "GET /recommendations (contexto familiar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('respuesta es array', () => pm.expect(body).to.be.an('array'));",
+                  "pm.test('como máximo 3 recomendaciones', () => pm.expect(body.length).to.be.at.most(3));",
+                  "pm.test('shape { event, activity(alias), score, reasons }', () => {",
+                  "  const r = body[0];",
+                  "  pm.expect(r).to.have.property('event');",
+                  "  pm.expect(r).to.have.property('activity'); // alias legacy del mismo objeto",
+                  "  pm.expect(r.score).to.be.a('number');",
+                  "  pm.expect(r.reasons).to.be.an('array');",
+                  "});",
+                  "pm.test('activity es alias de event (mismo id)', () => {",
+                  "  const r = body[0];",
+                  "  pm.expect(r.activity.id).to.eql(r.event.id);",
+                  "});",
+                  "pm.test('top result es explicable (reasons no vacío)', () => {",
+                  "  pm.expect(body[0].reasons.length).to.be.above(0);",
+                  "});",
+                  "pm.test('ordenadas por score descendente', () => {",
+                  "  const scores = body.map((r) => r.score);",
+                  "  const sorted = [...scores].sort((a, b) => b - a);",
+                  "  pm.expect(scores).to.eql(sorted);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/recommendations?childrenAges=2&strollerFriendly=true&rainSuitable=true&municipality=Bilbao&budget=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["recommendations"],
+              "query": [
+                { "key": "childrenAges", "value": "2" },
+                { "key": "strollerFriendly", "value": "true" },
+                { "key": "rainSuitable", "value": "true" },
+                { "key": "municipality", "value": "Bilbao" },
+                { "key": "budget", "value": "20" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 Favorites (Prisma · user_favorite_events · user mock 100)",
+      "description": "El orden importa: estos requests modifican estado. Ejecutar de arriba abajo.",
+      "item": [
+        {
+          "name": "GET /favorites (estado inicial)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('respuesta es array de eventos', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites"]
+            }
+          }
+        },
+        {
+          "name": "POST /favorites/1 (añadir)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test('eventId === 1', () => pm.expect(b.eventId).to.eql(1));",
+                  "pm.test('activityId alias legacy === 1', () => pm.expect(b.activityId).to.eql(1));",
+                  "pm.test('favorited true', () => pm.expect(b.favorited).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "1"]
+            }
+          }
+        },
+        {
+          "name": "GET /favorites (tras añadir)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('incluye el evento id 1', () => pm.expect(body.some((e) => e.id === 1)).to.be.true);",
+                  "pm.test('los favoritos son eventos reales (tienen title)', () => {",
+                  "  const fav = body.find((e) => e.id === 1);",
+                  "  pm.expect(fav).to.have.property('title');",
+                  "  pm.expect(fav).to.have.property('municipio');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites"]
+            }
+          }
+        },
+        {
+          "name": "POST /favorites/1 (idempotente)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201 (idempotente, no falla)', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test('favorited sigue true', () => pm.expect(b.favorited).to.eql(true));",
+                  "// La no-duplicación se comprueba en el GET previo (sigue 1 sola entrada)."
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "1"]
+            }
+          }
+        },
+        {
+          "name": "DELETE /favorites/1 (quitar)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('eventId === 1', () => pm.expect(b.eventId).to.eql(1));",
+                  "pm.test('favorited false', () => pm.expect(b.favorited).to.eql(false));",
+                  "pm.test('removed true', () => pm.expect(b.removed).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "1"]
+            }
+          }
+        },
+        {
+          "name": "POST /favorites/999999 (evento inexistente → 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('cuerpo con error', () => pm.expect(pm.response.json()).to.have.property('error'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/999999",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "999999"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 Legacy / mock (no persistente en DB)",
+      "item": [
+        {
+          "name": "GET /activities (mock legacy)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('respuesta es array', () => pm.expect(body).to.be.an('array'));",
+                  "pm.test('solo actividades approved (mock)', () => {",
+                  "  body.forEach((a) => pm.expect(a.status).to.eql('approved'));",
+                  "});",
+                  "pm.test('ids tipo act-xxx (entidad mock, no events)', () => {",
+                  "  if (body.length) pm.expect(String(body[0].id)).to.match(/^act-/);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/activities",
+              "host": ["{{baseUrl}}"],
+              "path": ["activities"]
+            }
+          }
+        },
+        {
+          "name": "POST /reviews (mock · activityId act-001)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test('entra como pending', () => pm.expect(b.status).to.eql('pending'));",
+                  "pm.test('eco de activityId', () => pm.expect(b.activityId).to.eql('act-001'));",
+                  "pm.test('tiene id y createdAt', () => {",
+                  "  pm.expect(b).to.have.property('id');",
+                  "  pm.expect(b).to.have.property('createdAt');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityId\": \"act-001\",\n  \"rating\": 5,\n  \"comment\": \"Genial para ir con carrito\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/reviews",
+              "host": ["{{baseUrl}}"],
+              "path": ["reviews"]
+            }
+          }
+        },
+        {
+          "name": "POST /incidents (mock · activityId act-001)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 201', () => pm.response.to.have.status(201));",
+                  "const b = pm.response.json();",
+                  "pm.test('entra como open', () => pm.expect(b.status).to.eql('open'));",
+                  "pm.test('eco de activityId y type', () => {",
+                  "  pm.expect(b.activityId).to.eql('act-001');",
+                  "  pm.expect(b.type).to.eql('datos-incorrectos');",
+                  "});",
+                  "pm.test('tiene id y createdAt', () => {",
+                  "  pm.expect(b).to.have.property('id');",
+                  "  pm.expect(b).to.have.property('createdAt');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activityId\": \"act-001\",\n  \"type\": \"datos-incorrectos\",\n  \"description\": \"El horario no coincide\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/incidents",
+              "host": ["{{baseUrl}}"],
+              "path": ["incidents"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 Assistant (fallback reglado · sin IA externa)",
+      "item": [
+        {
+          "name": "POST /assistant/family-plan",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const b = pm.response.json();",
+                  "pm.test('mode fallback (no IA externa)', () => pm.expect(b.mode).to.eql('fallback'));",
+                  "pm.test('recommendations es array (≤3)', () => {",
+                  "  pm.expect(b.recommendations).to.be.an('array');",
+                  "  pm.expect(b.recommendations.length).to.be.at.most(3);",
+                  "});",
+                  "// NOTA: el campo 'question' del body NO lo usa el endpoint todavía.",
+                  "// El fallback se construye con childrenAges/municipality/booleanos/budget.",
+                  "// 'message' (≤500) sí se valida; 'question' se ignora (no es integración IA real)."
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Plan a cubierto para niño de 2 años en Bilbao\",\n  \"childrenAges\": [2],\n  \"strollerFriendly\": true,\n  \"rainSuitable\": true,\n  \"municipality\": \"Bilbao\",\n  \"budget\": 20\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/assistant/family-plan",
+              "host": ["{{baseUrl}}"],
+              "path": ["assistant", "family-plan"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
