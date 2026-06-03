@@ -141,7 +141,6 @@ model Plan {
   creator_id        Int?
   title             String  @db.VarChar(150)
   is_recommendation Boolean @default(false)
-  rating            Int?
 
   creator        User?              @relation(fields: [creator_id], references: [id], onDelete: SetNull)
   plan_events    PlanEvent[]
@@ -194,6 +193,7 @@ model UserSelectedRecommendation {
   user_id     Int
   event_id    Int
   selected_at DateTime? @default(now()) @db.Timestamp(6)
+  rating      Int?
 
   user  User  @relation(fields: [user_id], references: [id], onDelete: Cascade)
   event Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
