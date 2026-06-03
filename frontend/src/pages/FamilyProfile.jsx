@@ -15,6 +15,10 @@ function FamilyProfile() {
   const [avatar, setAvatar] = useState(user?.avatar || "FA");
   const [saved, setSaved] = useState(false);
 
+  const [showAddChildForm, setShowAddChildForm] = useState(false);
+  const [newChildGender, setNewChildGender] = useState("Niño/a");
+  const [newChildAge, setNewChildAge] = useState("");
+
   const togglePreference = (key) => {
     setPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -28,7 +32,16 @@ function FamilyProfile() {
   };
 
   const handleAddChild = () => {
-    addChild({ type: "Niño/a", age: "0-2 años" });
+    setShowAddChildForm(true);
+  };
+
+  const submitChild = () => {
+    if (newChildAge) {
+      addChild({ type: newChildGender, age: `${newChildAge} años` });
+      setShowAddChildForm(false);
+      setNewChildGender("Niño/a");
+      setNewChildAge("");
+    }
   };
 
   const handleRemoveChild = (id) => {
@@ -88,6 +101,54 @@ function FamilyProfile() {
             Añadir
           </button>
         </div>
+
+        {showAddChildForm && (
+          <div className="add-child-form" style={{ marginBottom: "1rem", padding: "1rem", backgroundColor: "var(--surface-container-lowest)", borderRadius: "8px", border: "1px solid var(--outline-variant)" }}>
+            <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+              <div style={{ flex: 1 }}>
+                <label className="section-label" style={{ fontSize: "0.875rem", marginBottom: "0.5rem", display: "block" }}>Sexo</label>
+                <select 
+                  value={newChildGender} 
+                  onChange={(e) => setNewChildGender(e.target.value)}
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "8px", border: "1px solid var(--outline)", backgroundColor: "transparent", color: "var(--on-surface)" }}
+                >
+                  <option value="Niño/a">Prefiero no decirlo</option>
+                  <option value="Niña">Niña</option>
+                  <option value="Niño">Niño</option>
+                </select>
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="section-label" style={{ fontSize: "0.875rem", marginBottom: "0.5rem", display: "block" }}>Edad</label>
+                <input 
+                  type="number" 
+                  value={newChildAge} 
+                  onChange={(e) => setNewChildAge(e.target.value)}
+                  placeholder="Ej: 5"
+                  style={{ width: "100%", padding: "0.5rem", borderRadius: "8px", border: "1px solid var(--outline)", backgroundColor: "transparent", color: "var(--on-surface)" }}
+                />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
+              <button 
+                className="btn-outline-sm" 
+                type="button"
+                onClick={() => setShowAddChildForm(false)}
+                style={{ padding: "0.5rem 1rem" }}
+              >
+                Cancelar
+              </button>
+              <button 
+                className="btn-primary-sm" 
+                type="button"
+                onClick={submitChild}
+                style={{ padding: "0.5rem 1rem" }}
+                disabled={!newChildAge}
+              >
+                Guardar
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="children-list">
           {children.map((child) => (
