@@ -14,6 +14,8 @@ import PlanDetail from "../pages/PlanDetail";
 import FamilyProfile from "../pages/FamilyProfile";
 import Favorites from "../pages/Favorites";
 import CreateFamily from "../pages/CreateFamily";
+import OffersUser from "../pages/OffersUser";
+import PlansSearch from "../pages/PlansSearch";
 import CreateBusiness from "../pages/CreateBusiness";
 import BusinessDashboard from "../pages/BusinessDashboard";
 import BusinessOverview from "../pages/BusinessOverview";
@@ -38,6 +40,8 @@ function AppRoutes() {
         <Route path="/planes/:id" element={<PlanDetail />} />
         <Route path="/favoritos" element={<Favorites />} />
         <Route path="/perfil" element={<FamilyProfile />} />
+        <Route path="/ofertas" element={<OffersUser />} />
+        <Route path="/buscar" element={<PlansSearch />} />
       </Route>
 
       {/* Registration / Account Creation */}

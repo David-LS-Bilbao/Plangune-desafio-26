@@ -93,9 +93,16 @@ export const usePlansStore = create((set, get) => ({
   activeCategory: "Todos",
   setActiveCategory: (category) => set({ activeCategory: category }),
 
-  // Derived state: get filtered plans
+  activeFilters: [],
+  toggleFilter: (filter) => set((state) => ({
+    activeFilters: state.activeFilters.includes(filter)
+      ? state.activeFilters.filter(f => f !== filter)
+      : [...state.activeFilters, filter]
+  })),
+
+  // Derived state: get filtered and sorted plans
   getFilteredPlans: () => {
-    const { allPlans, searchQuery, activeCategory } = get();
+    const { allPlans, searchQuery, activeCategory, activeFilters } = get();
     let filtered = allPlans;
 
     if (activeCategory !== "Todos") {
@@ -110,6 +117,16 @@ export const usePlansStore = create((set, get) => ({
           plan.location.toLowerCase().includes(q),
       );
     }
+
+    if (activeFilters.length > 0) {
+      filtered = filtered.filter((plan) => 
+        activeFilters.every(f => plan.tags && plan.tags.some(tag => tag.toLowerCase().includes(f.toLowerCase())))
+      );
+    }
+
+    // Sort by subscription tier (Premium > Pro > Base > None)
+    const tierOrder = { 'Premium': 3, 'Pro': 2, 'Base': 1, 'None': 0 };
+    filtered.sort((a, b) => (tierOrder[b.subscriptionTier] || 0) - (tierOrder[a.subscriptionTier] || 0));
 
     return filtered;
   },
