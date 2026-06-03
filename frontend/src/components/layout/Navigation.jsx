@@ -41,8 +41,10 @@ function Navigation() {
   ];
 
   const defaultLinks = [
-    { to: "/planes", icon: "search", label: "Explorar", exact: false },
-    { to: "/favoritos", icon: "favorite", label: "Guardados" },
+    { to: "/", icon: "home", label: "Inicio", exact: true },
+    { to: "/planes", icon: "event", label: "Planes", exact: false },
+    { to: "/ofertas", icon: "local_offer", label: "Ofertas", exact: false },
+    { to: "/buscar", icon: "search", label: "Buscar", exact: false },
     { to: "/perfil", icon: "account_circle", label: "Perfil" },
   ];
 

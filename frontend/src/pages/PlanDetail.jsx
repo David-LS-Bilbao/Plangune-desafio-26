@@ -121,10 +121,23 @@ function PlanDetail() {
       </section>
 
       {/* Main Actions */}
-      <section className="main-actions">
+      <section className="main-actions" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
         <button
           className="btn-primary-large"
           type="button"
+          style={{ flex: 1 }}
+          onClick={() => {
+            useUserStore.getState().addReservation(plan);
+            alert("Reserva confirmada. ¡Disfruta del plan!");
+          }}
+        >
+          <span className="material-symbols-outlined">calendar_today</span>
+          Reservar
+        </button>
+        <button
+          className="btn-primary-large"
+          type="button"
+          style={{ flex: 1, backgroundColor: 'var(--secondary)', color: 'var(--on-secondary)' }}
           onClick={() =>
             window.open(
               `https://www.google.com/maps/search/${encodeURIComponent(plan.location)}`,
@@ -139,6 +152,7 @@ function PlanDetail() {
           className="btn-outline-large"
           onClick={() => toggleFavorite(parseInt(id))}
           style={{
+            flex: 1,
             backgroundColor: isFavorite
               ? "var(--primary-container)"
               : "transparent",

@@ -1,10 +1,14 @@
 import React, { useState } from "react";
+import { useBusinessStore } from "../store";
 
 function BusinessSubscriptions() {
-  const [selectedPlan, setSelectedPlan] = useState(null);
+  const { subscription, setSubscription } = useBusinessStore();
+  const [selectedPlan, setSelectedPlan] = useState(subscription);
 
   const handleSelectPlan = (planName) => {
     setSelectedPlan(planName);
+    setSubscription(planName);
+    alert(`Suscripción actualizada a plan ${planName}`);
   };
 
   return (

@@ -1,12 +1,24 @@
 import React, { useState } from "react";
+import { useAdminStore, useBusinessStore } from "../store";
 
 function AdminDashboard() {
   const [reviewMessage, setReviewMessage] = useState("");
+  const { pendingBusinesses, approveBusiness, rejectBusiness, stats } = useAdminStore();
+  const businessOffers = useBusinessStore(state => state.offers);
 
-  const handleApprove = () =>
-    setReviewMessage("La solicitud ha sido aprobada.");
-  const handleReject = () =>
-    setReviewMessage("La solicitud ha sido rechazada.");
+  const handleApprove = (id) => {
+    approveBusiness(id);
+    setReviewMessage("El negocio ha sido aprobado.");
+    setTimeout(() => setReviewMessage(""), 2000);
+  };
+  
+  const handleReject = (id) => {
+    if(window.confirm("¿Estás seguro de rechazar este negocio?")) {
+      rejectBusiness(id);
+      setReviewMessage("El negocio ha sido rechazado.");
+      setTimeout(() => setReviewMessage(""), 2000);
+    }
+  };
 
   return (
     <main className="admin-dashboard-main">
@@ -23,7 +35,7 @@ function AdminDashboard() {
             <span className="material-symbols-outlined">group</span>
           </div>
           <p className="metric-label">Familias</p>
-          <p className="metric-number">124</p>
+          <p className="metric-number">{stats.activeFamilies}</p>
         </div>
 
         <div className="admin-metric-card">
@@ -31,7 +43,7 @@ function AdminDashboard() {
             <span className="material-symbols-outlined">storefront</span>
           </div>
           <p className="metric-label">Negocios</p>
-          <p className="metric-number">18</p>
+          <p className="metric-number">{stats.activeBusinesses}</p>
         </div>
 
         <div className="admin-metric-card">
@@ -39,7 +51,7 @@ function AdminDashboard() {
             <span className="material-symbols-outlined">explore</span>
           </div>
           <p className="metric-label">Planes</p>
-          <p className="metric-number">86</p>
+          <p className="metric-number">{businessOffers.length + 80}</p>
         </div>
 
         <div className="admin-metric-card">
@@ -56,54 +68,45 @@ function AdminDashboard() {
         {/* Left Column: Pending Review */}
         <div className="pending-column">
           <div className="section-title-row">
-            <h3 className="section-title">Pendiente revisión</h3>
-            <span className="badge-error">1 Nuevo</span>
+            <h3 className="section-title">Negocios Pendientes</h3>
+            <span className="badge-error">{pendingBusinesses.length} Nuevos</span>
           </div>
 
           <div className="pending-list">
-            {/* Pending Item */}
-            <div className="pending-card">
-              <div className="pending-card-body">
-                <div className="pending-meta-row">
-                  <span className="badge-type">Nuevo Plan</span>
-                  <span className="time-ago">hace 2 horas</span>
+            {pendingBusinesses.length === 0 ? (
+              <p className="text-secondary mt-4">No hay negocios pendientes de revisión.</p>
+            ) : (
+              pendingBusinesses.map((business) => (
+                <div className="pending-card" key={business.id}>
+                  <div className="pending-card-body">
+                    <div className="pending-meta-row">
+                      <span className="badge-type">Nuevo Negocio</span>
+                      <span className="time-ago">{business.requestDate}</span>
+                    </div>
+                    <h4 className="pending-title">{business.name}</h4>
+                    <p className="pending-by">
+                      Email: {business.email}
+                    </p>
+                  </div>
+                  <div className="pending-actions">
+                    <button
+                      className="btn-reject"
+                      type="button"
+                      onClick={() => handleReject(business.id)}
+                    >
+                      Rechazar
+                    </button>
+                    <button
+                      className="btn-approve"
+                      type="button"
+                      onClick={() => handleApprove(business.id)}
+                    >
+                      Aprobar
+                    </button>
+                  </div>
                 </div>
-                <h4 className="pending-title">Taller de cuentos</h4>
-                <p className="pending-by">
-                  Enviado por: Biblioteca Central Bilbao
-                </p>
-                <div className="pending-tags">
-                  <span className="pending-tag">
-                    <span className="material-symbols-outlined">
-                      child_care
-                    </span>{" "}
-                    3-6 años
-                  </span>
-                  <span className="pending-tag">
-                    <span className="material-symbols-outlined">
-                      location_on
-                    </span>{" "}
-                    Interior
-                  </span>
-                </div>
-              </div>
-              <div className="pending-actions">
-                <button
-                  className="btn-reject"
-                  type="button"
-                  onClick={handleReject}
-                >
-                  Rechazar
-                </button>
-                <button
-                  className="btn-approve"
-                  type="button"
-                  onClick={handleApprove}
-                >
-                  Aprobar
-                </button>
-              </div>
-            </div>
+              ))
+            )}
           </div>
         </div>
 

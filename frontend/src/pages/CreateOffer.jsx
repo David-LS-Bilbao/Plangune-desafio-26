@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useBusinessStore } from "../store";
 
 function CreateOffer() {
   const navigate = useNavigate();
@@ -20,10 +21,23 @@ function CreateOffer() {
     setOfferData((prev) => ({ ...prev, [id]: value }));
   };
 
+  const addOffer = useBusinessStore((state) => state.addOffer);
+
   const handleSendReview = () => {
+    addOffer({
+      title: offerData.title,
+      description: offerData.description,
+      activity: offerData.associatedActivity || "Actividad General",
+      icon: "local_offer",
+      meta: offerData.promoCode ? `Código: ${offerData.promoCode}` : "Sin código",
+      status: "pending"
+    });
     setStatusMessage(
-      "Oferta enviada a revisión. Recibirás notificación cuando esté aprobada.",
+      "Oferta enviada a revisión. Redirigiendo...",
     );
+    setTimeout(() => {
+      navigate('/negocio/ofertas');
+    }, 1500);
   };
 
   const handleSaveDraft = () => {

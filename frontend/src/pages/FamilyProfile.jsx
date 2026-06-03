@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { useAuthStore } from "../store";
+import { useAuthStore, useUserStore } from "../store";
 
 function FamilyProfile() {
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
+  const { children, addChild, removeChild } = useUserStore();
   const [preferences, setPreferences] = useState({
     carrito: true,
     cambiador: true,
@@ -11,10 +12,6 @@ function FamilyProfile() {
     presupuesto: true,
     tranquilos: false,
   });
-  const [children, setChildren] = useState([
-    { id: 1, type: "Bebé", age: "8 meses" },
-    { id: 2, type: "Niño/a", age: "3 años" },
-  ]);
   const [avatar, setAvatar] = useState(user?.avatar || "FA");
   const [saved, setSaved] = useState(false);
 
@@ -31,15 +28,11 @@ function FamilyProfile() {
   };
 
   const handleAddChild = () => {
-    const nextId = children.length + 1;
-    setChildren((prev) => [
-      ...prev,
-      { id: nextId, type: "Niño/a", age: "0-2 años" },
-    ]);
+    addChild({ type: "Niño/a", age: "0-2 años" });
   };
 
   const handleRemoveChild = (id) => {
-    setChildren((prev) => prev.filter((child) => child.id !== id));
+    removeChild(id);
   };
 
   const handleSaveProfile = () => {

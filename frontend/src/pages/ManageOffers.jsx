@@ -1,23 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const OFFERS = [
-  { id: 1, status: 'active', title: '2x1 en menú infantil', activity: 'Comida Familiar de Domingo', icon: 'restaurant', meta: 'Sábados y Domingos (Octubre)' },
-  { id: 2, status: 'active', title: 'Plan de lluvia con merienda incluida', activity: 'Parque de Bolas TxikiPark', icon: 'attractions', meta: 'Válido hasta el 15 de Nov' },
-  { id: 3, status: 'pending', title: 'Descuento especial fin de semana', activity: 'Teatro Infantil: El Bosque Mágico', icon: 'theater_comedy', meta: '10 Nov - 12 Nov' },
-  { id: 4, status: 'active', title: 'Taller gratuito de manualidades', activity: 'Taller de Otoño Creativo', icon: 'palette', meta: 'Todos los Miércoles' },
-];
-
-const TABS = [
-  { key: 'all', label: 'Todas las ofertas (4)' },
-  { key: 'active', label: 'Activas (3)' },
-  { key: 'pending', label: 'Pendientes (1)' },
-];
+import { useBusinessStore } from '../store';
 
 function ManageOffers() {
   const [activeTab, setActiveTab] = useState('all');
+  const { offers, updateOffer, deleteOffer } = useBusinessStore();
 
-  const filtered = activeTab === 'all' ? OFFERS : OFFERS.filter(o => o.status === activeTab);
+  const TABS = [
+    { key: 'all', label: `Todas las ofertas (${offers.length})` },
+    { key: 'active', label: `Activas (${offers.filter(o => o.status === 'active').length})` },
+    { key: 'pending', label: `Pendientes (${offers.filter(o => o.status === 'pending').length})` },
+  ];
+
+  const filtered = activeTab === 'all' ? offers : offers.filter(o => o.status === activeTab);
 
   return (
     <main className="manage-offers-main">
@@ -89,13 +84,22 @@ function ManageOffers() {
 
               {/* Actions Footer */}
               <div className="offer-card-actions">
-                <button className="card-action-btn edit">
+                <button className="card-action-btn edit" onClick={() => alert('Editar no implementado en mockup')}>
                   <span className="material-symbols-outlined">edit</span> Editar
                 </button>
-                <button className="card-action-btn pause" disabled={offer.status === 'pending'}>
-                  <span className="material-symbols-outlined">pause</span> Pausar
+                <button 
+                  className="card-action-btn pause" 
+                  disabled={offer.status === 'pending'}
+                  onClick={() => updateOffer(offer.id, { status: offer.status === 'active' ? 'paused' : 'active' })}
+                >
+                  <span className="material-symbols-outlined">{offer.status === 'active' ? 'pause' : 'play_arrow'}</span> 
+                  {offer.status === 'active' ? 'Pausar' : 'Activar'}
                 </button>
-                <button className="card-action-btn delete">
+                <button className="card-action-btn delete" onClick={() => {
+                  if (window.confirm("¿Seguro que quieres borrar esta oferta?")) {
+                    deleteOffer(offer.id);
+                  }
+                }}>
                   <span className="material-symbols-outlined">delete</span>
                 </button>
               </div>
