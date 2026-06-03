@@ -11,8 +11,10 @@ CREATE TABLE IF NOT EXISTS public.businesses
     address text COLLATE pg_catalog."default",
     phone_number character varying(30) COLLATE pg_catalog."default",
     plan integer,
+    nif character varying(20) COLLATE pg_catalog."default",
     CONSTRAINT businesses_pkey PRIMARY KEY (id),
-    CONSTRAINT businesses_user_id_key UNIQUE (user_id)
+    CONSTRAINT businesses_user_id_key UNIQUE (user_id),
+    CONSTRAINT businesses_nif_key UNIQUE (nif)
 );
 
 CREATE TABLE IF NOT EXISTS public.events

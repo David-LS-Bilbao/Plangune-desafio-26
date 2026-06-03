@@ -67,6 +67,7 @@ model Business {
   address      String?
   phone_number String? @db.VarChar(30)
   plan         Int? // entero suelto en init.sql (NO es FK)
+  nif          String? @unique @db.VarChar(20) // NIF/CIF/NIE; nullable durante la transición
 
   user   User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
   events Event[]

@@ -241,7 +241,7 @@ El `schema.prisma` ([../backend/prisma/schema.prisma](../backend/prisma/schema.p
 | `User` | `users` | `id` | 1:1 `Business`; 1:N `Family`, `Plan` (creator), favoritos y recomendaciones |
 | `Family` | `families` | `id` | N:1 `User` (Cascade); 1:N `FamilyMember` |
 | `FamilyMember` | `family_members` | `id` | N:1 `Family` (Cascade) |
-| `Business` | `businesses` | `id` | N:1 `User` (Cascade, `user_id` único → 1:1); 1:N `Event`, `Offer` |
+| `Business` | `businesses` | `id` | N:1 `User` (Cascade, `user_id` único → 1:1); 1:N `Event`, `Offer`. Tiene `nif` (NIF/CIF/NIE) nullable + unique, ver [features/db-add-business-nif.md](features/db-add-business-nif.md) |
 | `Event` | `events` | `id` | N:1 `Business` (**SetNull**); 1:N `PlanEvent`, favoritos, recomendaciones |
 | `Offer` | `offers` | `id` | N:1 `Business` (Cascade) |
 | `Plan` | `plans` | `id` | N:1 `User` (creator, **SetNull**); 1:N `PlanEvent`, `UserFavoritePlan` |
