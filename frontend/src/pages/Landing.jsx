@@ -79,7 +79,7 @@ function Landing() {
         <section className="benefits-section">
           <div className="benefits-container">
             <h2>Pensado para familias reales</h2>
-            <p className="benefits-subtitle">Toda la información que necesitas saber antes de salir de casa, de un vistazo rápido.</p>
+            <p className="benefits-subtitle">Descubre de un sólo vistazo toda la información que necesitas saber.</p>
 
             <div className="benefits-grid">
               <div className="benefit-card">
