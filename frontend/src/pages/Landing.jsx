@@ -48,7 +48,7 @@ function Landing() {
             <h2>Tu plan familiar en tres pasos</h2>
             <div className="steps-grid">
               <div className="step-card">
-                <div className="step-bar bar-1"></div>
+                <div className="step-bar"></div>
                 <div className="step-icon icon-1">
                   <span className="material-symbols-outlined">account_circle</span>
                 </div>
@@ -56,7 +56,7 @@ function Landing() {
                 <p>Introduce la edad de tus peques y tus preferencias para recibir recomendaciones personalizadas.</p>
               </div>
               <div className="step-card">
-                <div className="step-bar bar-2"></div>
+                <div className="step-bar"></div>
                 <div className="step-icon icon-2">
                   <span className="material-symbols-outlined">tune</span>
                 </div>
@@ -64,7 +64,7 @@ function Landing() {
                 <p>Busca actividades por ubicación, accesibilidad para carritos, interiores o exteriores, y más.</p>
               </div>
               <div className="step-card">
-                <div className="step-bar bar-3"></div>
+                <div className="step-bar"></div>
                 <div className="step-icon icon-3">
                   <span className="material-symbols-outlined">celebration</span>
                 </div>
