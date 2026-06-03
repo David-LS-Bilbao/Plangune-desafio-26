@@ -14,9 +14,9 @@
  * Ejecución (con DB local levantada y cliente Prisma generado):
  *   node prisma/seed.js            # desde el workspace backend
  */
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 
-import { mockActivities } from '../src/seed/mockActivities.js';
+import { mockActivities } from "../src/seed/mockActivities.js";
 
 const prisma = new PrismaClient();
 
@@ -32,17 +32,12 @@ async function seedActivities() {
   return mockActivities.length;
 }
 
-async function main() {
-  // Orquesta el seed para mantener el manejo de errores en un único punto.
+try {
   const count = await seedActivities();
   console.log(`✅ Seed completado: ${count} actividades (upsert idempotente).`);
+} catch (error) {
+  console.error("❌ Error en el seed:", error);
+  process.exitCode = 1;
+} finally {
+  await prisma.$disconnect();
 }
-
-main()
-  .catch((error) => {
-    console.error('❌ Error en el seed:', error);
-    process.exitCode = 1;
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
