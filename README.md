@@ -44,16 +44,21 @@ Estado actual:
   `DATA_RECOMMENDER_ENABLED=true`.
 * Si Data está deshabilitada, falla o agota timeout, Express usa el recomendador local
   Prisma/PostgreSQL como fallback.
+* Existe un servicio local opcional [`ai-service/`](ai-service/) para demo del asistente LLM
+  con Ollama. Corre en `http://localhost:5001` y Express lo consume desde
+  `POST /api/assistant/family-plan`; el frontend no llama a Flask.
+* Si `LLM_ASSISTANT_ENABLED=false` o el `ai-service` falla, Express mantiene el fallback local
+  sin IA.
 * El campo actual para planes interiores/a cubierto es `events.es_interior`.
 * Existe una migración incremental segura para renombrar `es_lluvia` a `es_interior`.
-* Tests backend actuales: **10 suites · 67/67 verdes**.
+* Tests backend actuales: **10 suites · 73/73 verdes**.
 
 Endpoints actuales:
 
 * `GET /api/health`
 * `GET /api/activities` · `GET /api/activities/:id` (solo `approved`)
 * `GET /api/recommendations` (hasta 3 planes con Family Score reglado y explicable)
-* `POST /api/assistant/family-plan` (fallback sin IA)
+* `POST /api/assistant/family-plan` (LLM local opcional con fallback sin IA)
 * `POST /api/reviews` · `POST /api/incidents`
 * `GET/POST/DELETE /api/favorites`
 
@@ -66,6 +71,17 @@ DATA_API_TIMEOUT_MS=2000
 ```
 
 Pendiente técnico: dockerizar `data-api` en Compose para activar Data en local de forma reproducible.
+
+Variables LLM local (`backend/.env.example`):
+
+```bash
+LLM_ASSISTANT_ENABLED=false
+LLM_ASSISTANT_API_URL=http://localhost:5001
+LLM_ASSISTANT_TIMEOUT_MS=8000
+```
+
+Documentación completa del asistente local: [docs/integration-ai-ollama-local.md](docs/integration-ai-ollama-local.md).
+Pendiente técnico: dockerizar `ai-service` en una fase posterior; hoy es solo demo local controlada.
 
 Arranque y tests (monorepo npm workspaces):
 

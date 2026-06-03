@@ -189,24 +189,39 @@ Respuesta (array de recomendaciones con explicación):
 ## Asistente
 
 ### `POST /api/assistant/family-plan`
-Plan familiar. De momento **no usa IA** (ni Python ni Ollama): devuelve un fallback controlado reutilizando el recomendador.
+Plan familiar conversacional.
 
-Body (todos los campos opcionales):
+> **Fuente runtime:** el **asistente LLM local** (ai-service Flask + Ollama) cuando
+> `LLM_ASSISTANT_ENABLED=true`; si está deshabilitado o falla, **fallback local** sin IA.
+> El frontend **siempre** consume este Express, nunca Flask directamente.
+> Ver [integration-ai-ollama-local.md](integration-ai-ollama-local.md).
+
+Body (todos los campos opcionales). Admite `familyProfile` anidado y/o campos sueltos (compat):
 
 ```json
 {
-  "message": "Plan a cubierto para un peque de 3 años",
-  "childrenAges": [3],
+  "message": "Plan gratis para hoy en Bilbao",
+  "familyProfile": { "childrenAges": [3], "municipality": "Bilbao" },
   "rainSuitable": true,
-  "municipality": "Bilbao",
   "budget": 30,
   "strollerFriendly": true
 }
 ```
 
-Validación: `message` ≤ 500 caracteres; `childrenAges` array; `budget` numérico ≥ 0; `municipality` string; `strollerFriendly`/`rainSuitable` booleanos.
+Validación: `message` ≤ 500 caracteres; `familyProfile` objeto; `childrenAges` array; `budget` numérico ≥ 0; `municipality` string; `strollerFriendly`/`rainSuitable` booleanos.
 
-Respuesta:
+Respuesta con LLM (`mode: "ai"`):
+
+```json
+{
+  "mode": "ai",
+  "source": "llm-local",
+  "assistantMessageMarkdown": "## 🎭 Plan recomendado\n\n...markdown...",
+  "recommendations": []
+}
+```
+
+Respuesta de fallback local (LLM deshabilitado o caído):
 
 ```json
 {
@@ -215,6 +230,10 @@ Respuesta:
   "recommendations": [ /* hasta 3, mismo formato que /recommendations */ ]
 }
 ```
+
+En fallback, el contrato histórico no incluye `source`; `mode: "fallback"` identifica que Express
+ha usado el recomendador local. En modo LLM, `recommendations` puede venir vacío porque el
+`ai-service` devuelve principalmente Markdown en `assistantMessageMarkdown`.
 
 ## Reseñas
 
@@ -303,7 +322,7 @@ Respuesta `200`:
 | GET | `/api/activities` | Lista de actividades aprobadas (mock previo) |
 | GET | `/api/activities/:id` | Detalle de actividad |
 | GET | `/api/recommendations` | Recomendaciones Data primary con fallback local (por defecto hasta 3, o `limit`) |
-| POST | `/api/assistant/family-plan` | Plan familiar (fallback sin IA) |
+| POST | `/api/assistant/family-plan` | Asistente familiar LLM local opcional con fallback sin IA |
 | POST | `/api/reviews` | Crear reseña |
 | POST | `/api/incidents` | Reportar incidencia |
 | GET | `/api/favorites` | Listar favoritos |
