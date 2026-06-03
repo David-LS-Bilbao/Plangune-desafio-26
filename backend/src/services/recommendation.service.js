@@ -1,24 +1,24 @@
 import { findEvents } from '../repositories/event.repository.js';
 import { serializeEvent, toNumberOrNull } from '../utils/serializeEvent.js';
+import { isDataRecommenderEnabled, fetchDataPlanes } from '../clients/dataRecommender.client.js';
 
 /**
- * Recomendador reglado, determinista y explicable — Family Score.
+ * Recomendador de DESAFIO-26.
  *
- * Fuente de datos: todos los eventos de Prisma/PostgreSQL (tabla `events`).
- * Scoring sobre campos reales de `events`; mapeo desde la API Activity previa:
- *   childrenAges   → edad_minima <= min(childrenAges)
+ * Fuente PRINCIPAL: la API de Data (Flask) `GET /planes`, cuando `DATA_RECOMMENDER_ENABLED=true`.
+ * Fuente FALLBACK: recomendador local reglado y explicable (Family Score) sobre los eventos
+ * reales de Prisma/PostgreSQL. Se usa si Data está deshabilitado, falla, agota timeout o
+ * devuelve algo inválido/vacío.
+ *
+ * El frontend SIEMPRE consume este Express; nunca llama a Flask directamente.
+ * Cada item lleva `source: "data-api" | "local-fallback"`. `activity` es alias legacy de `event`.
+ *
+ * Family Score local (mapeo desde la API Activity previa):
+ *   childrenAges     → edad_minima <= min(childrenAges)
  *   strollerFriendly → es_carrito
- *   rainSuitable   → es_lluvia
- *   municipality   → municipio (case-insensitive contains)
- *   budget         → price parseado ("Gratis"=0, "8 €"=8; no parseable = no suma ni penaliza)
- *
- * Campos deliberadamente no usados:
- *   - averageRating: no existe en `events`.
- *   - multiplicador: existe pero sin decisión documentada para scoring.
- *
- * Respuesta: { event, activity, score, reasons }
- *   `activity` es alias temporal de `event` para compatibilidad con frontend/tests actuales.
- *   Retirar cuando el frontend confirme migración a la clave `event`.
+ *   rainSuitable     → es_interior
+ *   municipality     → municipio (case-insensitive contains)
+ *   budget           → price parseado ("Gratis"=0, "8 €"=8; no parseable = no suma ni penaliza)
  */
 
 // Serialización de eventos: helper común en utils/serializeEvent.js.
@@ -70,7 +70,7 @@ function scoreEvent(event, context) {
     reasons.push('Accesible con carrito');
   }
 
-  if (rainSuitable && event.es_lluvia) {
+  if (rainSuitable && event.es_interior) {
     score += 10;
     reasons.push('Buen plan si llueve (a cubierto)');
   }
@@ -93,11 +93,12 @@ function scoreEvent(event, context) {
 }
 
 // ---------------------------------------------------------------------------
-// API pública
+// Fallback local (recomendador reglado sobre events de Prisma)
 // ---------------------------------------------------------------------------
 
 /**
- * Devuelve hasta 3 eventos ordenados por Family Score.
+ * Recomendador local: hasta 3 eventos ordenados por Family Score.
+ * Cada item lleva `source: "local-fallback"`. `activity` es alias legacy de `event`.
  *
  * @param {object}   [context={}]
  * @param {number[]} [context.childrenAges]
@@ -105,18 +106,100 @@ function scoreEvent(event, context) {
  * @param {boolean}  [context.rainSuitable]
  * @param {number}   [context.budget]
  * @param {string}   [context.municipality]
- * @returns {Promise<Array<{event, activity, score, reasons}>>}
+ * @returns {Promise<Array<{event, activity, score, reasons, source}>>}
  */
-export async function getRecommendations(context = {}) {
+export async function getLocalRecommendations(context = {}) {
   const rawEvents = await findEvents({});
 
   const scored = rawEvents.map((rawEvent) => {
     const event = serializeEvent(rawEvent);
     const { score, reasons } = scoreEvent(event, context);
-    // `activity` es alias temporal para no romper frontend/tests hasta migración.
-    return { event, activity: event, score, reasons };
+    return { event, activity: event, score, reasons, source: 'local-fallback' };
   });
 
   scored.sort((a, b) => b.score - a.score);
-  return scored.slice(0, 3);
+  return scored.slice(0, context.limit ?? DEFAULT_RECOMMENDATION_LIMIT);
+}
+
+// ---------------------------------------------------------------------------
+// Integración con Data (recomendador principal)
+// ---------------------------------------------------------------------------
+
+/** Límite por defecto de recomendaciones (contrato público estable). */
+const DEFAULT_RECOMMENDATION_LIMIT = 3;
+
+/** Mapea el contexto de Express a los query params de la API de Data. */
+function buildDataParams(context = {}) {
+  const params = {};
+  if (context.municipality) params.ubicacion = context.municipality;
+  if (Array.isArray(context.childrenAges) && context.childrenAges.length > 0) {
+    params.edad_max = Math.min(...context.childrenAges);
+  }
+  if (context.rainSuitable !== undefined) params.lluvia = context.rainSuitable;
+  if (context.strollerFriendly !== undefined) params.carrito = context.strollerFriendly;
+  if (context.changingTable !== undefined) params.cambiador = context.changingTable;
+  if (context.wheelchairAccessible !== undefined) params.silla_ruedas = context.wheelchairAccessible;
+  if (context.petsAllowed !== undefined) params.mascotas = context.petsAllowed;
+  if (context.includeKulturklik !== undefined) params.kulturklik = context.includeKulturklik;
+  // Siempre se envía un límite a Data (el del usuario o el por defecto del contrato).
+  params.limite = context.limit ?? DEFAULT_RECOMMENDATION_LIMIT;
+  return params;
+}
+
+/**
+ * Normaliza la respuesta de Data a un array de "planes".
+ * Formato principal de Data: `{ total, filtros, resultados }`.
+ * Acepta también, de forma defensiva, un array directo.
+ * Devuelve `null` si el shape no es reconocible (→ fallback local).
+ */
+function extractDataPlanes(response) {
+  if (Array.isArray(response)) return response;
+  if (response && Array.isArray(response.resultados)) return response.resultados;
+  return null;
+}
+
+/** Mapea cada "plan" de Data a un item de recomendación con shape compatible. */
+function mapDataPlanesToItems(planes) {
+  return planes.map((plan) => ({
+    event: plan,
+    activity: plan, // alias legacy de event
+    score: typeof plan.score === 'number' ? plan.score : 3,
+    reasons:
+      Array.isArray(plan.reasons) && plan.reasons.length > 0
+        ? plan.reasons
+        : ['Recomendado por el servicio Data'],
+    source: 'data-api',
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// API pública
+// ---------------------------------------------------------------------------
+
+/**
+ * Devuelve hasta 3 recomendaciones.
+ * - Si Data está habilitado y responde con resultados válidos → `source: "data-api"`.
+ * - En cualquier otro caso (deshabilitado, error, timeout, 503, vacío o inválido)
+ *   → recomendador local con `source: "local-fallback"`.
+ *
+ * @param {object} [context={}]
+ * @returns {Promise<Array<{event, activity, score, reasons, source}>>}
+ */
+export async function getRecommendations(context = {}) {
+  if (isDataRecommenderEnabled()) {
+    try {
+      const response = await fetchDataPlanes(buildDataParams(context));
+      const planes = extractDataPlanes(response);
+      if (Array.isArray(planes) && planes.length > 0) {
+        const limit = context.limit ?? DEFAULT_RECOMMENDATION_LIMIT;
+        // Contrato estable: Express limita por seguridad aunque Data devuelva más.
+        return mapDataPlanesToItems(planes).slice(0, limit);
+      }
+      // Respuesta inválida, vacía o sin resultados → se cae al fallback local.
+    } catch {
+      // Error de red, timeout (AbortError) o status no-2xx → fallback local.
+    }
+  }
+
+  return getLocalRecommendations(context);
 }

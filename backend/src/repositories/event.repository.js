@@ -20,7 +20,7 @@ function buildWhere(filters) {
   if (filters.categoria)   where.categoria   = { equals: filters.categoria,   mode: 'insensitive' };
   if (filters.tipo_evento) where.tipo_evento = { equals: filters.tipo_evento, mode: 'insensitive' };
 
-  if (filters.es_lluvia   !== undefined) where.es_lluvia   = filters.es_lluvia;
+  if (filters.es_interior   !== undefined) where.es_interior   = filters.es_interior;
   if (filters.es_carrito  !== undefined) where.es_carrito  = filters.es_carrito;
   if (filters.es_cambiador !== undefined) where.es_cambiador = filters.es_cambiador;
 

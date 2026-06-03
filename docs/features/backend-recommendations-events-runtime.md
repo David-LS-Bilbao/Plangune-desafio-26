@@ -68,7 +68,7 @@ temporal `activity`, y añade `event` como la nueva clave recomendada:
       "title": "Exposición interactiva en el museo",
       "municipio": "Bilbao",
       "es_carrito": true,
-      "es_lluvia": true,
+      "es_interior": true,
       "edad_minima": 0,
       "price": "Gratis"
     },
@@ -100,7 +100,7 @@ temporal `activity`, y añade `event` como la nueva clave recomendada:
 |---|---|---|---|
 | Edad (peque más pequeño) | `edad_minima <= min(childrenAges)` | +20 | "Apto para la edad de tus peques (edad mínima: N años)" |
 | Acceso con carrito | `es_carrito === true` | +10 | "Accesible con carrito" |
-| Plan a cubierto/lluvia | `es_lluvia === true` | +10 | "Buen plan si llueve (a cubierto)" |
+| Plan a cubierto/lluvia | `es_interior === true` | +10 | "Buen plan si llueve (a cubierto)" |
 | Cercanía | `municipio.includes(municipality)` case-insensitive | +10 | "Cerca de X" |
 | Presupuesto | `parsePrice(price) <= budget` | +10 | "Dentro de tu presupuesto (X €)" |
 | Score base | — | 50 | — |

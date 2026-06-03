@@ -94,7 +94,7 @@ model Event {
   telefono        String?   @db.VarChar(30)
   email           String?   @db.VarChar(100)
   website         String?
-  es_lluvia       Boolean   @default(false)
+  es_interior       Boolean   @default(false)
   es_carrito      Boolean   @default(false)
   es_cambiador    Boolean   @default(false)
   es_silla_ruedas Boolean   @default(false)

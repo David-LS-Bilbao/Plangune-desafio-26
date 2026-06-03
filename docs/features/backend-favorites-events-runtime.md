@@ -98,7 +98,7 @@ Array de **eventos reales** (shape de la tabla `events`, snake_case):
     "title": "Exposición interactiva en el museo",
     "municipio": "Bilbao",
     "es_carrito": true,
-    "es_lluvia": true,
+    "es_interior": true,
     "edad_minima": 0,
     "price": "Gratis"
   }

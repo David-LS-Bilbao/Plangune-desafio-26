@@ -56,7 +56,7 @@ Definido en [`backend/prisma/schema.prisma`](../../backend/prisma/schema.prisma)
 | `telefono` | `String? @db.VarChar(30)` | `telefono varchar(30)` |
 | `email` | `String? @db.VarChar(100)` | `email varchar(100)` |
 | `website` | `String?` | `website text` |
-| `es_lluvia` | `Boolean @default(false)` | `es_lluvia boolean` |
+| `es_interior` | `Boolean @default(false)` | `es_interior boolean` |
 | `es_carrito` | `Boolean @default(false)` | `es_carrito boolean` |
 | `es_cambiador` | `Boolean @default(false)` | `es_cambiador boolean` |
 | `es_silla_ruedas` | `Boolean @default(false)` | `es_silla_ruedas boolean` |
@@ -91,7 +91,7 @@ Contrato detallado y ejemplo de respuesta en [`docs/api.md`](../api.md#eventos-e
 | `territorio` | `territorio` | igualdad (Bizkaia/Gipuzkoa/Araba) |
 | `categoria` | `categoria` | igualdad |
 | `tipo_evento` | `tipo_evento` | igualdad |
-| `es_lluvia` | `es_lluvia` | booleano |
+| `es_interior` | `es_interior` | booleano |
 | `es_carrito` | `es_carrito` | booleano |
 | `es_cambiador` | `es_cambiador` | booleano |
 | `edad` | `edad_minima` | **apto si `edad_minima ≤ edad`** |

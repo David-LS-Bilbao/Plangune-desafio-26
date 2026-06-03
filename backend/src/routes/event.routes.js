@@ -12,7 +12,7 @@ const eventFilterValidator = [
   query('territorio').optional().isString(),
   query('categoria').optional().isString(),
   query('tipo_evento').optional().isString(),
-  query('es_lluvia').optional().isBoolean().withMessage('es_lluvia debe ser booleano'),
+  query('es_interior').optional().isBoolean().withMessage('es_interior debe ser booleano'),
   query('es_carrito').optional().isBoolean().withMessage('es_carrito debe ser booleano'),
   query('es_cambiador').optional().isBoolean().withMessage('es_cambiador debe ser booleano'),
   query('edad').optional().isInt({ min: 0 }).withMessage('edad debe ser un entero >= 0'),
