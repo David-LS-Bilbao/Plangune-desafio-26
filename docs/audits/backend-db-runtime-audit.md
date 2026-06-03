@@ -6,6 +6,9 @@
 - **Commit base:** `feature/backend` @ `ddfa232` (PR #29 merge, rating incremental)
 
 > **Nombre técnico estable:** DESAFIO-26. App provisional: *TxikiPlan Euskadi* (lo define Marketing).
+>
+> **Validación manual complementaria:** colección Postman en
+> [../postman/README.md](../postman/README.md) para probar los endpoints descritos aquí.
 
 ---
 
