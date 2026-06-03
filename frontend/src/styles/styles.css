@@ -42,7 +42,9 @@
     --accent-color: #d35230;
     --accent-color-dark: #d03307;
     --white: #f6f5f2;
+    --white-pure: #fafafa;
     --black: #222222;
+    --dark-grey: #777777;
     --font-varela: 'Varela Round', sans-serif;
     --font-poppins: 'Poppins', sans-serif;
     --font-fredoka: 'Fredoka One', sans-serif;
@@ -131,6 +133,23 @@ html,
 body {
   margin: 0;
   padding: 0;
+  color: var(--dark-grey);
+  background: var(--white);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-fredoka);
+    font-weight: 400;
+    color: var(--secondary-color);
+    letter-spacing: 0.05rem;
+}
+
+.logo-name {
+    font-family: var(--font-fredoka);
+    color: var(--primary-color);
+    font-weight: 400;
+    letter-spacing: 0.04rem;
+    
 }
 
 
