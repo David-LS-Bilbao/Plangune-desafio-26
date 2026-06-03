@@ -15,6 +15,7 @@ router.post(
       .optional()
       .isLength({ max: 500 })
       .withMessage('message admite como máximo 500 caracteres'),
+    body('familyProfile').optional().isObject().withMessage('familyProfile debe ser un objeto'),
     body('childrenAges').optional().isArray().withMessage('childrenAges debe ser un array'),
     body('budget')
       .optional()

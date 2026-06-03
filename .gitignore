@@ -30,3 +30,9 @@ Thumbs.db
 # Claude Code (configuración local personal)
 .claude/
 .claude/settings.local.json
+
+# Python / ai-service
+__pycache__/
+*.pyc
+.venv/
+ai-service/events_weather.csv

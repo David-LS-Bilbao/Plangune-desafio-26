@@ -8,7 +8,7 @@ explicaciones por chat. Cubre:
 - endpoints que ya usan **Prisma/PostgreSQL real** (`/events`, `/recommendations`, `/favorites`);
 - endpoints **mock/legacy** que siguen activos pero no persisten en DB (`/activities`, `/reviews`, `/incidents`);
 - la **compatibilidad temporal** con los aliases legacy `activity` (en recommendations) y `activityId` (en favorites);
-- el **asistente** en modo fallback reglado (sin IA externa real).
+- el **asistente** en modo fallback reglado y, si se prepara el entorno local, modo LLM vía Express.
 
 Complementa la auditoría [../audits/backend-db-runtime-audit.md](../audits/backend-db-runtime-audit.md).
 
@@ -32,7 +32,7 @@ Complementa la auditoría [../audits/backend-db-runtime-audit.md](../audits/back
 | Activities | `GET /api/activities` | mock legacy |
 | Reviews | `POST /api/reviews` | mock |
 | Incidents | `POST /api/incidents` | mock |
-| Assistant | `POST /api/assistant/family-plan` | fallback, sin IA externa real |
+| Assistant | `POST /api/assistant/family-plan` | fallback por defecto; LLM local opcional |
 
 ## 4. Preparación del entorno
 
@@ -79,7 +79,8 @@ Puedes usar el **Collection Runner** de Postman para ejecutar todo de una vez en
 - **03 Recommendations**: scoring sobre `events` reales; cada item trae `event` (clave nueva) y `activity` (alias legacy del mismo objeto), `score` y `reasons`; orden descendente y top explicable.
 - **04 Favorites**: persistencia real en `user_favorite_events` con el **usuario mock id=100**; respuesta con `eventId` (nuevo) y `activityId` (alias legacy); flujo add → list → idempotente → delete → 404.
 - **05 Legacy/mock**: endpoints aún activos pero **no persistentes**; `activities` devuelve la entidad mock (ids `act-xxx`); `reviews`/`incidents` validan contra el mock (por eso usan `activityId: "act-001"`).
-- **06 Assistant**: fallback reglado **sin IA externa**; reutiliza el recomendador sobre `events` reales.
+- **06 Assistant**: fallback reglado por defecto; para probar LLM real hay que arrancar
+  `ai-service` en `:5001` y activar `LLM_ASSISTANT_ENABLED=true` en el backend.
 
 ## 8. Tests incluidos en Postman
 
@@ -95,10 +96,9 @@ Cada request valida:
 - **Reviews e incidents son mock legacy**: validan contra `mockActivities`, por eso el body usa
   `activityId: "act-001"` (id tipo `act-xxx`), **no** un id de evento numérico. Con un id numérico
   devolverían 404.
-- **Assistant — campo `question`**: el body incluye `question` por compatibilidad con la intención
-  futura, pero **el endpoint todavía no lo usa**. El fallback se construye con
-  `childrenAges` / `municipality` / `strollerFriendly` / `rainSuitable` / `budget`. El campo
-  `message` (≤500 caracteres) sí se valida; `question` se ignora. **No es integración IA real todavía.**
+- **Assistant LLM local**: la colección puede llamar a `POST /api/assistant/family-plan` vía Express.
+  Para probar modo LLM real, arranca `ai-service` (`cd ai-service && source .venv/bin/activate && python app.py`)
+  y configura `LLM_ASSISTANT_ENABLED=true`. El frontend y Postman siguen llamando a Express, no a Flask.
 
 ## 10. Limitaciones conocidas
 
@@ -107,7 +107,7 @@ Cada request valida:
 - **`activity` es alias legacy de `event`** (en recommendations).
 - **`activityId` es alias legacy de `eventId`** (en favorites).
 - **Reviews/incidents NO persisten en DB** (mock en memoria; se pierden al reiniciar el backend).
-- **Assistant no llama todavía a Flask/Ollama real**: es un fallback reglado.
+- **Assistant LLM no dockerizado**: Flask/Ollama es solo demo local; si no está activo, Express devuelve fallback.
 - **El orden de ejecución afecta a favoritos**: `POST`/`DELETE` modifican estado. Ejecuta la
   carpeta 04 de arriba abajo. Si la repites, el primer `POST` puede partir de un estado ya añadido
   (sigue siendo idempotente).
