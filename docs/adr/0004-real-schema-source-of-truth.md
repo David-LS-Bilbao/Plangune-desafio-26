@@ -58,6 +58,15 @@ qué fichero manda.
 - ⚠️ La decisión sobre `reviews`/`incidents` (¿tablas nuevas en `init.sql`? ¿endpoints retirados?) está pendiente y debe tomarse antes de la migración a runtime Prisma.
 - ➡️ Próximo paso: cuando llegue la rama de migración a runtime, partir siempre de `init.sql` actualizado como referencia y no de `BBDD.sql`.
 
+## Correcciones recibidas sobre `init.sql`
+
+- **2026-06-03 · ubicación de `rating`** (`init_variable_corregida.sql`): `rating` se movió de
+  `plans` a `user_selected_recommendations` (la valoración pertenece a la recomendación elegida
+  por el usuario, no al plan). Aplicado al `init.sql` versionado, al `schema.prisma` y mediante
+  la migración incremental `move_rating_from_plans_to_user_selected_recommendations` (sin tocar
+  la migración inicial). Detalle en
+  [../features/db-move-rating-to-selected-recommendations.md](../features/db-move-rating-to-selected-recommendations.md).
+
 ## Relacionado
 
 - [ADR-0001](0001-prisma-preparado-no-runtime.md) — Prisma preparado pero no runtime.

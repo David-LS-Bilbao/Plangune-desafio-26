@@ -91,7 +91,6 @@ CREATE TABLE IF NOT EXISTS public.plans
     creator_id integer,
     title character varying(150) COLLATE pg_catalog."default" NOT NULL,
     is_recommendation boolean DEFAULT false,
-    rating integer,
     CONSTRAINT plans_pkey PRIMARY KEY (id)
 );
 
@@ -116,6 +115,7 @@ CREATE TABLE IF NOT EXISTS public.user_selected_recommendations
     user_id integer NOT NULL,
     event_id integer NOT NULL,
     selected_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    rating integer,
     CONSTRAINT user_selected_recommendations_pkey PRIMARY KEY (user_id, event_id)
 );
 
