@@ -6,6 +6,7 @@ function PlanDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [reportStatus, setReportStatus] = useState("");
+  const [reserved, setReserved] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(5);
@@ -138,14 +139,17 @@ function PlanDetail() {
         <button
           className="btn-primary-large"
           type="button"
-          style={{ flex: 1 }}
+          style={{ flex: 1, opacity: reserved ? 0.75 : 1 }}
+          disabled={reserved}
           onClick={() => {
             useUserStore.getState().addReservation(plan);
-            alert("Reserva confirmada. ¡Disfruta del plan!");
+            setReserved(true);
           }}
         >
-          <span className="material-symbols-outlined">calendar_today</span>
-          Reservar
+          <span className="material-symbols-outlined">
+            {reserved ? "check_circle" : "calendar_today"}
+          </span>
+          {reserved ? "¡Reservado!" : "Reservar"}
         </button>
         <button
           className="btn-primary-large"

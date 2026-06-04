@@ -22,6 +22,34 @@ function Header() {
     navigate(path);
   };
 
+  // Nav items according to role
+  const navItems = (() => {
+    if (!user) return [
+      { label: "Inicio", path: "/", icon: "home" },
+      { label: "Explorar planes", path: "/planes", icon: "explore" },
+      { label: "Iniciar sesión", path: "/login", icon: "login" },
+    ];
+    if (user.role === "family") return [
+      { label: "Inicio", path: "/", icon: "home" },
+      { label: "Explorar planes", path: "/planes", icon: "explore" },
+      { label: "Favoritos", path: "/favoritos", icon: "favorite" },
+      { label: "Mi perfil", path: "/perfil", icon: "person" },
+      { label: "Ofertas", path: "/ofertas", icon: "local_offer" },
+    ];
+    if (user.role === "business") return [
+      { label: "Dashboard", path: "/negocio/dashboard", icon: "dashboard" },
+      { label: "Mis ofertas", path: "/negocio/ofertas", icon: "local_offer" },
+      { label: "Rendimiento", path: "/negocio/rendimiento", icon: "bar_chart" },
+      { label: "Estrategia", path: "/negocio/estrategia", icon: "rocket_launch" },
+      { label: "Suscripción", path: "/negocio/suscripcion", icon: "workspace_premium" },
+    ];
+    if (user.role === "admin") return [
+      { label: "Panel admin", path: "/admin", icon: "admin_panel_settings" },
+      { label: "Datos", path: "/admin/datos", icon: "database" },
+    ];
+    return [];
+  })();
+
   return (
     <header className="app-header-bar">
       <div className="header-content">
@@ -39,13 +67,13 @@ function Header() {
           <button
             aria-label="Account"
             className="icon-button"
-            onClick={() => goTo("/perfil")}
+            onClick={() => goTo(user?.role === "business" ? "/negocio/dashboard" : user?.role === "admin" ? "/admin" : "/perfil")}
           >
             <span
               className="material-symbols-outlined"
               data-icon="family_restroom"
             >
-              family_restroom
+              {user?.role === "business" ? "store" : user?.role === "admin" ? "admin_panel_settings" : "family_restroom"}
             </span>
           </button>
 
@@ -64,48 +92,41 @@ function Header() {
       {menuOpen && (
         <div className="header-menu-overlay" onClick={toggleMenu}>
           <div className="header-menu" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="menu-item"
-              onClick={() => goTo("/")}
-            >
-              Landing
-            </button>
-            <button
-              type="button"
-              className="menu-item"
-              onClick={() => goTo("/planes")}
-            >
-              Explorar planes
-            </button>
-            <button
-              type="button"
-              className="menu-item"
-              onClick={() => goTo("/favoritos")}
-            >
-              Favoritos
-            </button>
-            <button
-              type="button"
-              className="menu-item"
-              onClick={() => goTo("/perfil")}
-            >
-              Perfil
-            </button>
-            <button
-              type="button"
-              className="menu-item"
-              onClick={() => goTo("/crear-familia")}
-            >
-              Crear familia
-            </button>
-            <button
-              type="button"
-              className="menu-item"
-              onClick={() => goTo("/crear-negocio")}
-            >
-              Crear negocio
-            </button>
+            {/* User info header */}
+            {user && (
+              <div className="menu-user-info">
+                <div className="menu-user-avatar">{user.avatar}</div>
+                <div>
+                  <p className="menu-user-name">{user.name}</p>
+                  <p className="menu-user-role">
+                    {user.role === "family" ? "Familia" : user.role === "business" ? "Negocio" : "Administrador"}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {navItems.map((item) => (
+              <button
+                key={item.path}
+                type="button"
+                className="menu-item"
+                onClick={() => goTo(item.path)}
+              >
+                <span className="material-symbols-outlined menu-item-icon">{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+
+            {user && (
+              <button
+                type="button"
+                className="menu-item menu-item-danger"
+                onClick={handleLogout}
+              >
+                <span className="material-symbols-outlined menu-item-icon">logout</span>
+                Cerrar sesión
+              </button>
+            )}
           </div>
         </div>
       )}
