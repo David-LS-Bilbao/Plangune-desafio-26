@@ -4,11 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 import router from './routes/index.js';
-<<<<<<< Updated upstream
-import { notFoundHandler, errorHandler } from './middlewares/error.middleware.js';
-=======
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
->>>>>>> Stashed changes
 
 /**
  * Construye la aplicación Express (sin abrir puerto).
@@ -31,11 +27,7 @@ export function createApp() {
   // Rutas de la API
   app.use('/api', router);
 
-<<<<<<< Updated upstream
-  // 404 para rutas no definidas y manejador central de errores
-=======
   // 404 + manejador global de errores
->>>>>>> Stashed changes
   app.use(notFoundHandler);
   app.use(errorHandler);
 

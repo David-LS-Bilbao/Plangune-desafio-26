@@ -10,28 +10,16 @@ function parseBool(value) {
 /** Construye el contexto del recomendador a partir de la query string. */
 function parseContext(query) {
   const {
-<<<<<<< Updated upstream
-    // Filtros existentes (no se rompe el contrato actual)
-=======
->>>>>>> Stashed changes
     childrenAges,
     strollerFriendly,
     rainSuitable,
     budget,
     municipality,
-<<<<<<< Updated upstream
-    // Filtros adicionales para la API de Data
-=======
     limit,
->>>>>>> Stashed changes
     changingTable,
     wheelchairAccessible,
     petsAllowed,
     includeKulturklik,
-<<<<<<< Updated upstream
-    limit,
-=======
->>>>>>> Stashed changes
   } = query;
 
   return {
@@ -45,10 +33,7 @@ function parseContext(query) {
     rainSuitable: parseBool(rainSuitable),
     budget: budget !== undefined ? Number(budget) : undefined,
     municipality: municipality || undefined,
-<<<<<<< Updated upstream
     // Adicionales (Data): se mapean en el service. Opcionales; undefined si no vienen.
-=======
->>>>>>> Stashed changes
     changingTable: parseBool(changingTable),
     wheelchairAccessible: parseBool(wheelchairAccessible),
     petsAllowed: parseBool(petsAllowed),
@@ -60,12 +45,8 @@ function parseContext(query) {
 /** GET /api/recommendations — recomendaciones de Data o fallback local. */
 export const getRecommendationsHandler = asyncHandler(async (req, res) => {
   const context = parseContext(req.query);
-<<<<<<< Updated upstream
-  res.status(200).json(await getRecommendations(context));
-=======
   const recommendations = await getRecommendations(context);
   res.status(200).json(recommendations);
->>>>>>> Stashed changes
 });
 
 export default { getRecommendationsHandler };
