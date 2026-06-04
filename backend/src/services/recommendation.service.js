@@ -9,13 +9,19 @@ import { isDataRecommenderEnabled, fetchDataPlanes } from '../clients/dataRecomm
  */
 const DEFAULT_RECOMMENDATION_LIMIT = 3;
 
-/** Parsea el campo `price` a un coste numérico en euros (best effort). */
+/**
+ * Parsea el campo `price` a un coste numérico en euros (best effort).
+ * Devuelve `0` para "Gratis", el número detectado para strings con cifra, y
+ * `null` cuando el precio es desconocido o no parseable (null/undefined/vacío/
+ * texto sin número). Un precio desconocido NO debe tratarse como gratis.
+ */
 function parsePrice(price) {
-  if (!price) return 0;
-  const normalized = price.trim().toLowerCase();
+  if (price === null || price === undefined) return null;
+  const normalized = String(price).trim().toLowerCase();
+  if (normalized === '') return null;
   if (normalized === 'gratis') return 0;
   const match = normalized.match(/(\d+(?:[.,]\d+)?)/);
-  return match ? parseFloat(match[1].replace(',', '.')) : 0;
+  return match ? parseFloat(match[1].replace(',', '.')) : null;
 }
 
 /** Calcula score y razones de un evento frente al contexto. */
@@ -46,7 +52,8 @@ function scoreEvent(event, context) {
 
   if (typeof budget === 'number' && !Number.isNaN(budget)) {
     const cost = parsePrice(event.price);
-    if (cost === 0 || cost <= budget) {
+    // Sin bonus si el precio es desconocido (cost === null): no se asume gratis.
+    if (cost !== null && cost <= budget) {
       score += 10;
       const label = cost === 0 ? 'Gratis' : `${cost}€`;
       reasons.push(`Dentro del presupuesto (${label})`);
