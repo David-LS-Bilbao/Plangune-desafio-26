@@ -22,6 +22,31 @@ Frontend React → Backend Express → ai-service Flask (:5001) → Ollama / API
 - El **ai-service** (Python/Flask) envuelve el script de Danilo y lo ejecuta con `subprocess`
   en cada request.
 
+## Dos contratos LLM (`LLM_ASSISTANT_CONTRACT`)
+
+Express habla con un proveedor LLM en `LLM_ASSISTANT_API_URL` (por defecto `:5001`). El
+**protocolo** se elige con `LLM_ASSISTANT_CONTRACT`; solo corre uno de los dos a la vez:
+
+| Contrato | Proveedor | Llamada de Express | `source` |
+|---|---|---|---|
+| `get-question` | **chatbot Data** dockerizado (`urkomen/Desafio-Data`) | `GET {API_URL}/<pregunta>` | `data-chatbot` |
+| `post-family-plan` | **ai-service** Flask histórico (este doc) | `POST {API_URL}/assistant/family-plan` | `llm-local` |
+
+- `.env.example` trae `LLM_ASSISTANT_CONTRACT=get-question` (objetivo actual: consumir el
+  chatbot Docker de Data). El **default en código** es `post-family-plan` (retrocompatible).
+- En ambos contratos, si el LLM está deshabilitado, da timeout, error de red, status no-2xx,
+  body vacío, respuesta inválida o (solo Data) **HTTP 200 con cuerpo que empieza por `ERROR:`**,
+  Express usa el **fallback local** (recomendador reglado sobre Prisma).
+
+### Contrato `get-question` (chatbot Data)
+
+- El chatbot Data expone `GET /` y `GET /<path:question>` en `:5001`.
+- Express compone una pregunta en español a partir de `message` + contexto familiar
+  (`Familia con niños de X años. Municipio: Y.`) y la codifica:
+  `GET {API_URL}/${encodeURIComponent(question)}`.
+- **Importante:** el chatbot Data puede responder **HTTP 200 con cuerpo `ERROR:`** cuando falla
+  internamente. El cliente Express lo trata como fallo (igual que body vacío) y activa el fallback.
+
 ## ai-service (Python/Flask, puerto 5001)
 
 Carpeta [`ai-service/`](../ai-service/):

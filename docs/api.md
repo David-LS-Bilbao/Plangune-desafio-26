@@ -191,9 +191,13 @@ Respuesta (array de recomendaciones con explicación):
 ### `POST /api/assistant/family-plan`
 Plan familiar conversacional.
 
-> **Fuente runtime:** el **asistente LLM local** (ai-service Flask + Ollama) cuando
-> `LLM_ASSISTANT_ENABLED=true`; si está deshabilitado o falla, **fallback local** sin IA.
-> El frontend **siempre** consume este Express, nunca Flask directamente.
+> **Fuente runtime:** un asistente LLM cuando `LLM_ASSISTANT_ENABLED=true`; si está
+> deshabilitado o falla, **fallback local** sin IA. El proveedor LLM se elige con
+> `LLM_ASSISTANT_CONTRACT`:
+> - `get-question` → **chatbot Data** dockerizado (`GET {API_URL}/<pregunta>`), `source: "data-chatbot"`.
+> - `post-family-plan` → **ai-service** Flask + Ollama (`POST /assistant/family-plan`), `source: "llm-local"`.
+>
+> El frontend **siempre** consume este Express, nunca el LLM directamente.
 > Ver [integration-ai-ollama-local.md](integration-ai-ollama-local.md).
 
 Body (todos los campos opcionales). Admite `familyProfile` anidado y/o campos sueltos (compat):
@@ -210,16 +214,21 @@ Body (todos los campos opcionales). Admite `familyProfile` anidado y/o campos su
 
 Validación: `message` ≤ 500 caracteres; `familyProfile` objeto; `childrenAges` array; `budget` numérico ≥ 0; `municipality` string; `strollerFriendly`/`rainSuitable` booleanos.
 
-Respuesta con LLM (`mode: "ai"`):
+Respuesta con LLM (`mode: "ai"`). `source` indica el proveedor según el contrato:
 
 ```json
 {
   "mode": "ai",
-  "source": "llm-local",
+  "source": "data-chatbot",
   "assistantMessageMarkdown": "## 🎭 Plan recomendado\n\n...markdown...",
   "recommendations": []
 }
 ```
+
+> Con `LLM_ASSISTANT_CONTRACT=get-question` el `source` es `"data-chatbot"`; con
+> `post-family-plan` es `"llm-local"`. En ambos casos, `recommendations` viene `[]`
+> (el LLM responde Markdown). El chatbot Data puede devolver **HTTP 200 con cuerpo
+> `ERROR:`** cuando falla internamente: Express lo trata como fallo y usa el fallback local.
 
 Respuesta de fallback local (LLM deshabilitado o caído):
 
