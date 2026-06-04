@@ -51,12 +51,10 @@ function NavbarResponsive() {
 
   const menuItems = (() => {
     if (!user) return [
-      { label: 'Inicio', path: '/', icon: 'home' },
-      { label: 'Explorar planes', path: '/planes', icon: 'explore' },
       { label: 'Iniciar sesión', path: '/login', icon: 'login' },
+      { label: 'Explorar planes', path: '/planes', icon: 'explore' },
     ];
     if (user.role === 'family') return [
-      { label: 'Inicio', path: '/', icon: 'home' },
       { label: 'Explorar planes', path: '/planes', icon: 'explore' },
       { label: 'Favoritos', path: '/favoritos', icon: 'favorite' },
       { label: 'Mi perfil', path: '/perfil', icon: 'person' },
@@ -132,7 +130,7 @@ function NavbarResponsive() {
 
       {/* ── MOBILE: barra inferior con iconos (< 768px) ───────────────────── */}
       <nav className="nr-bottom-nav">
-        {links.map(({ to, icon, label, exact }) => (
+        {links.slice(0, 2).map(({ to, icon, label, exact }) => (
           <NavLink
             key={to}
             to={to}
@@ -141,12 +139,41 @@ function NavbarResponsive() {
               `nr-bottom-link${isActive ? ' nr-bottom-link--active' : ''}`
             }
           >
-            <span className={`material-symbols-outlined${isActive(to, exact) ? ' fill' : ''}`}>
-              {icon}
-            </span>
+            <span className={`material-symbols-outlined${isActive(to, exact) ? ' fill' : ''}`}>{icon}</span>
             <span className="nr-bottom-label">{label}</span>
           </NavLink>
         ))}
+
+        {/* Hueco central para el FAB */}
+        <div className="nr-bottom-gap" aria-hidden="true" />
+
+        {links.slice(3).map(({ to, icon, label, exact }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={exact}
+            className={({ isActive }) =>
+              `nr-bottom-link${isActive ? ' nr-bottom-link--active' : ''}`
+            }
+          >
+            <span className={`material-symbols-outlined${isActive(to, exact) ? ' fill' : ''}`}>{icon}</span>
+            <span className="nr-bottom-label">{label}</span>
+          </NavLink>
+        ))}
+
+        {/* FAB flotante — fuera del flujo, centrado con CSS */}
+        {(() => { const h = links[2]; return (
+          <NavLink
+            to={h.to}
+            end={h.exact}
+            className={({ isActive }) =>
+              `nr-bottom-fab${isActive ? ' nr-bottom-link--active' : ''}`
+            }
+            aria-label="Inicio"
+          >
+            <span className={`material-symbols-outlined${isActive(h.to, h.exact) ? ' fill' : ''}`}>{h.icon}</span>
+          </NavLink>
+        ); })()}
       </nav>
 
       {/* ── DESKTOP: navbar horizontal superior (>= 768px) ───────────────── */}

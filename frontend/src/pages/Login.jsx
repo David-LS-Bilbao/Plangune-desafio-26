@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store";
 import LoginForm from "../components/auth/LoginForm";
-import Navbar from "../components/common/Navbar";
+import NavbarResponsive from "../components/common/NavbarResponsive";
 import '../styles/login.css';
 
 function Login() {
@@ -20,7 +20,7 @@ function Login() {
 
   return (
     <>
-      <Navbar />
+      <NavbarResponsive />
       <div className="login-wrapper">
         <div className="login-card">
 

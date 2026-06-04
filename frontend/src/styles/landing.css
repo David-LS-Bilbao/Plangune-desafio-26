@@ -14,6 +14,10 @@
         min-height: 37rem;
         overflow: hidden;
 
+        @media (max-width: 767px) {
+            height: calc(100dvh - 2rem);
+        }
+
         .hero-background {
             position: absolute;
             inset: 0;

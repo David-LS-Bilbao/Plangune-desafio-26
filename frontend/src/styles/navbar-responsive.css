@@ -112,8 +112,7 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background-color: var(--surface-container);
-  border-bottom: 0.0625rem solid var(--outline-variant);
+  background-color: var(--white);
 }
 
 .nr-mobile-header-content {
@@ -144,7 +143,7 @@
   transition: background 0.2s ease;
 
   &:hover {
-    background: var(--surface-container-high);
+    background: transparent;
   }
 }
 
@@ -182,7 +181,7 @@
   top: 3.5rem;
   left: 0;
   right: 0;
-  background-color: var(--surface-container);
+  background-color: var(--white);
   border-bottom: 0.0625rem solid var(--outline-variant);
   padding: 0.5rem 0;
   z-index: 99;
@@ -283,10 +282,13 @@
   right: 0;
   background-color: var(--white);
   display: flex;
+  align-items: center;
   justify-content: space-around;
   padding: 0.75rem 0;
-  border-top: 0.0625rem solid var(--outline-variant);
+  border-top: 0.2rem solid var(--secondary-color);
   z-index: 50;
+  /* espacio para que el FAB no quede cortado */
+  overflow: visible;
 }
 
 .nr-bottom-link {
@@ -294,7 +296,7 @@
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  color: var(--on-surface-variant);
+  color: var(--secondary-color);
   gap: 0.25rem;
   font-family: var(--font-body);
   font-size: 0.75rem;
@@ -302,11 +304,56 @@
 }
 
 .nr-bottom-link--active {
-  color: var(--primary);
+  color: var(--secondary-color);
 }
 
 .nr-bottom-label {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+}
+
+/* Botón flotante central (Inicio) */
+.nr-bottom-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 50%;
+  background-color: var(--white);
+  border: none;
+  color: var(--secondary-color);
+  text-decoration: none;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(100% - 2.75rem);
+  z-index: 51;
+
+  /* Arco superior: continúa la línea del border-top del nav */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -0.0625rem;
+    border-radius: 50%;
+    border: 0.2rem solid var(--secondary-color);
+    /* oculta los lados y la parte inferior, deja solo el arco superior */
+    clip-path: inset(0 0 65% 0);
+  }
+
+  .material-symbols-outlined {
+    font-size: 2.85rem;
+    margin-top: 0.75rem;
+  }
+}
+
+.nr-bottom-fab.nr-bottom-link--active {
+  color: var(--secondary-color);
+}
+
+/* Hueco central que reserva espacio para el FAB — mismo ancho que el botón */
+.nr-bottom-gap {
+  width: 4.25rem;
+  flex-shrink: 0;
 }
 
 @media (min-width: 768px) {
