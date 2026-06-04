@@ -1,42 +1,38 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store";
+import { MOCK_USERS } from "../../mocks/data";
 
 function LoginForm() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  const [role, setRole] = useState("family");
+  const [email, setEmail] = useState("familia.agirre@example.com");
+  const [password, setPassword] = useState("password123");
 
   const handleLogin = (e) => {
     e.preventDefault();
-    login(role);
-    if (role === "family") navigate("/planes");
-    else if (role === "business") navigate("/negocio/dashboard");
-    else if (role === "admin") navigate("/admin");
+    
+    // Auto-detect role based on email or use MOCK_USERS
+    let detectedRole = "family";
+    const foundUser = Object.values(MOCK_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
+    
+    if (foundUser) {
+      detectedRole = foundUser.role;
+    } else if (email.toLowerCase().includes("admin")) {
+      detectedRole = "admin";
+    } else if (email.toLowerCase().includes("negocio") || email.toLowerCase().includes("business") || email.toLowerCase().includes("info")) {
+      detectedRole = "business";
+    }
+
+    login(detectedRole);
+    
+    if (detectedRole === "family") navigate("/planes");
+    else if (detectedRole === "business") navigate("/negocio/dashboard");
+    else if (detectedRole === "admin") navigate("/admin");
   };
 
   return (
     <form className="login-form-new" onSubmit={handleLogin}>
-      {/* Role Selector */}
-      <div className="input-group">
-        <label className="sr-only" htmlFor="role">
-          Simular Rol
-        </label>
-        <div className="input-wrapper">
-          <span className="material-symbols-outlined input-icon">badge</span>
-          <select
-            id="role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="form-select"
-          >
-            <option value="family">👨‍👩‍👧 Familia (Buscador de planes)</option>
-            <option value="business">🏪 Negocio (Gestor de actividades)</option>
-            <option value="admin">🛡️ Administrador (Gestión y datos)</option>
-          </select>
-        </div>
-      </div>
-
       {/* Email */}
       <div className="input-group">
         <label className="sr-only" htmlFor="email">
@@ -48,7 +44,8 @@ function LoginForm() {
             type="email"
             id="email"
             placeholder="tu@email.com"
-            defaultValue="demo@txikiplan.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
       </div>
@@ -64,7 +61,8 @@ function LoginForm() {
             type="password"
             id="password"
             placeholder="••••••••"
-            defaultValue="password123"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
         </div>
       </div>
