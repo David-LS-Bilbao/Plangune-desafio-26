@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store";
 import LoginForm from "../components/auth/LoginForm";
+import Navbar from "../components/common/Navbar";
+import '../styles/login.css';
 
 function Login() {
   const navigate = useNavigate();
@@ -17,24 +19,19 @@ function Login() {
   };
 
   return (
+    <>
+    <Navbar />
     <div className="login-wrapper">
-      <div className="login-background" />
-      <div className="login-overlay" />
-
       <div className="login-main-new">
-        <div className="login-card-new">
-          {/* Brand Header */}
-          <div className="brand-header">
-            <span className="material-symbols-outlined brand-icon">
-              family_restroom
-            </span>
-            <h1 className="brand-title">TxikiPlan</h1>
-            <p className="brand-subtitle">
-              Encuentra los mejores planes para disfrutar en familia
-            </p>
-          </div>
+        <div className="login-desktop-panel">
+          <h2 className="desktop-panel-title">Tu familia, tus planes</h2>
+          <p className="desktop-panel-text">
+            Descubre las mejores actividades para disfrutar con tus peques en Euskadi.
+          </p>
+        </div>
 
-          <h2 className="login-title">Bienvenido de nuevo</h2>
+        <div className="login-card-new">
+
 
           <LoginForm />
 
@@ -126,6 +123,7 @@ function Login() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
