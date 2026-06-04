@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store";
 
 function CreateFamily() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const [form, setForm] = useState({
@@ -28,11 +30,10 @@ function CreateFamily() {
   return (
     <main className="create-account-main">
       <section className="page-header">
-        <p className="page-tag">Registro familiar</p>
-        <h1 className="page-title">Crea tu familia</h1>
+        <p className="page-tag">{t('createFamily.tag', 'Registro familiar')}</p>
+        <h1 className="page-title">{t('createFamily.title', 'Crea tu familia')}</h1>
         <p className="page-subtitle">
-          Configura tu perfil para recibir planes y recomendaciones
-          personalizadas.
+          {t('createFamily.subtitle', 'Configura tu perfil para recibir planes y recomendaciones personalizadas.')}
         </p>
       </section>
 
@@ -40,7 +41,7 @@ function CreateFamily() {
         <form className="create-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label" htmlFor="familyName">
-              Nombre de la familia
+              {t('createFamily.familyName', 'Nombre de la familia')}
             </label>
             <input
               id="familyName"
@@ -56,7 +57,7 @@ function CreateFamily() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="location">
-              Ubicación
+              {t('createFamily.location', 'Ubicación')}
             </label>
             <input
               id="location"
@@ -72,7 +73,7 @@ function CreateFamily() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="members">
-              Miembros en el hogar
+              {t('createFamily.members', 'Miembros en el hogar')}
             </label>
             <input
               id="members"
@@ -89,7 +90,7 @@ function CreateFamily() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="childrenAges">
-              Edades de los peques
+              {t('createFamily.childrenAges', 'Edades de los peques')}
             </label>
             <input
               id="childrenAges"
@@ -104,7 +105,7 @@ function CreateFamily() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="email">
-              Correo electrónico
+              {t('createFamily.email', 'Correo electrónico')}
             </label>
             <input
               id="email"
@@ -120,7 +121,7 @@ function CreateFamily() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="password">
-              Contraseña
+              {t('createFamily.password', 'Contraseña')}
             </label>
             <input
               id="password"
@@ -136,14 +137,14 @@ function CreateFamily() {
 
           <div className="form-actions">
             <button type="submit" className="btn-primary-full">
-              Crear familia
+              {t('createFamily.submit', 'Crear familia')}
             </button>
             <button
               type="button"
               className="btn-link"
               onClick={() => navigate("/login")}
             >
-              Volver al inicio
+              {t('createFamily.back', 'Volver al inicio')}
             </button>
           </div>
         </form>

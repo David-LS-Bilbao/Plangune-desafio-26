@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store";
 import LoginForm from "../components/auth/LoginForm";
 
 function Login() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const [registerRole, setRegisterRole] = useState("family");
@@ -30,18 +32,18 @@ function Login() {
             </span>
             <h1 className="brand-title">TxikiPlan</h1>
             <p className="brand-subtitle">
-              Encuentra los mejores planes para disfrutar en familia
+              {t('loginPage.subtitle', 'Encuentra los mejores planes para disfrutar en familia')}
             </p>
           </div>
 
-          <h2 className="login-title">Bienvenido de nuevo</h2>
+          <h2 className="login-title">{t('loginPage.welcomeBack', 'Bienvenido de nuevo')}</h2>
 
           <LoginForm />
 
           {/* Social Divider */}
           <div className="social-divider">
             <div className="divider-line"></div>
-            <span className="divider-text">o continuar con</span>
+            <span className="divider-text">{t('loginPage.orContinueWith', 'o continuar con')}</span>
             <div className="divider-line"></div>
           </div>
 
@@ -67,7 +69,7 @@ function Login() {
           {/* Register */}
           <div className="registration-section">
             <p className="registration-text">
-              ¿No tienes cuenta? Elige tu perfil:
+              {t('loginPage.noAccount', '¿No tienes cuenta? Elige tu perfil:')}
             </p>
             <div className="role-grid">
               <label className="role-label">
@@ -83,7 +85,7 @@ function Login() {
                   <span className="material-symbols-outlined role-icon-primary">
                     family_restroom
                   </span>
-                  <span className="role-title">Familia</span>
+                  <span className="role-title">{t('loginPage.family', 'Familia')}</span>
                   <div className="check-icon">
                     <span className="material-symbols-outlined fill">
                       check_circle
@@ -104,7 +106,7 @@ function Login() {
                   <span className="material-symbols-outlined role-icon-secondary">
                     storefront
                   </span>
-                  <span className="role-title">Negocio</span>
+                  <span className="role-title">{t('loginPage.business', 'Negocio')}</span>
                   <div className="check-icon">
                     <span className="material-symbols-outlined fill">
                       check_circle
@@ -119,7 +121,7 @@ function Login() {
                 className="btn-link"
                 onClick={handleRegister}
               >
-                Registrarse →
+                {t('loginPage.register', 'Registrarse →')}
               </button>
             </div>
           </div>

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 
 function BusinessSubscriptions() {
+  const { t } = useTranslation();
   const { subscription, setSubscription } = useBusinessStore();
   const [selectedPlan, setSelectedPlan] = useState(subscription);
   const [toastMsg, setToastMsg] = useState("");
@@ -10,7 +12,7 @@ function BusinessSubscriptions() {
     if (planName === selectedPlan) return;
     setSelectedPlan(planName);
     setSubscription(planName);
-    setToastMsg(`✓ Plan ${planName} activado correctamente`);
+    setToastMsg(t('subscriptions.successToast', { plan: planName }));
     setTimeout(() => setToastMsg(""), 3500);
   };
 
@@ -31,15 +33,15 @@ function BusinessSubscriptions() {
       )}
 
       <section className="subscriptions-header">
-        <p className="page-tag">Suscripciones</p>
-        <h1 className="page-title">Planes de pago</h1>
+        <p className="page-tag">{t('subscriptions.tag', 'Suscripciones')}</p>
+        <h1 className="page-title">{t('subscriptions.title', 'Planes de pago')}</h1>
         <p className="page-subtitle">
-          Elige el plan que mejor impulse tus promociones y resultados.
+          {t('subscriptions.subtitle', 'Elige el plan que mejor impulse tus promociones y resultados.')}
         </p>
         {selectedPlan && (
           <p className="section-note">
             <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle' }}>stars</span>
-            {' '}Plan activo: <strong>{selectedPlan}</strong>
+            {' '}{t('subscriptions.activePlan', 'Plan activo:')} <strong>{selectedPlan}</strong>
           </p>
         )}
       </section>
@@ -55,7 +57,7 @@ function BusinessSubscriptions() {
               {isActive && (
                 <div className="subscription-active-badge">
                   <span className="material-symbols-outlined fill" style={{ fontSize: '1rem' }}>check_circle</span>
-                  Plan actual
+                  {t('subscriptions.currentPlanBadge', 'Plan actual')}
                 </div>
               )}
               <div className="subscription-top">
@@ -73,7 +75,7 @@ function BusinessSubscriptions() {
                 disabled={isActive}
                 onClick={() => handleSelectPlan(plan.name)}
               >
-                {isActive ? 'Plan activo' : 'Seleccionar plan'}
+                {isActive ? t('subscriptions.planActiveBtn', 'Plan activo') : t('subscriptions.selectPlan', 'Seleccionar plan')}
               </button>
             </article>
           );

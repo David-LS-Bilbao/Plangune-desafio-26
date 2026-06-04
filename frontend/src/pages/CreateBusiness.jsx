@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store";
 
 function CreateBusiness() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const [form, setForm] = useState({
@@ -37,10 +39,10 @@ function CreateBusiness() {
   return (
     <main className="create-account-main">
       <section className="page-header">
-        <p className="page-tag">Registro de negocio</p>
-        <h1 className="page-title">Crea tu negocio</h1>
+        <p className="page-tag">{t('createBusiness.tag', 'Registro de negocio')}</p>
+        <h1 className="page-title">{t('createBusiness.title', 'Crea tu negocio')}</h1>
         <p className="page-subtitle">
-          Configura tu perfil comercial y comienza a publicar tus ofertas.
+          {t('createBusiness.subtitle', 'Configura tu perfil comercial y comienza a publicar tus ofertas.')}
         </p>
       </section>
 
@@ -48,7 +50,7 @@ function CreateBusiness() {
         <form className="create-form" onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label" htmlFor="businessName">
-              Nombre del negocio
+              {t('createBusiness.businessName', 'Nombre del negocio')}
             </label>
             <input
               id="businessName"
@@ -64,7 +66,7 @@ function CreateBusiness() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="category">
-              Categoría
+              {t('createBusiness.category', 'Categoría')}
             </label>
             <input
               id="category"
@@ -79,7 +81,7 @@ function CreateBusiness() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="address">
-              Dirección
+              {t('createBusiness.address', 'Dirección')}
             </label>
             <input
               id="address"
@@ -110,7 +112,7 @@ function CreateBusiness() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="phone">
-              Teléfono
+              {t('createBusiness.phone', 'Teléfono')}
             </label>
             <input
               id="phone"
@@ -125,7 +127,7 @@ function CreateBusiness() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="email">
-              Correo electrónico
+              {t('createBusiness.email', 'Correo electrónico')}
             </label>
             <input
               id="email"
@@ -141,7 +143,7 @@ function CreateBusiness() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="password">
-              Contraseña
+              {t('createBusiness.password', 'Contraseña')}
             </label>
             <input
               id="password"
@@ -157,14 +159,14 @@ function CreateBusiness() {
 
           <div className="form-actions">
             <button type="submit" className="btn-primary-full">
-              Crear negocio
+              {t('createBusiness.submit', 'Crear negocio')}
             </button>
             <button
               type="button"
               className="btn-link"
               onClick={() => navigate("/login")}
             >
-              Volver al inicio
+              {t('createBusiness.back', 'Volver al inicio')}
             </button>
           </div>
         </form>

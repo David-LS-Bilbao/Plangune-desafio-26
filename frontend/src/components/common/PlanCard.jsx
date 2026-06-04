@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function PlanCard({ plan }) {
+  const { t } = useTranslation();
   return (
     <Link to={`/planes/${plan.id}`} style={{ textDecoration: 'none' }}>
       <div style={{ 
@@ -18,7 +20,7 @@ function PlanCard({ plan }) {
           {plan.isIdeal && (
             <span style={{ position: 'absolute', top: '0.5rem', left: '0.5rem', backgroundColor: 'var(--primary)', color: 'white', padding: '0.25rem 0.5rem', borderRadius: '0.25rem', fontSize: '12px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
               <span className="material-symbols-outlined" style={{ fontSize: '14px' }}>stars</span>
-              Ideal
+              {t('planCard.ideal')}
             </span>
           )}
         </div>

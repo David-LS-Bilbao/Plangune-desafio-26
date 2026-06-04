@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../store";
 
 function Header() {
@@ -7,6 +8,8 @@ function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+
+  const { t, i18n } = useTranslation();
 
   const handleLogout = () => {
     logout();
@@ -22,30 +25,34 @@ function Header() {
     navigate(path);
   };
 
+  const toggleLang = (lang) => {
+    i18n.changeLanguage(lang);
+  };
+
   // Nav items according to role
   const navItems = (() => {
     if (!user) return [
-      { label: "Inicio", path: "/", icon: "home" },
-      { label: "Explorar planes", path: "/planes", icon: "explore" },
-      { label: "Iniciar sesión", path: "/login", icon: "login" },
+      { label: t('nav.home'), path: "/", icon: "home" },
+      { label: t('nav.plans'), path: "/planes", icon: "explore" },
+      { label: t('nav.login', 'Iniciar sesión'), path: "/login", icon: "login" },
     ];
     if (user.role === "family") return [
-      { label: "Inicio", path: "/", icon: "home" },
-      { label: "Explorar planes", path: "/planes", icon: "explore" },
-      { label: "Favoritos", path: "/favoritos", icon: "favorite" },
-      { label: "Mi perfil", path: "/perfil", icon: "person" },
-      { label: "Ofertas", path: "/ofertas", icon: "local_offer" },
+      { label: t('nav.home'), path: "/", icon: "home" },
+      { label: t('nav.plans'), path: "/planes", icon: "explore" },
+      { label: t('nav.favorites'), path: "/favoritos", icon: "favorite" },
+      { label: t('nav.profile'), path: "/perfil", icon: "person" },
+      { label: t('nav.offers'), path: "/ofertas", icon: "local_offer" },
     ];
     if (user.role === "business") return [
-      { label: "Dashboard", path: "/negocio/dashboard", icon: "dashboard" },
-      { label: "Mis ofertas", path: "/negocio/ofertas", icon: "local_offer" },
-      { label: "Rendimiento", path: "/negocio/rendimiento", icon: "bar_chart" },
-      { label: "Estrategia", path: "/negocio/estrategia", icon: "rocket_launch" },
-      { label: "Suscripción", path: "/negocio/suscripcion", icon: "workspace_premium" },
+      { label: t('nav.dashboard', 'Dashboard'), path: "/negocio/dashboard", icon: "dashboard" },
+      { label: t('nav.myOffers', 'Mis ofertas'), path: "/negocio/ofertas", icon: "local_offer" },
+      { label: t('nav.performance', 'Rendimiento'), path: "/negocio/rendimiento", icon: "bar_chart" },
+      { label: t('nav.strategy', 'Estrategia'), path: "/negocio/estrategia", icon: "rocket_launch" },
+      { label: t('nav.subscription', 'Suscripción'), path: "/negocio/suscripcion", icon: "workspace_premium" },
     ];
     if (user.role === "admin") return [
-      { label: "Panel admin", path: "/admin", icon: "admin_panel_settings" },
-      { label: "Datos", path: "/admin/datos", icon: "database" },
+      { label: t('nav.adminPanel', 'Panel admin'), path: "/admin", icon: "admin_panel_settings" },
+      { label: t('nav.data', 'Datos'), path: "/admin/datos", icon: "database" },
     ];
     return [];
   })();
@@ -60,10 +67,26 @@ function Header() {
         </button>
 
         <div className="title title-clickable" onClick={() => goTo("/")}>
-          TxikiPlan
+          {t('common.appName', 'TxikiPlan')}
         </div>
 
-        <div className="header-actions">
+        <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <div className="lang-toggle" style={{ display: 'flex', gap: '4px', fontSize: '14px', fontWeight: 'bold' }}>
+            <span 
+              style={{ cursor: 'pointer', textDecoration: i18n.language === 'es' ? 'underline' : 'none', color: i18n.language === 'es' ? 'var(--primary)' : 'var(--on-surface-variant)' }}
+              onClick={() => toggleLang('es')}
+            >
+              ES
+            </span>
+            <span style={{ color: 'var(--outline)' }}>|</span>
+            <span 
+              style={{ cursor: 'pointer', textDecoration: i18n.language === 'eu' ? 'underline' : 'none', color: i18n.language === 'eu' ? 'var(--primary)' : 'var(--on-surface-variant)' }}
+              onClick={() => toggleLang('eu')}
+            >
+              EU
+            </span>
+          </div>
+
           <button
             aria-label="Account"
             className="icon-button"

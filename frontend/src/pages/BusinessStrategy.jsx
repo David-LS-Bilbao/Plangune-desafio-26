@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 
 function BusinessStrategy() {
+  const { t } = useTranslation();
   const [strategyOptimized, setStrategyOptimized] = useState(false);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [upgradeMessage, setUpgradeMessage] = useState("");
@@ -9,7 +11,7 @@ function BusinessStrategy() {
 
   const handleFeatureClick = (featureId) => {
     if (subscription === "Free") {
-      setUpgradeMessage("Mejora tu plan para activar estas funcionalidades.");
+      setUpgradeMessage(t('businessStrategy.upgradeMsg', 'Mejora tu plan para activar estas funcionalidades.'));
       return;
     }
     setUpgradeMessage("");
@@ -30,18 +32,16 @@ function BusinessStrategy() {
   return (
     <main className="business-strategy-main">
       <section className="strategy-header">
-        <p className="page-tag">Mi estrategia</p>
-        <h1 className="page-title">Tu plan de visibilidad</h1>
+        <p className="page-tag">{t('businessStrategy.tag', 'Mi estrategia')}</p>
+        <h1 className="page-title">{t('businessStrategy.title', 'Tu plan de visibilidad')}</h1>
         <p className="page-subtitle">
-          Activa las funciones clave que amplían el alcance de tu negocio y
-          mejoran tu captación.
+          {t('businessStrategy.subtitle', 'Activa las funciones clave que amplían el alcance de tu negocio y mejoran tu captación.')}
         </p>
       </section>
 
       <section className="strategy-intro">
         <p>
-          Estas son las herramientas que puedes usar para destacar tu negocio
-          dentro de TxikiPlan:
+          {t('businessStrategy.intro', 'Estas son las herramientas que puedes usar para destacar tu negocio dentro de TxikiPlan:')}
         </p>
       </section>
 
@@ -59,9 +59,9 @@ function BusinessStrategy() {
           style={{ textAlign: "left", width: "100%", border: selectedFeatures.includes("destacados") ? "2px solid var(--md-sys-color-primary)" : undefined }}
         >
           <span className="material-symbols-outlined feature-icon">star</span>
-          <h2 className="feature-title">Destacados</h2>
+          <h2 className="feature-title">{t('businessStrategy.featured', 'Destacados')}</h2>
           <p className="feature-text">
-            Aparece en secciones premium del buscador y recibe más impresiones.
+            {t('businessStrategy.featuredDesc', 'Aparece en secciones premium del buscador y recibe más impresiones.')}
           </p>
         </button>
 
@@ -71,10 +71,9 @@ function BusinessStrategy() {
           style={{ textAlign: "left", width: "100%", border: selectedFeatures.includes("mailing") ? "2px solid var(--md-sys-color-primary)" : undefined }}
         >
           <span className="material-symbols-outlined feature-icon">mail</span>
-          <h2 className="feature-title">Mailing</h2>
+          <h2 className="feature-title">{t('businessStrategy.mailing', 'Mailing')}</h2>
           <p className="feature-text">
-            Envía mensajes directos a familias interesadas con tus promociones
-            más relevantes.
+            {t('businessStrategy.mailingDesc', 'Envía mensajes directos a familias interesadas con tus promociones más relevantes.')}
           </p>
         </button>
 
@@ -84,10 +83,9 @@ function BusinessStrategy() {
           style={{ textAlign: "left", width: "100%", border: selectedFeatures.includes("mapa") ? "2px solid var(--md-sys-color-primary)" : undefined }}
         >
           <span className="material-symbols-outlined feature-icon">map</span>
-          <h2 className="feature-title">Destacados en el mapa</h2>
+          <h2 className="feature-title">{t('businessStrategy.mapFeatured', 'Destacados en el mapa')}</h2>
           <p className="feature-text">
-            Tu ubicación se resaltará para que las familias te encuentren
-            rápidamente.
+            {t('businessStrategy.mapFeaturedDesc', 'Tu ubicación se resaltará para que las familias te encuentren rápidamente.')}
           </p>
         </button>
 
@@ -99,23 +97,21 @@ function BusinessStrategy() {
           <span className="material-symbols-outlined feature-icon">
             filter_alt
           </span>
-          <h2 className="feature-title">Filtro patrocinado</h2>
+          <h2 className="feature-title">{t('businessStrategy.sponsoredFilter', 'Filtro patrocinado')}</h2>
           <p className="feature-text">
-            Aparece primero cuando las familias usan filtros avanzados en su
-            búsqueda.
+            {t('businessStrategy.sponsoredFilterDesc', 'Aparece primero cuando las familias usan filtros avanzados en su búsqueda.')}
           </p>
         </button>
       </section>
 
       <section className="strategy-summary-card">
         <div>
-          <h2 className="section-title">Tu estrategia ahora</h2>
+          <h2 className="section-title">{t('businessStrategy.summaryTitle', 'Tu estrategia ahora')}</h2>
           <p>
-            Aumenta tu visibilidad con las funciones seleccionadas y maximiza la
-            conversión de tus actividades.
+            {t('businessStrategy.summaryText', 'Aumenta tu visibilidad con las funciones seleccionadas y maximiza la conversión de tus actividades.')}
           </p>
           {strategyOptimized && (
-            <p className="section-note">Estrategia optimizada correctamente.</p>
+            <p className="section-note">{t('businessStrategy.optimized', 'Estrategia optimizada correctamente.')}</p>
           )}
         </div>
         <button
@@ -123,7 +119,7 @@ function BusinessStrategy() {
           type="button"
           onClick={handleOptimize}
         >
-          Optimizar estrategia
+          {t('businessStrategy.optimizeBtn', 'Optimizar estrategia')}
         </button>
       </section>
     </main>

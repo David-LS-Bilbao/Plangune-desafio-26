@@ -1,8 +1,10 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 
 function BusinessDashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activityName, setActivityName] = useState("");
   const [category, setCategory] = useState("");
@@ -58,7 +60,7 @@ function BusinessDashboard() {
     <main className="business-dashboard-main">
       {/* Header */}
       <div className="dashboard-header">
-        <h1 className="dashboard-title">Panel negocio</h1>
+        <h1 className="dashboard-title">{t('business.dashboardTitle', 'Panel negocio')}</h1>
         <p className="dashboard-subtitle">Gestiona tus planes y promociones.</p>
       </div>
 
@@ -104,7 +106,7 @@ function BusinessDashboard() {
         onClick={handleCreateActivity}
       >
         <span className="material-symbols-outlined">add_circle</span>
-        Crear actividad
+        {t('business.newOffer', 'Crear actividad')}
       </button>
 
       {message && <p className="status-message">{message}</p>}

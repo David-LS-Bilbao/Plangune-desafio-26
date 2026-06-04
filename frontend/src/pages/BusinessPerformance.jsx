@@ -1,15 +1,16 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function BusinessPerformance() {
+  const { t } = useTranslation();
   const [showFullReport, setShowFullReport] = useState(false);
 
   return (
     <main className="business-performance-main">
       <div className="performance-header">
-        <h2 className="performance-title">Resumen de Rendimiento</h2>
+        <h2 className="performance-title">{t('businessPerformance.title', 'Resumen de Rendimiento')}</h2>
         <p className="performance-subtitle">
-          Consulta el impacto de tus actividades y ofertas en los últimos 30
-          días.
+          {t('businessPerformance.subtitle', 'Consulta el impacto de tus actividades y ofertas en los últimos 30 días.')}
         </p>
       </div>
 
@@ -29,7 +30,7 @@ function BusinessPerformance() {
             </div>
           </div>
           <div className="metric-content">
-            <h3 className="metric-label">Visualizaciones</h3>
+            <h3 className="metric-label">{t('businessPerformance.views', 'Visualizaciones')}</h3>
             <p className="metric-value">1,245</p>
           </div>
         </div>
@@ -48,7 +49,7 @@ function BusinessPerformance() {
             </div>
           </div>
           <div className="metric-content">
-            <h3 className="metric-label">Clics en Ofertas</h3>
+            <h3 className="metric-label">{t('businessPerformance.offerClicks', 'Clics en Ofertas')}</h3>
             <p className="metric-value">342</p>
           </div>
         </div>
@@ -67,7 +68,7 @@ function BusinessPerformance() {
             </div>
           </div>
           <div className="metric-content">
-            <h3 className="metric-label">Ofertas Guardadas</h3>
+            <h3 className="metric-label">{t('businessPerformance.savedOffers', 'Ofertas Guardadas')}</h3>
             <p className="metric-value">89</p>
           </div>
         </div>
@@ -78,10 +79,10 @@ function BusinessPerformance() {
             <span className="material-symbols-outlined icon-star fill">
               star
             </span>
-            <span className="badge-neutral">Media Global</span>
+            <span className="badge-neutral">{t('businessPerformance.globalAvg', 'Media Global')}</span>
           </div>
           <div className="metric-content">
-            <h3 className="metric-label">Valoración Media</h3>
+            <h3 className="metric-label">{t('businessPerformance.avgRating', 'Valoración Media')}</h3>
             <div className="rating-value">
               <p className="metric-value">4.8</p>
               <p className="rating-max">/ 5</p>
@@ -95,19 +96,19 @@ function BusinessPerformance() {
         {/* Chart Area */}
         <div className="chart-section col-span-2">
           <div className="chart-header">
-            <h3 className="chart-title">Interacción Semanal</h3>
+            <h3 className="chart-title">{t('businessPerformance.weeklyInteraction', 'Interacción Semanal')}</h3>
             <button
               className="btn-link-sm"
               type="button"
               onClick={() => setShowFullReport(true)}
             >
-              Ver reporte completo
+              {t('businessPerformance.fullReport', 'Ver reporte completo')}
             </button>
           </div>
           {showFullReport && (
             <div className="report-note">
               <p>
-                Mostrando datos extendidos y recomendaciones de optimización.
+                {t('businessPerformance.extendedData', 'Mostrando datos extendidos y recomendaciones de optimización.')}
               </p>
             </div>
           )}
@@ -162,7 +163,7 @@ function BusinessPerformance() {
         {/* Recent Reviews */}
         <div className="reviews-section-small">
           <div className="reviews-header">
-            <h3 className="reviews-title">Reseñas Recientes</h3>
+            <h3 className="reviews-title">{t('businessPerformance.recentReviews', 'Reseñas Recientes')}</h3>
           </div>
           <div className="reviews-list">
             {/* Review 1 */}

@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store";
 
 function BusinessProfile() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
 
@@ -25,11 +27,10 @@ function BusinessProfile() {
   return (
     <main className="business-profile-main">
       <section className="page-header">
-        <p className="page-tag">Perfil de negocio</p>
-        <h1 className="page-title">Editar datos de tu empresa</h1>
+        <p className="page-tag">{t('businessProfile.tag', 'Perfil de negocio')}</p>
+        <h1 className="page-title">{t('businessProfile.title', 'Editar datos de tu empresa')}</h1>
         <p className="page-subtitle">
-          Mantén tu perfil actualizado para que las familias te identifiquen con
-          confianza.
+          {t('businessProfile.subtitle', 'Mantén tu perfil actualizado para que las familias te identifiquen con confianza.')}
         </p>
       </section>
 
@@ -37,7 +38,7 @@ function BusinessProfile() {
         <form className="create-form" onSubmit={handleSave}>
           <div className="form-group">
             <label className="form-label" htmlFor="name">
-              Nombre del negocio
+              {t('businessProfile.name', 'Nombre del negocio')}
             </label>
             <input
               id="name"
@@ -52,7 +53,7 @@ function BusinessProfile() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="email">
-              Correo electrónico
+              {t('businessProfile.email', 'Correo electrónico')}
             </label>
             <input
               id="email"
@@ -83,7 +84,7 @@ function BusinessProfile() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="address">
-              Dirección
+              {t('businessProfile.address', 'Dirección')}
             </label>
             <input
               id="address"
@@ -97,7 +98,7 @@ function BusinessProfile() {
 
           <div className="form-actions">
             <button type="submit" className="btn-primary-full">
-              Guardar cambios
+              {t('businessProfile.save', 'Guardar cambios')}
             </button>
           </div>
         </form>

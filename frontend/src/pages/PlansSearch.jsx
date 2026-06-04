@@ -1,11 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { usePlansStore } from "../store";
 import PlanCard from "../components/common/PlanCard";
 
 const AGE_OPTIONS = ["Bebé", "1-3 años", "4-6 años"];
 
 function PlansSearch() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const filteredPlans = usePlansStore((state) => state.getFilteredPlans());
   const searchQuery = usePlansStore((state) => state.searchQuery);
@@ -18,20 +20,20 @@ function PlansSearch() {
   return (
     <main className="plans-main-new" style={{ paddingBottom: "5rem" }}>
       <div className="plans-content">
-        <h1 className="plans-title">Buscador de planes</h1>
+        <h1 className="plans-title">{t('search.title', 'Buscador de planes')}</h1>
 
         {/* Search Form */}
         <div className="search-form-new">
           {/* Location */}
           <div className="form-group">
-            <label className="form-label">¿Qué buscas?</label>
+            <label className="form-label">{t('search.what', '¿Qué buscas?')}</label>
             <div className="input-with-icon">
               <span className="material-symbols-outlined icon" data-icon="search">
                 search
               </span>
               <input
                 type="text"
-                placeholder="Museo, Bilbao, Getxo..."
+                placeholder={t('search.whatPlaceholder', 'Museo, Bilbao, Getxo...')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -40,7 +42,7 @@ function PlansSearch() {
 
           {/* Age Filter */}
           <div className="form-group">
-            <label className="form-label">Edad de los peques</label>
+            <label className="form-label">{t('search.age', 'Edad de los peques')}</label>
             <div className="chips-container">
               {AGE_OPTIONS.map((age) => {
                 const isActive = ageFilters.includes(age);
@@ -71,7 +73,7 @@ function PlansSearch() {
 
           {/* Features Filter */}
           <div className="form-group">
-            <label className="form-label">Sin sobresaltos:</label>
+            <label className="form-label">{t('search.features', 'Sin sobresaltos:')}</label>
             <div className="checkboxes-container">
               {['Carrito', 'Cambiador', 'Interior', 'Tranquilo', 'Gratis'].map((filter) => (
                 <label className="checkbox-label" key={filter}>
@@ -91,7 +93,7 @@ function PlansSearch() {
           {(ageFilters.length > 0 || activeFilters.length > 0) && (
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
               <span style={{ fontSize: "12px", color: "var(--on-surface-variant)", fontWeight: 500 }}>
-                Filtros activos:
+                {t('search.activeFilters', 'Filtros activos:')}
               </span>
               {[...ageFilters, ...activeFilters].map((f) => (
                 <span key={f} style={{
@@ -113,8 +115,8 @@ function PlansSearch() {
         <div className="plans-list-dynamic" style={{ marginTop: "2rem" }}>
           <h2 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 600, color: "var(--on-background)", marginBottom: "1rem" }}>
             {filteredPlans.length > 0
-              ? `${filteredPlans.length} plan${filteredPlans.length !== 1 ? "es" : ""} encontrado${filteredPlans.length !== 1 ? "s" : ""}`
-              : "Resultados de búsqueda"}
+              ? (filteredPlans.length === 1 ? t('search.resultsCountOne') : t('search.resultsCount', { count: filteredPlans.length }))
+              : t('search.resultsTitle', 'Resultados de búsqueda')}
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -124,7 +126,7 @@ function PlansSearch() {
               ))
             ) : (
               <p style={{ color: "var(--on-surface-variant)" }}>
-                No se encontraron planes con esa búsqueda.
+                {t('search.noResults', 'No se encontraron planes con esa búsqueda.')}
               </p>
             )}
           </div>

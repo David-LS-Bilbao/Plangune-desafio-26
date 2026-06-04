@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useAuthStore, useUserStore } from "../store";
 
 function FamilyProfile() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
   const { children, addChild, removeChild } = useUserStore();
@@ -270,10 +272,10 @@ function FamilyProfile() {
           type="button"
           onClick={handleSaveProfile}
         >
-          Guardar perfil
+          {t('profile.save', 'Guardar perfil')}
         </button>
         {saved && (
-          <p className="status-message">Perfil guardado correctamente.</p>
+          <p className="status-message">{t('profile.savedMsg', 'Perfil guardado correctamente.')}</p>
         )}
       </section>
     </main>

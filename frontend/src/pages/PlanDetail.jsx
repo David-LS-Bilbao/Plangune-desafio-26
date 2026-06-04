@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { usePlansStore, useUserStore } from "../store";
 
 function PlanDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [reportStatus, setReportStatus] = useState("");
@@ -32,13 +34,13 @@ function PlanDetail() {
         className="plan-detail-main"
         style={{ padding: "2rem", textAlign: "center" }}
       >
-        <h2>Plan no encontrado</h2>
+        <h2>{t('plans.noResults', 'Plan no encontrado')}</h2>
         <button
           onClick={() => navigate("/planes")}
           className="btn-primary"
           style={{ marginTop: "1rem", padding: "0.5rem 1rem" }}
         >
-          Volver
+          {t('common.cancel', 'Volver')}
         </button>
       </main>
     );
@@ -60,7 +62,7 @@ function PlanDetail() {
         <img alt={`Imagen de ${plan.title}`} src={plan.image} />
         <button className="map-toggle-btn">
           <span className="material-symbols-outlined text-lg">map</span>
-          Ver Mapa
+          {t('planDetail.howToGetThere', 'Ver Mapa')}
         </button>
       </div>
 
@@ -84,7 +86,7 @@ function PlanDetail() {
             <span className="material-symbols-outlined">child_care</span>
           </div>
           <div className="info-text">
-            <span className="info-label">Edad</span>
+            <span className="info-label">{t('planDetail.years', 'Edad').split(' ')[0]}</span>
             <span className="info-value">{plan.ageRange}</span>
           </div>
         </div>
@@ -94,7 +96,7 @@ function PlanDetail() {
             <span className="material-symbols-outlined">euro_symbol</span>
           </div>
           <div className="info-text">
-            <span className="info-label">Precio</span>
+            <span className="info-label">{t('planDetail.price', 'Precio').replace(':','')}</span>
             <span className="info-value">{plan.price}</span>
           </div>
         </div>
@@ -104,7 +106,7 @@ function PlanDetail() {
             <span className="material-symbols-outlined">category</span>
           </div>
           <div className="info-text">
-            <span className="info-label">Categoría</span>
+            <span className="info-label">{t('planDetail.category', 'Categoría').replace(':','')}</span>
             <span className="info-value">{plan.category}</span>
           </div>
         </div>
@@ -114,9 +116,9 @@ function PlanDetail() {
             <span className="material-symbols-outlined">stroller</span>
           </div>
           <div className="info-text">
-            <span className="info-label">Carrito</span>
+            <span className="info-label">{t('planDetail.stroller', 'Carrito').replace(':','')}</span>
             <span className="info-value">
-              {plan.tags?.includes("Apto Carrito") ? "Sí" : "No"}
+              {plan.tags?.includes("Apto Carrito") ? t('planDetail.yes') : t('planDetail.no')}
             </span>
           </div>
         </div>
@@ -126,9 +128,9 @@ function PlanDetail() {
             <span className="material-symbols-outlined">sentiment_calm</span>
           </div>
           <div className="info-text">
-            <span className="info-label">Recomendado</span>
+            <span className="info-label">{t('planDetail.recommended', 'Recomendado').split(' ')[0]}</span>
             <span className="info-value">
-              {plan.isIdeal ? "Ideal para ti" : "Buen plan"}
+              {plan.isIdeal ? t('planCard.ideal') : t('planDetail.about')}
             </span>
           </div>
         </div>
@@ -149,7 +151,7 @@ function PlanDetail() {
           <span className="material-symbols-outlined">
             {reserved ? "check_circle" : "calendar_today"}
           </span>
-          {reserved ? "¡Reservado!" : "Reservar"}
+          {reserved ? t('planDetail.reserved') : t('planDetail.reserve')}
         </button>
         <button
           className="btn-primary-large"
@@ -163,7 +165,7 @@ function PlanDetail() {
           }
         >
           <span className="material-symbols-outlined">directions</span>
-          Cómo llegar
+          {t('planDetail.howToGetThere')}
         </button>
         <button
           className="btn-outline-large"
@@ -186,7 +188,7 @@ function PlanDetail() {
           >
             favorite
           </span>
-          {isFavorite ? "Guardado" : "Favorito"}
+          {isFavorite ? t('planDetail.favorited') : t('planDetail.favorite')}
         </button>
       </section>
 
@@ -196,11 +198,11 @@ function PlanDetail() {
           className="btn-report"
           type="button"
           onClick={() =>
-            setReportStatus("Tu reporte ha sido enviado. Gracias.")
+            setReportStatus(t('planDetail.issueReported'))
           }
         >
           <span className="material-symbols-outlined text-lg">report</span>
-          <span>Reportar incidencia</span>
+          <span>{t('planDetail.reportIssue')}</span>
         </button>
       </div>
       {reportStatus && <p className="status-message">{reportStatus}</p>}
@@ -209,7 +211,7 @@ function PlanDetail() {
       <section className="reviews-section">
         <div className="reviews-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <h3 className="reviews-title">Reseñas familiares</h3>
+            <h3 className="reviews-title">{t('planDetail.reviews', { count: reviews.length })}</h3>
             <div className="overall-rating">
               <span className="rating-score">{plan.rating}</span>
               <span className="material-symbols-outlined fill text-sm">star</span>
@@ -224,7 +226,7 @@ function PlanDetail() {
             style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
             onClick={() => setShowReviewForm(!showReviewForm)}
           >
-            {showReviewForm ? "Cancelar" : "Añadir reseña"}
+            {showReviewForm ? t('common.cancel') : t('planDetail.addReview')}
           </button>
         </div>
 

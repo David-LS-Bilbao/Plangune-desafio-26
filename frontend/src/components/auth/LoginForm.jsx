@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../store";
 import { MOCK_USERS } from "../../mocks/data";
 
 function LoginForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
   const [email, setEmail] = useState("familia.agirre@example.com");
@@ -37,14 +39,14 @@ function LoginForm() {
       {/* Email */}
       <div className="input-group">
         <label className="sr-only" htmlFor="email">
-          Correo electrónico
+          {t('login.emailLabel')}
         </label>
         <div className="input-wrapper">
           <span className="material-symbols-outlined input-icon">mail</span>
           <input
             type="email"
             id="email"
-            placeholder="tu@email.com"
+            placeholder={t('login.emailPlaceholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -54,14 +56,14 @@ function LoginForm() {
       {/* Password */}
       <div className="input-group">
         <label className="sr-only" htmlFor="password">
-          Contraseña
+          {t('login.passwordLabel')}
         </label>
         <div className="input-wrapper" style={{ position: 'relative' }}>
           <span className="material-symbols-outlined input-icon">lock</span>
           <input
             type={showPassword ? "text" : "password"}
             id="password"
-            placeholder="••••••••"
+            placeholder={t('login.passwordPlaceholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={{ paddingRight: '2.5rem' }}
@@ -69,7 +71,7 @@ function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword((p) => !p)}
-            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
             style={{
               position: 'absolute',
               right: '0.75rem',
@@ -95,7 +97,7 @@ function LoginForm() {
       <div className="submit-group">
         <button type="submit" className="btn-primary-new">
           <span className="material-symbols-outlined">login</span>
-          Iniciar Sesión
+          {t('login.submit')}
         </button>
       </div>
     </form>

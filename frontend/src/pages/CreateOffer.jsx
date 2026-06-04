@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 
 function CreateOffer() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [offerData, setOfferData] = useState({
     title: "",
@@ -32,18 +34,14 @@ function CreateOffer() {
       meta: offerData.promoCode ? `Código: ${offerData.promoCode}` : "Sin código",
       status: "pending"
     });
-    setStatusMessage(
-      "Oferta enviada a revisión. Redirigiendo...",
-    );
+    setStatusMessage(t('createOffer.sentToReview', 'Oferta enviada a revisión. Redirigiendo...'));
     setTimeout(() => {
       navigate('/negocio/ofertas');
     }, 1500);
   };
 
   const handleSaveDraft = () => {
-    setStatusMessage(
-      "Borrador guardado. Puedes volver a editarlo cuando quieras.",
-    );
+    setStatusMessage(t('createOffer.saveDraft', 'Borrador guardado. Puedes volver a editarlo cuando quieras.'));
   };
 
   const handleBack = () => {
@@ -61,9 +59,9 @@ function CreateOffer() {
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
-        <h1 className="header-title truncate">Crear Oferta</h1>
+        <h1 className="header-title truncate">{t('createOffer.title', 'Crear Oferta')}</h1>
         <div className="header-status hidden md:flex">
-          <span className="badge-draft">Borrador</span>
+          <span className="badge-draft">{t('createOffer.draft', 'Borrador')}</span>
         </div>
       </div>
 
@@ -77,9 +75,9 @@ function CreateOffer() {
                 add_photo_alternate
               </span>
               <div className="upload-text">
-                <p className="primary-text">Subir Imagen de Portada</p>
+                <p className="primary-text">{t('createOffer.uploadImage', 'Subir Imagen de Portada')}</p>
                 <p className="secondary-text">
-                  PNG, JPG, o WEBP (Recomendado: 16:9, max 5MB)
+                  {t('createOffer.uploadHint', 'PNG, JPG, o WEBP (Recomendado: 16:9, max 5MB)')}
                 </p>
               </div>
               <div className="gradient-blob"></div>
@@ -89,7 +87,7 @@ function CreateOffer() {
           <section className="core-info-section">
             <div className="form-group">
               <label htmlFor="title" className="form-label">
-                Título de la oferta
+                {t('createOffer.offerTitle', 'Título de la oferta')}
               </label>
               <input
                 type="text"
@@ -103,7 +101,7 @@ function CreateOffer() {
 
             <div className="form-group">
               <label htmlFor="description" className="form-label">
-                Descripción
+                {t('createOffer.description', 'Descripción')}
               </label>
               <textarea
                 id="description"
@@ -117,7 +115,7 @@ function CreateOffer() {
 
             <div className="form-group">
               <label htmlFor="conditions" className="form-label">
-                Condiciones del servicio
+                {t('createOffer.conditions', 'Condiciones del servicio')}
               </label>
               <textarea
                 id="conditions"
@@ -134,11 +132,11 @@ function CreateOffer() {
         <div className="right-column">
           <div className="sticky-wrapper">
             <section className="config-section">
-              <h2 className="section-title">Configuración</h2>
+              <h2 className="section-title">{t('createOffer.config', 'Configuración')}</h2>
 
               <div className="form-group">
                 <label htmlFor="associatedActivity" className="form-label">
-                  Actividad asociada
+                  {t('createOffer.associatedActivity', 'Actividad asociada')}
                 </label>
                 <div className="input-with-icon">
                   <select
@@ -148,7 +146,7 @@ function CreateOffer() {
                     onChange={handleChange}
                   >
                     <option value="" disabled>
-                      Selecciona una actividad activa
+                      {t('createOffer.selectActivity', 'Selecciona una actividad activa')}
                     </option>
                     <option value="Taller de Cerámica Familiar (Sábados)">
                       Taller de Cerámica Familiar (Sábados)
@@ -168,7 +166,7 @@ function CreateOffer() {
 
               <div className="form-group">
                 <label htmlFor="offerType" className="form-label">
-                  Tipo de oferta
+                  {t('createOffer.offerType', 'Tipo de oferta')}
                 </label>
                 <div className="input-with-icon">
                   <select
@@ -191,9 +189,9 @@ function CreateOffer() {
               <div className="form-group">
                 <div className="label-row">
                   <label htmlFor="promoCode" className="form-label mb-0">
-                    Código promocional
+                    {t('createOffer.promoCode', 'Código promocional')}
                   </label>
-                  <span className="label-optional">Opcional</span>
+                  <span className="label-optional">{t('createOffer.optional', 'Opcional')}</span>
                 </div>
                 <div className="input-with-icon left-icon">
                   <span className="material-symbols-outlined icon-left">
@@ -212,11 +210,11 @@ function CreateOffer() {
             </section>
 
             <section className="validity-section">
-              <h2 className="section-title">Vigencia</h2>
+              <h2 className="section-title">{t('createOffer.validity', 'Vigencia')}</h2>
               <div className="grid-2-cols">
                 <div className="form-group">
                   <label htmlFor="startDate" className="form-label">
-                    Fecha inicio
+                    {t('createOffer.startDate', 'Fecha inicio')}
                   </label>
                   <input
                     type="date"
@@ -228,7 +226,7 @@ function CreateOffer() {
                 </div>
                 <div className="form-group">
                   <label htmlFor="endDate" className="form-label">
-                    Fecha fin
+                    {t('createOffer.endDate', 'Fecha fin')}
                   </label>
                   <input
                     type="date"
@@ -246,8 +244,7 @@ function CreateOffer() {
                 info
               </span>
               <p className="notice-text">
-                Las ofertas deben ser revisadas por admin antes de publicarse
-                para garantizar la calidad del servicio en TxikiPlan.
+                {t('createOffer.notice', 'Las ofertas deben ser revisadas por admin antes de publicarse para garantizar la calidad del servicio en TxikiPlan.')}
               </p>
             </div>
 
@@ -258,7 +255,7 @@ function CreateOffer() {
                 onClick={handleSendReview}
               >
                 <span className="material-symbols-outlined text-lg">send</span>
-                Enviar a revisión
+                {t('createOffer.sendReview', 'Enviar a revisión')}
               </button>
               <button
                 type="button"
@@ -266,7 +263,7 @@ function CreateOffer() {
                 onClick={handleSaveDraft}
               >
                 <span className="material-symbols-outlined text-lg">save</span>
-                Guardar borrador
+                {t('createOffer.saveDraft', 'Guardar borrador')}
               </button>
             </div>
           </div>
@@ -285,14 +282,14 @@ function CreateOffer() {
           className="btn-outline flex-1 truncate"
           onClick={handleSaveDraft}
         >
-          Guardar borrador
+          {t('createOffer.saveDraft', 'Guardar borrador')}
         </button>
         <button
           type="button"
           className="btn-primary flex-1 truncate"
           onClick={handleSendReview}
         >
-          Enviar a revisión
+          {t('createOffer.sendReview', 'Enviar a revisión')}
         </button>
       </div>
     </main>

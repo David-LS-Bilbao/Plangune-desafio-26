@@ -1,23 +1,25 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 function PlansResults() {
+  const { t } = useTranslation();
   return (
     <main className="plans-results-main">
       {/* Header Section */}
       <section className="results-header">
-        <h2 className="results-title">Planes en Bilbao</h2>
+        <h2 className="results-title">{t('plansResults.title', 'Planes en Bilbao')}</h2>
         
         {/* Tabs */}
         <div className="results-tabs">
-          <button className="tab-btn active">Lista</button>
-          <button className="tab-btn">Mapa</button>
+          <button className="tab-btn active">{t('plansResults.listTab', 'Lista')}</button>
+          <button className="tab-btn">{t('plansResults.mapTab', 'Mapa')}</button>
         </div>
         
         <div className="active-filters">
           <button className="filter-chip">
             <span className="material-symbols-outlined text-sm">local_offer</span>
-            Con oferta
+            {t('plansResults.withOffer', 'Con oferta')}
           </button>
         </div>
       </section>
@@ -36,7 +38,7 @@ function PlansResults() {
           <div className="result-content">
             <div className="offer-tag">
               <span className="material-symbols-outlined text-sm fill">local_offer</span>
-              Oferta activa
+              {t('plansResults.activeOffer', 'Oferta activa')}
             </div>
             
             <div className="result-header">
@@ -61,7 +63,7 @@ function PlansResults() {
             
             <div className="card-actions">
               <Link to="/plan/1" className="btn-text">
-                Ver detalles <span className="material-symbols-outlined text-sm">chevron_right</span>
+                {t('plansResults.viewDetails', 'Ver detalles')} <span className="material-symbols-outlined text-sm">chevron_right</span>
               </Link>
             </div>
           </div>
@@ -99,7 +101,7 @@ function PlansResults() {
             
             <div className="card-actions">
               <Link to="/plan/2" className="btn-text">
-                Ver detalles <span className="material-symbols-outlined text-sm">chevron_right</span>
+                {t('plansResults.viewDetails', 'Ver detalles')} <span className="material-symbols-outlined text-sm">chevron_right</span>
               </Link>
             </div>
           </div>
@@ -117,7 +119,7 @@ function PlansResults() {
           <div className="result-content">
             <div className="offer-tag">
               <span className="material-symbols-outlined text-sm fill">local_offer</span>
-              Oferta activa
+              {t('plansResults.activeOffer', 'Oferta activa')}
             </div>
             
             <div className="result-header">
@@ -141,7 +143,7 @@ function PlansResults() {
             
             <div className="card-actions">
               <Link to="/plan/3" className="btn-text">
-                Ver detalles <span className="material-symbols-outlined text-sm">chevron_right</span>
+                {t('plansResults.viewDetails', 'Ver detalles')} <span className="material-symbols-outlined text-sm">chevron_right</span>
               </Link>
             </div>
           </div>

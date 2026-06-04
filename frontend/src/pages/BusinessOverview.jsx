@@ -1,8 +1,10 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 
 function BusinessOverview() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { offers, stats } = useBusinessStore();
 
@@ -10,9 +12,9 @@ function BusinessOverview() {
     <main className="business-overview-main">
       {/* Welcome Section */}
       <section className="overview-header">
-        <h2 className="overview-title">Hola, Gestión Local</h2>
+        <h2 className="overview-title">{t('businessOverview.greetingTitle', 'Hola, Gestión Local')}</h2>
         <p className="overview-subtitle">
-          Aquí tienes un resumen del impacto de tus planes familiares.
+          {t('businessOverview.greetingSubtitle', 'Aquí tienes un resumen del impacto de tus planes familiares.')}
         </p>
       </section>
 
@@ -28,9 +30,9 @@ function BusinessOverview() {
             <span className="material-symbols-outlined fill">add_circle</span>
           </div>
           <h3 className="action-title">
-            Crear
+            {t('businessOverview.createActivity', 'Crear actividad').split('\n')[0]}
             <br />
-            actividad
+            {t('businessOverview.createActivity', 'Crear actividad').split('\n')[1]}
           </h3>
         </button>
 
@@ -44,9 +46,9 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">sell</span>
           </div>
           <h3 className="action-title">
-            Crear
+            {t('businessOverview.createOffer', 'Crear oferta').split('\n')[0]}
             <br />
-            oferta
+            {t('businessOverview.createOffer', 'Crear oferta').split('\n')[1]}
           </h3>
         </button>
 
@@ -60,9 +62,9 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">insights</span>
           </div>
           <h3 className="action-title-utility">
-            Mi
+            {t('businessOverview.myStrategy', 'Mi estrategia').split('\n')[0]}
             <br />
-            estrategia
+            {t('businessOverview.myStrategy', 'Mi estrategia').split('\n')[1]}
           </h3>
         </button>
 
@@ -76,9 +78,9 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">payments</span>
           </div>
           <h3 className="action-title-utility">
-            Suscripciones
+            {t('businessOverview.subscriptions', 'Suscripciones de pago').split('\n')[0]}
             <br />
-            de pago
+            {t('businessOverview.subscriptions', 'Suscripciones de pago').split('\n')[1]}
           </h3>
         </button>
 
@@ -92,9 +94,9 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">edit</span>
           </div>
           <h3 className="action-title-utility">
-            Editar
+            {t('businessOverview.editProfile', 'Editar perfil').split('\n')[0]}
             <br />
-            perfil
+            {t('businessOverview.editProfile', 'Editar perfil').split('\n')[1]}
           </h3>
         </button>
 
@@ -108,9 +110,9 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">reviews</span>
           </div>
           <h3 className="action-title-utility">
-            Ver
+            {t('businessOverview.viewReviews', 'Ver reseñas').split('\n')[0]}
             <br />
-            reseñas
+            {t('businessOverview.viewReviews', 'Ver reseñas').split('\n')[1]}
           </h3>
         </button>
       </section>
@@ -118,13 +120,13 @@ function BusinessOverview() {
       {/* KPIs Section */}
       <section className="kpis-section">
         <div className="kpis-header">
-          <h3 className="kpis-title">Rendimiento Actual</h3>
+          <h3 className="kpis-title">{t('businessOverview.currentPerformance', 'Rendimiento Actual')}</h3>
           <button
             className="btn-link"
             type="button"
             onClick={() => navigate("/negocio/rendimiento")}
           >
-            Ver informe detallado
+            {t('businessOverview.viewFullReport', 'Ver informe detallado')}
             <span className="material-symbols-outlined text-sm">
               arrow_forward
             </span>
@@ -196,7 +198,7 @@ function BusinessOverview() {
             <div className="kpi-value-row z-10">
               <span className="kpi-value">12</span>
               <span className="kpi-subtext text-primary flex items-center">
-                +2 esta semana
+                {t('businessOverview.thisWeek', '+2 esta semana')}
               </span>
             </div>
           </div>
