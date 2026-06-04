@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/landing.css';
-import Navbar from '../components/common/Navbar';
+import Navbar from '../components/common/NavbarResponsive';
 import heroImage from '../assets/hero-image.webp';
 import businessImage from '../assets/business-espectacle.webp';
 import logoTemp from '../assets/logo-temp.svg';
