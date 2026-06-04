@@ -288,3 +288,77 @@ describe('GET /api/recommendations · Data API principal', () => {
     expect(fetchDataPlanes.mock.calls[0][0].limite).toBe(5);
   });
 });
+
+// ---------------------------------------------------------------------------
+// parsePrice / bonus de presupuesto (fallback local)
+//
+// Se ejercita a través del endpoint con eventos controlados en findEvents.
+// La razón "Dentro del presupuesto (...)" solo aparece si el precio es conocido
+// (número o "Gratis"). Un precio desconocido/no parseable NO da bonus: no se
+// asume gratis.
+// ---------------------------------------------------------------------------
+
+describe('GET /api/recommendations · parsePrice y presupuesto (fallback local)', () => {
+  // Evento mínimo válido para el recomendador local; price configurable por test.
+  const buildEvent = (id, price) => ({
+    id,
+    title: `Evento ${id}`,
+    municipio: 'Bilbao',
+    edad_minima: 0,
+    es_carrito: false,
+    es_interior: false,
+    price,
+  });
+
+  // Devuelve las reasons del item cuyo event.id coincide.
+  const reasonsForEvent = (body, id) =>
+    body.find((item) => item.event.id === id)?.reasons ?? [];
+
+  it('"Gratis" se trata como 0 € → entra en presupuesto con etiqueta "Gratis"', async () => {
+    findEvents.mockResolvedValue([buildEvent(1, 'Gratis')]);
+
+    const res = await request(app).get('/api/recommendations?budget=10');
+
+    expect(res.status).toBe(200);
+    expect(reasonsForEvent(res.body, 1)).toContain('Dentro del presupuesto (Gratis)');
+  });
+
+  it('string con número se parsea → "Desde 12€" entra con budget 40 (etiqueta "12€")', async () => {
+    findEvents.mockResolvedValue([buildEvent(2, 'Desde 12€')]);
+
+    const res = await request(app).get('/api/recommendations?budget=40');
+
+    expect(res.status).toBe(200);
+    expect(reasonsForEvent(res.body, 2)).toContain('Dentro del presupuesto (12€)');
+  });
+
+  it('string con número por encima del presupuesto → sin bonus de presupuesto', async () => {
+    findEvents.mockResolvedValue([buildEvent(3, 'Desde 12€')]);
+
+    const res = await request(app).get('/api/recommendations?budget=5');
+
+    expect(res.status).toBe(200);
+    const reasons = reasonsForEvent(res.body, 3);
+    expect(reasons.some((r) => r.startsWith('Dentro del presupuesto'))).toBe(false);
+  });
+
+  it('precio null (desconocido) → NO se trata como gratis: sin bonus de presupuesto', async () => {
+    findEvents.mockResolvedValue([buildEvent(4, null)]);
+
+    const res = await request(app).get('/api/recommendations?budget=10');
+
+    expect(res.status).toBe(200);
+    const reasons = reasonsForEvent(res.body, 4);
+    expect(reasons.some((r) => r.startsWith('Dentro del presupuesto'))).toBe(false);
+  });
+
+  it('precio no parseable ("Consultar") → NO se trata como gratis: sin bonus de presupuesto', async () => {
+    findEvents.mockResolvedValue([buildEvent(5, 'Consultar')]);
+
+    const res = await request(app).get('/api/recommendations?budget=10');
+
+    expect(res.status).toBe(200);
+    const reasons = reasonsForEvent(res.body, 5);
+    expect(reasons.some((r) => r.startsWith('Dentro del presupuesto'))).toBe(false);
+  });
+});
