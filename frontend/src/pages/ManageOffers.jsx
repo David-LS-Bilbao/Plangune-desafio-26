@@ -84,7 +84,12 @@ function ManageOffers() {
 
               {/* Actions Footer */}
               <div className="offer-card-actions">
-                <button className="card-action-btn edit" onClick={() => alert('Editar no implementado en mockup')}>
+                <button className="card-action-btn edit" onClick={() => {
+                  const newTitle = window.prompt('Editar título de la oferta:', offer.title);
+                  if (newTitle && newTitle.trim() !== '') {
+                    updateOffer(offer.id, { title: newTitle.trim() });
+                  }
+                }}>
                   <span className="material-symbols-outlined">edit</span> Editar
                 </button>
                 <button 

@@ -7,6 +7,7 @@ function BusinessDashboard() {
   const [activityName, setActivityName] = useState("");
   const [category, setCategory] = useState("");
   const [services, setServices] = useState(["Carrito", "Cambiador"]);
+  const [newService, setNewService] = useState("");
   const [message, setMessage] = useState("");
   const formRef = useRef(null);
 
@@ -15,6 +16,21 @@ function BusinessDashboard() {
   const handleCreateActivity = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
     setMessage("Listo para añadir una nueva actividad.");
+  };
+
+  const handleServiceAdd = () => {
+    const trimmed = newService.trim();
+    if (trimmed && !services.includes(trimmed)) {
+      setServices((prev) => [...prev, trimmed]);
+      setNewService("");
+    }
+  };
+
+  const handleServiceKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleServiceAdd();
+    }
   };
 
   const handleServiceRemove = (serviceToRemove) => {
@@ -35,6 +51,7 @@ function BusinessDashboard() {
     setMessage("Tu actividad se ha enviado a revisión.");
     setActivityName("");
     setCategory("");
+    setServices(["Carrito", "Cambiador"]);
   };
 
   return (
@@ -157,9 +174,20 @@ function BusinessDashboard() {
                 type="text"
                 id="servicios"
                 className="form-input pr-10"
-                placeholder="Ej: carrito, cambiador, menú infantil..."
+                placeholder="Ej: menú infantil, zona de juego..."
+                value={newService}
+                onChange={(e) => setNewService(e.target.value)}
+                onKeyDown={handleServiceKeyDown}
               />
-              <span className="material-symbols-outlined icon">add</span>
+              <button
+                type="button"
+                className="icon"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: 0 }}
+                onClick={handleServiceAdd}
+                aria-label="Añadir servicio"
+              >
+                <span className="material-symbols-outlined">add</span>
+              </button>
             </div>
 
             {/* Chips context */}

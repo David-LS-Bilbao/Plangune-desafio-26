@@ -8,6 +8,7 @@ function LoginForm() {
   const login = useAuthStore((state) => state.login);
   const [email, setEmail] = useState("familia.agirre@example.com");
   const [password, setPassword] = useState("password123");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -55,15 +56,38 @@ function LoginForm() {
         <label className="sr-only" htmlFor="password">
           Contraseña
         </label>
-        <div className="input-wrapper">
+        <div className="input-wrapper" style={{ position: 'relative' }}>
           <span className="material-symbols-outlined input-icon">lock</span>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             id="password"
             placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            style={{ paddingRight: '2.5rem' }}
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((p) => !p)}
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+            style={{
+              position: 'absolute',
+              right: '0.75rem',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--on-surface-variant)',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+              {showPassword ? "visibility_off" : "visibility"}
+            </span>
+          </button>
         </div>
       </div>
 

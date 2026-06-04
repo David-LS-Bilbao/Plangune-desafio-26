@@ -100,9 +100,16 @@ export const usePlansStore = create((set, get) => ({
       : [...state.activeFilters, filter]
   })),
 
+  ageFilters: [],
+  toggleAgeFilter: (age) => set((state) => ({
+    ageFilters: state.ageFilters.includes(age)
+      ? state.ageFilters.filter(a => a !== age)
+      : [...state.ageFilters, age]
+  })),
+
   // Derived state: get filtered and sorted plans
   getFilteredPlans: () => {
-    const { allPlans, searchQuery, activeCategory, activeFilters } = get();
+    const { allPlans, searchQuery, activeCategory, activeFilters, ageFilters } = get();
     let filtered = allPlans;
 
     if (activeCategory !== "Todos") {
@@ -122,6 +129,19 @@ export const usePlansStore = create((set, get) => ({
       filtered = filtered.filter((plan) => 
         activeFilters.every(f => plan.tags && plan.tags.some(tag => tag.toLowerCase().includes(f.toLowerCase())))
       );
+    }
+
+    if (ageFilters.length > 0) {
+      filtered = filtered.filter((plan) => {
+        const ar = plan.ageRange || "";
+        return ageFilters.some((age) => {
+          if (ar === "Todas las edades") return true;
+          if (age === "Bebé")     return ar.includes("0");
+          if (age === "1-3 años") return ar.includes("1") || ar.includes("2") || ar.includes("3");
+          if (age === "4-6 años") return ar.includes("4") || ar.includes("5") || ar.includes("6") || ar === "3+ años";
+          return false;
+        });
+      });
     }
 
     // Sort by subscription tier (Premium > Pro > Base > None)
