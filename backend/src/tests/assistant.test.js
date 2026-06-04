@@ -14,7 +14,9 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 vi.mock('../clients/llmAssistant.client.js', () => ({
   isLlmAssistantEnabled: vi.fn(),
+  getLlmAssistantContract: vi.fn(),
   fetchLlmFamilyPlan: vi.fn(),
+  fetchLlmQuestion: vi.fn(),
 }));
 
 vi.mock('../clients/dataRecommender.client.js', () => ({
@@ -32,7 +34,12 @@ import request from 'supertest';
 import { createApp } from '../app.js';
 import { mockEvents } from '../seed/mockEvents.js';
 import { findEvents } from '../repositories/event.repository.js';
-import { isLlmAssistantEnabled, fetchLlmFamilyPlan } from '../clients/llmAssistant.client.js';
+import {
+  isLlmAssistantEnabled,
+  getLlmAssistantContract,
+  fetchLlmFamilyPlan,
+  fetchLlmQuestion,
+} from '../clients/llmAssistant.client.js';
 
 const app = createApp();
 
@@ -41,6 +48,8 @@ beforeEach(() => {
   findEvents.mockResolvedValue(mockEvents);
   // Por defecto, LLM deshabilitado → fallback local.
   isLlmAssistantEnabled.mockReturnValue(false);
+  // Default retrocompatible: contrato ai-service (POST). Los tests de get-question lo sobreescriben.
+  getLlmAssistantContract.mockReturnValue('post-family-plan');
 });
 
 // ---------------------------------------------------------------------------
@@ -163,5 +172,98 @@ describe('POST /api/assistant/family-plan · LLM local habilitado', () => {
     expect(res.status).toBe(200);
     expect(res.body.mode).toBe('fallback');
     expect(Array.isArray(res.body.recommendations)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Contrato "get-question" — chatbot Data dockerizado (GET /<pregunta>)
+//
+// El client (fetchLlmQuestion) va mockeado: resuelve Markdown en el caso OK y
+// rechaza en los casos de fallo (timeout, body vacío, "ERROR:", 500). La
+// detección REAL de body vacío / "ERROR:" se cubre en llmAssistant.client.test.js.
+// ---------------------------------------------------------------------------
+
+describe('POST /api/assistant/family-plan · contrato get-question (chatbot Data)', () => {
+  beforeEach(() => {
+    isLlmAssistantEnabled.mockReturnValue(true);
+    getLlmAssistantContract.mockReturnValue('get-question');
+  });
+
+  it('OK → mode "ai", source "data-chatbot", Markdown y recommendations []', async () => {
+    fetchLlmQuestion.mockResolvedValue('## Plan en Bilbao\n\nOs propongo...');
+
+    const res = await request(app)
+      .post('/api/assistant/family-plan')
+      .send({ message: 'Plan gratis para hoy en Bilbao', familyProfile: { childrenAges: [3], municipality: 'Bilbao' } });
+
+    expect(res.status).toBe(200);
+    expect(res.body.mode).toBe('ai');
+    expect(res.body.source).toBe('data-chatbot');
+    expect(typeof res.body.assistantMessageMarkdown).toBe('string');
+    expect(res.body.assistantMessageMarkdown.length).toBeGreaterThan(0);
+    // En modo AI las recomendaciones vienen vacías (el chatbot devuelve Markdown).
+    expect(res.body.recommendations).toEqual([]);
+    // No se usó el contrato POST ni el fallback local.
+    expect(fetchLlmFamilyPlan).not.toHaveBeenCalled();
+    expect(findEvents).not.toHaveBeenCalled();
+  });
+
+  it('timeout/error de fetch → fallback local', async () => {
+    const abort = new Error('The operation was aborted');
+    abort.name = 'AbortError';
+    fetchLlmQuestion.mockRejectedValue(abort);
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.mode).toBe('fallback');
+    expect(Array.isArray(res.body.recommendations)).toBe(true);
+  });
+
+  it('respuesta vacía (client rechaza) → fallback local', async () => {
+    fetchLlmQuestion.mockRejectedValue(new Error('Respuesta vacía del chatbot Data'));
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.mode).toBe('fallback');
+  });
+
+  it('body que empieza por "ERROR:" (client rechaza) → fallback local', async () => {
+    fetchLlmQuestion.mockRejectedValue(new Error('El chatbot Data devolvió ERROR'));
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.mode).toBe('fallback');
+    expect(Array.isArray(res.body.recommendations)).toBe(true);
+  });
+
+  it('500 del chatbot Data → fallback local', async () => {
+    const err = new Error('Chatbot Data respondió 500');
+    err.status = 500;
+    fetchLlmQuestion.mockRejectedValue(err);
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.mode).toBe('fallback');
+  });
+
+  it('mantiene el contrato público: 200 y no usa el contrato POST', async () => {
+    fetchLlmQuestion.mockResolvedValue('## Plan\n\nContenido');
+
+    const res = await request(app)
+      .post('/api/assistant/family-plan')
+      .send({ message: 'Plan en Getxo', familyProfile: { childrenAges: [2, 5], municipality: 'Getxo' } });
+
+    expect(res.status).toBe(200);
+    expect(fetchLlmFamilyPlan).not.toHaveBeenCalled();
+    expect(fetchLlmQuestion).toHaveBeenCalledTimes(1);
+    // La pregunta enviada al chatbot incluye mensaje + contexto familiar.
+    const question = fetchLlmQuestion.mock.calls[0][0];
+    expect(question).toContain('Plan en Getxo');
+    expect(question).toContain('2, 5');
+    expect(question).toContain('Getxo');
   });
 });
