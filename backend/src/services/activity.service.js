@@ -1,4 +1,4 @@
-import { mockActivities } from '../seed/mockActivities.js';
+import { mockActivities } from "../seed/mockActivities.js";
 
 /**
  * Almacén en memoria de actividades (MVP). Se clona el seed para no mutar el original.
@@ -14,7 +14,7 @@ export function getAllActivities() {
 
 /** Devuelve solo las actividades aprobadas (las públicas del contrato). */
 export function getApprovedActivities() {
-  return activities.filter((a) => a.status === 'approved');
+  return activities.filter((a) => a.status === "approved");
 }
 
 /** Busca una actividad por id (cualquier estado). `undefined` si no existe. */
@@ -25,7 +25,7 @@ export function getActivityById(id) {
 /** Busca una actividad aprobada por id. `undefined` si no existe o no está aprobada. */
 export function getApprovedActivityById(id) {
   const activity = getActivityById(id);
-  return activity && activity.status === 'approved' ? activity : undefined;
+  return activity?.status === "approved" ? activity : undefined;
 }
 
 /** `true` si existe una actividad con ese id (cualquier estado). */
