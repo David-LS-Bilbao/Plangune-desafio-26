@@ -29,7 +29,7 @@ cp backend/.env.example backend/.env
 El archivo `backend/.env` ya contiene la `DATABASE_URL` correcta para el contenedor local:
 
 ```
-DATABASE_URL="postgresql://desafio26:desafio26_dev_password@localhost:5432/desafio26_dev?schema=public"
+DATABASE_URL="postgresql://desafio26:desafio26_dev_password@localhost:5434/desafio26_dev?schema=public"
 ```
 
 ## 2. Levantar la base de datos
@@ -211,7 +211,7 @@ docker compose down -v
 | ------------------ | --------------------------- |
 | Imagen             | `postgres:16-alpine`        |
 | Nombre contenedor  | `desafio26_postgres`        |
-| Puerto             | `5432:5432`                 |
+| Puerto             | `5434:5432`                 |
 | Base de datos      | `desafio26_dev`             |
 | Usuario            | `desafio26`                 |
 | Contraseña (local) | `desafio26_dev_password`    |
