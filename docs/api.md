@@ -1,9 +1,13 @@
 # API · DESAFIO-26 (MVP)
 
-Documentación mínima de los endpoints de la rama `feat/backend-api-contract`.
+Índice/resumen de los endpoints del backend. La **fuente de verdad** del contrato Frontend ↔ Backend
+es [contracts/frontend-backend-api-contract.md](contracts/frontend-backend-api-contract.md);
+el flujo de integración está en [integration/frontend-backend.md](integration/frontend-backend.md).
 
-> **Estado MVP**: los datos son **mock en memoria** (sin PostgreSQL/Prisma todavía).
-> No hay auth. Las reseñas, incidencias y favoritos **se reinician al reiniciar el proceso**.
+> **Estado runtime**: `events` y favoritos se sirven desde **PostgreSQL vía Prisma** cuando la DB
+> local está levantada; `recommendations` usa Data API (Flask) con fallback local; el asistente usa
+> LLM con fallback local. Las entidades `activities`, reseñas e incidencias siguen siendo **mock en
+> memoria** y se reinician al reiniciar el proceso. No hay auth todavía.
 > Nombre técnico estable: `DESAFIO-26`. App provisional: *TxikiPlan Euskadi*.
 
 - **Base URL**: `http://localhost:3000/api`

@@ -2,11 +2,23 @@
 
 Convenciones de frontend para DESAFIO-26 (React + Vite, CSS propio).
 
+> **Contrato API:** cualquier tarea frontend que consuma o modifique API debe consultar
+> [../../contracts/frontend-backend-api-contract.md](../../contracts/frontend-backend-api-contract.md)
+> **antes de tocar código**. Ver también [SKILL_FRONTEND_BACKEND_CONTRACT.md](SKILL_FRONTEND_BACKEND_CONTRACT.md).
+
 ## Principios
 
 - **Mobile-first**: estilos base para móvil; usar `@media (min-width: ...)` para crecer.
 - CSS propio por clases (sin Tailwind, sin TypeScript).
 - Componentes funcionales y pequeños.
+
+## Consumo de API (fachada única)
+
+- El frontend consume **solo** Express bajo `/api`, vía `import.meta.env.VITE_API_URL`.
+- **Nunca** llamar directamente a Data API, Flask, Python, Ollama, chatbot Data ni puertos internos
+  (`5434`, `11434`, etc.). Express normaliza y gestiona los fallbacks.
+- Tratar `source` (`data-api`/`local-fallback`/`data-chatbot`/`llm-local`) y `mode` (`ai`/`fallback`)
+  como **metadatos técnicos**: no mostrarlos en crudo. La UI debe manejar el fallback sin romperse.
 
 ## Estructura de `frontend/src`
 

@@ -100,6 +100,12 @@ Si el cambio toca API, comprobar además:
 
 Si se toca `recommendations`, `activities`, `reviews`, `incidents`, `favorites` o `assistant`, debe haber test de contrato o justificación clara.
 
+Si el PR toca **API o su consumo**, verificar coherencia con la fuente de verdad
+[../contracts/frontend-backend-api-contract.md](../contracts/frontend-backend-api-contract.md):
+shape de respuesta, nombres de endpoint, alias legacy (`event`/`activity`, `eventId`/`activityId`),
+`source`/`mode` reales y campo `assistantMessageMarkdown` (no `assistantMessage`). Si cambia el
+contrato, debe actualizarse el contrato y `docs/api.md` en el mismo PR.
+
 ---
 
 ## Paso 4 · Validar frontend si se ha tocado frontend
@@ -168,6 +174,7 @@ Si se añade una dependencia nueva, justificar por qué acelera el MVP.
 Si el cambio afecta comportamiento, actualizar o revisar:
 
 * `README.md`;
+* `docs/contracts/frontend-backend-api-contract.md` (si toca API o su consumo);
 * `docs/api.md`;
 * `docs/database.md`;
 * `docs/security.md`;

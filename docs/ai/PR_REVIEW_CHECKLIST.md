@@ -22,6 +22,20 @@ Revisar antes de abrir y antes de mergear un Pull Request. El **destino del PR d
 - [ ] Sin `console.log` de depuración olvidados.
 - [ ] Nombres técnicos usan `DESAFIO-26` (no se fija el nombre provisional de la app).
 
+## Contrato Frontend ↔ Backend (obligatorio en PRs que toquen API o su consumo)
+
+> Regla: cualquier tarea frontend/backend que consuma o modifique API debe consultar
+> [contracts/frontend-backend-api-contract.md](../contracts/frontend-backend-api-contract.md) **antes de tocar código**.
+
+- [ ] Revisado el contrato antes de codificar.
+- [ ] El frontend solo llama a Express `/api` (vía `VITE_API_URL`); ni Flask/Data/Ollama/puertos internos.
+- [ ] No se cambió el shape/nombres de respuesta sin actualizar el contrato y `docs/api.md`.
+- [ ] No se renombraron endpoints sin acuerdo del equipo.
+- [ ] Alias legacy intactos (`event`/`activity`, `eventId`/`activityId`) o con plan de retirada documentado.
+- [ ] Asistente IA usa `assistantMessageMarkdown` (no se inventó `assistantMessage`).
+- [ ] La UI maneja `source: "local-fallback"` y `mode: "fallback"` sin romperse.
+- [ ] Si cambió el contrato: añadidos/actualizados tests o mocks.
+
 ## Tests
 
 - [ ] `npm test` pasa (backend y frontend).
