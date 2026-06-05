@@ -33,6 +33,10 @@ No commitees. Devuélveme: archivos tocados, endpoints y riesgos.
 
 ## Reglas
 
+- **Contrato API**: cualquier tarea que consuma o modifique API debe consultar
+  [../../contracts/frontend-backend-api-contract.md](../../contracts/frontend-backend-api-contract.md)
+  **antes de tocar código**. No cambiar shape/nombres de endpoint ni retirar alias legacy
+  (`event`/`activity`, `eventId`/`activityId`) sin actualizar el contrato + `docs/api.md` y avisar al frontend.
 - Acceso a datos solo vía Prisma (`src/config/prisma.js`).
 - Validar y sanear todas las entradas de usuario.
 - Control de acceso cuando exista auth: revisar Broken Access Control e IDOR

@@ -32,6 +32,12 @@ No commitees. Devuélveme: archivos tocados, decisiones de UI y riesgos.
 
 ## Reglas
 
+- **Contrato API**: cualquier tarea que consuma o modifique API debe consultar
+  [../../contracts/frontend-backend-api-contract.md](../../contracts/frontend-backend-api-contract.md)
+  **antes de tocar código**.
+- Consumir **solo** Express bajo `/api` vía `VITE_API_URL`. **Nunca** llamar directamente a Data API,
+  Flask, Python, Ollama, chatbot Data ni puertos internos.
+- Tratar `source`/`mode` como metadatos técnicos (no mostrarlos en crudo) y manejar el fallback sin romper la UI.
 - Accesibilidad básica: roles y etiquetas correctas en inputs/botones.
 - No fijar el nombre funcional ("TxikiPlan Euskadi") en textos técnicos; usar `DESAFIO-26`.
 - No introducir librerías de estilos ni de estado sin que la tarea lo pida.
