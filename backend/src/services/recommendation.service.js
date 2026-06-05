@@ -118,6 +118,21 @@ export async function getRecommendations(context = {}) {
       reasons.push('Buen plan si llueve (a cubierto)');
     }
 
+    if (wheelchairAccessible && event.es_silla_ruedas) {
+      score += 10;
+      reasons.push('Accesible para silla de ruedas');
+    }
+
+    if (petsAllowed && event.es_mascotas) {
+      score += 10;
+      reasons.push('Permite mascotas');
+    }
+
+    if (changingTable && event.es_cambiador) {
+      score += 10;
+      reasons.push('Dispone de cambiador');
+    }
+
     if (typeof budget === 'number' && !Number.isNaN(budget)) {
       const parsed = parsePrice(event.price);
       if (parsed !== null && parsed.value <= budget) {

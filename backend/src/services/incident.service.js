@@ -9,8 +9,8 @@ const incidents = [];
  * Crea una incidencia en estado `open`.
  * Lanza un error 404 (con `.status`) si la actividad no existe.
  */
-export function createIncident({ activityId, type, description }) {
-  if (!activityExists(activityId)) {
+export async function createIncident({ activityId, type, description }) {
+  if (!(await activityExists(activityId))) {
     const error = new Error('Actividad no encontrada');
     error.status = 404;
     throw error;

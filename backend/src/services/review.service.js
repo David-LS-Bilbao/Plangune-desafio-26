@@ -10,8 +10,8 @@ const reviews = [];
  * Lanza un error 404 (con `.status`) si la actividad no existe, para que lo
  * capture el errorHandler central.
  */
-export function createReview({ activityId, rating, comment }) {
-  if (!activityExists(activityId)) {
+export async function createReview({ activityId, rating, comment }) {
+  if (!(await activityExists(activityId))) {
     const error = new Error('Actividad no encontrada');
     error.status = 404;
     throw error;

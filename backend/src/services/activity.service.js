@@ -1,3 +1,4 @@
+import { findEventById } from "../repositories/event.repository.js";
 import { mockActivities } from "../seed/mockActivities.js";
 
 /**
@@ -28,7 +29,22 @@ export function getApprovedActivityById(id) {
   return activity?.status === "approved" ? activity : undefined;
 }
 
-/** `true` si existe una actividad con ese id (cualquier estado). */
-export function activityExists(id) {
-  return Boolean(getActivityById(id));
+/** `true` si existe una actividad o un evento en base de datos con ese id (cualquier estado). */
+export async function activityExists(id) {
+  // Check memory activities first
+  const existsInMemory = Boolean(getActivityById(id));
+  if (existsInMemory) return true;
+
+  // Check database events (numeric IDs)
+  const numId = Number(id);
+  if (Number.isInteger(numId) && numId > 0) {
+    try {
+      const event = await findEventById(numId);
+      return Boolean(event);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  return false;
 }
