@@ -22,7 +22,7 @@ function BusinessOverview() {
       <section className="quick-actions-grid">
         {/* Action 1: Primary Prominent */}
         <button
-          className="action-card primary col-span-2 md:col-span-1"
+          className="action-card primary"
           type="button"
           onClick={() => navigate("/negocio")}
         >
@@ -30,7 +30,7 @@ function BusinessOverview() {
             <span className="material-symbols-outlined fill">add_circle</span>
           </div>
           <h3 className="action-title">
-            {t('businessOverview.createActivity', 'Crear actividad').split('\n')[0]}
+            Crear
             <br />
             {t('businessOverview.createActivity', 'Crear actividad').split('\n')[1]}
           </h3>
@@ -46,7 +46,7 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">sell</span>
           </div>
           <h3 className="action-title">
-            {t('businessOverview.createOffer', 'Crear oferta').split('\n')[0]}
+            Crear
             <br />
             {t('businessOverview.createOffer', 'Crear oferta').split('\n')[1]}
           </h3>
@@ -62,9 +62,9 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">insights</span>
           </div>
           <h3 className="action-title-utility">
-            {t('businessOverview.myStrategy', 'Mi estrategia').split('\n')[0]}
+            Mi
             <br />
-            {t('businessOverview.myStrategy', 'Mi estrategia').split('\n')[1]}
+            estrategia
           </h3>
         </button>
 
@@ -78,7 +78,7 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">payments</span>
           </div>
           <h3 className="action-title-utility">
-            {t('businessOverview.subscriptions', 'Suscripciones de pago').split('\n')[0]}
+            Suscripciones
             <br />
             {t('businessOverview.subscriptions', 'Suscripciones de pago').split('\n')[1]}
           </h3>
@@ -94,9 +94,9 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">edit</span>
           </div>
           <h3 className="action-title-utility">
-            {t('businessOverview.editProfile', 'Editar perfil').split('\n')[0]}
+            Editar
             <br />
-            {t('businessOverview.editProfile', 'Editar perfil').split('\n')[1]}
+            perfil
           </h3>
         </button>
 
@@ -115,6 +115,22 @@ function BusinessOverview() {
             {t('businessOverview.viewReviews', 'Ver reseñas').split('\n')[1]}
           </h3>
         </button>
+
+        {/* Action 6: Utility */}
+        <button
+          className="action-card utility"
+          type="button"
+          onClick={() => navigate("/negocio/perfil")}
+        >
+          <div className="action-icon-utility text-primary">
+            <span className="material-symbols-outlined">edit</span>
+          </div>
+          <h3 className="action-title-utility">
+            Editar
+            <br />
+            perfil
+          </h3>
+        </button>
       </section>
 
       {/* KPIs Section */}
@@ -126,7 +142,7 @@ function BusinessOverview() {
             type="button"
             onClick={() => navigate("/negocio/rendimiento")}
           >
-            {t('businessOverview.viewFullReport', 'Ver informe detallado')}
+            Ver informe detallado
             <span className="material-symbols-outlined text-sm">
               arrow_forward
             </span>

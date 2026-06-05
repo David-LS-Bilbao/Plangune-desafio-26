@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store";
+import NavbarResponsive from "../components/common/NavbarResponsive";
 
 function CreateBusiness() {
   const { t } = useTranslation();
@@ -37,141 +38,90 @@ function CreateBusiness() {
   };
 
   return (
-    <main className="create-account-main">
-      <section className="page-header">
-        <p className="page-tag">{t('createBusiness.tag', 'Registro de negocio')}</p>
-        <h1 className="page-title">{t('createBusiness.title', 'Crea tu negocio')}</h1>
-        <p className="page-subtitle">
-          {t('createBusiness.subtitle', 'Configura tu perfil comercial y comienza a publicar tus ofertas.')}
-        </p>
-      </section>
+    <>
+      <NavbarResponsive />
+      <main className="create-family-main">
+        <div className="create-family-card">
 
-      <section className="create-card">
-        <form className="create-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="businessName">
-              {t('createBusiness.businessName', 'Nombre del negocio')}
-            </label>
-            <input
-              id="businessName"
-              name="businessName"
-              type="text"
-              className="form-input"
-              value={form.businessName}
-              onChange={handleChange}
-              placeholder="TxikiNegocio"
-              required
-            />
+          <div className="create-family-header">
+            <h1 className="create-family-title">Crea tu negocio</h1>
+            <p className="create-family-subtitle">
+              Configura tu perfil comercial y comienza a publicar tus ofertas.
+            </p>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="category">
-              {t('createBusiness.category', 'Categoría')}
-            </label>
-            <input
-              id="category"
-              name="category"
-              type="text"
-              className="form-input"
-              value={form.category}
-              onChange={handleChange}
-              placeholder="Turismo, Alimentación, Ocio"
-            />
-          </div>
+          <form className="create-family-form" onSubmit={handleSubmit}>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="address">
-              {t('createBusiness.address', 'Dirección')}
-            </label>
-            <input
-              id="address"
-              name="address"
-              type="text"
-              className="form-input"
-              value={form.address}
-              onChange={handleChange}
-              placeholder="Calle Mayor 12"
-            />
-          </div>
+            <div className="create-family-form__group">
+              <label className="section-label" htmlFor="businessName">Nombre del negocio</label>
+              <div className="input-with-icon">
+                <span className="material-symbols-outlined icon">storefront</span>
+                <input id="businessName" name="businessName" type="text" value={form.businessName} onChange={handleChange} placeholder="TxikiNegocio" required />
+              </div>
+            </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="nif">
-              NIF
-            </label>
-            <input
-              id="nif"
-              name="nif"
-              type="text"
-              className="form-input"
-              value={form.nif}
-              onChange={handleChange}
-              placeholder="A12345678"
-              required
-            />
-          </div>
+            <div className="create-family-form__group">
+              <label className="section-label" htmlFor="category">Categoría</label>
+              <div className="input-with-icon">
+                <span className="material-symbols-outlined icon">category</span>
+                <input id="category" name="category" type="text" value={form.category} onChange={handleChange} placeholder="Turismo, Alimentación, Ocio" />
+              </div>
+            </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="phone">
-              {t('createBusiness.phone', 'Teléfono')}
-            </label>
-            <input
-              id="phone"
-              name="phone"
-              type="tel"
-              className="form-input"
-              value={form.phone}
-              onChange={handleChange}
-              placeholder="+34 600 123 456"
-            />
-          </div>
+            <div className="create-family-form__group">
+              <label className="section-label" htmlFor="address">Dirección</label>
+              <div className="input-with-icon">
+                <span className="material-symbols-outlined icon">location_on</span>
+                <input id="address" name="address" type="text" value={form.address} onChange={handleChange} placeholder="Calle Mayor 12" />
+              </div>
+            </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">
-              {t('createBusiness.email', 'Correo electrónico')}
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              className="form-input"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="negocio@txikiplan.com"
-              required
-            />
-          </div>
+            <div className="create-family-form__group">
+              <label className="section-label" htmlFor="nif">NIF</label>
+              <div className="input-with-icon">
+                <span className="material-symbols-outlined icon">badge</span>
+                <input id="nif" name="nif" type="text" value={form.nif} onChange={handleChange} placeholder="A12345678" required />
+              </div>
+            </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="password">
-              {t('createBusiness.password', 'Contraseña')}
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              className="form-input"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-            />
-          </div>
+            <div className="create-family-form__group">
+              <label className="section-label" htmlFor="phone">Teléfono</label>
+              <div className="input-with-icon">
+                <span className="material-symbols-outlined icon">phone</span>
+                <input id="phone" name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="+34 600 123 456" />
+              </div>
+            </div>
 
-          <div className="form-actions">
-            <button type="submit" className="btn-primary-full">
-              {t('createBusiness.submit', 'Crear negocio')}
-            </button>
-            <button
-              type="button"
-              className="btn-link"
-              onClick={() => navigate("/login")}
-            >
-              {t('createBusiness.back', 'Volver al inicio')}
-            </button>
-          </div>
-        </form>
-      </section>
-    </main>
+            <div className="create-family-form__group">
+              <label className="section-label" htmlFor="email">Correo electrónico</label>
+              <div className="input-with-icon">
+                <span className="material-symbols-outlined icon">mail</span>
+                <input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="negocio@txikiplan.com" required />
+              </div>
+            </div>
+
+            <div className="create-family-form__group">
+              <label className="section-label" htmlFor="password">Contraseña</label>
+              <div className="input-with-icon">
+                <span className="material-symbols-outlined icon">lock</span>
+                <input id="password" name="password" type="password" value={form.password} onChange={handleChange} placeholder="••••••••" required />
+              </div>
+            </div>
+
+            <div className="create-family-form__actions">
+              <button type="submit" className="btn-primary">
+                <span className="material-symbols-outlined">add_business</span>
+                Crear negocio
+              </button>
+              <button type="button" className="btn-text-danger" onClick={() => navigate("/login")}>
+                Volver al inicio
+              </button>
+            </div>
+
+          </form>
+        </div>
+      </main>
+    </>
   );
 }
 

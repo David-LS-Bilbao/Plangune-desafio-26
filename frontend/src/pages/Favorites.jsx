@@ -1,41 +1,46 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
-import { useUserStore, usePlansStore } from "../store";
+import { useNavigate } from "react-router-dom";
+import { useAuthStore, useUserStore, usePlansStore } from "../store";
 import PlanCard from "../components/common/PlanCard";
 
 function Favorites() {
-  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
   const favoritesIds = useUserStore((state) => state.favorites);
   const allPlans = usePlansStore((state) => state.allPlans);
-  const favoritePlans = allPlans.filter((plan) =>
-    favoritesIds.includes(plan.id),
-  );
+  const favoritePlans = allPlans.filter((plan) => favoritesIds.includes(plan.id));
+
+  if (!user) {
+    return (
+      <main className="plans-user-main">
+        <div className="favorites-empty">
+          <span className="material-symbols-outlined favorites-empty__icon">lock</span>
+          <p>Inicia sesión para guardar tus planes favoritos.</p>
+          <button className="btn-primary" type="button" onClick={() => navigate("/login")}>
+            Iniciar sesión
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="favorites-main">
-      <section className="page-header">
-        <div>
-          <p className="page-tag">{t('nav.favorites', 'Guardados')}</p>
-          <h1 className="page-title">{t('favorites.title', 'Tus planes favoritos')}</h1>
-        </div>
-      </section>
+    <main className="plans-user-main">
+      <h1 className="plans-user-title">Tus planes favoritos</h1>
 
-      <section className="favorites-list">
-        {favoritePlans.length > 0 ? (
-          <div className="favorites-grid">
-            {favoritePlans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} />
-            ))}
-          </div>
-        ) : (
-          <div className="favorites-empty">
-            <p>{t('favorites.empty', 'No has guardado ningún plan aún.')}</p>
-            <p>
-              {t('favorites.explore', 'Visita la pantalla de explorar para encontrar actividades familiares que te encanten.')}
-            </p>
-          </div>
-        )}
-      </section>
+      {favoritePlans.length > 0 ? (
+        <div className="plans-user-list">
+          {favoritePlans.map((plan, i) => (
+            <PlanCard key={plan.id} plan={plan} index={i} />
+          ))}
+        </div>
+      ) : (
+        <div className="favorites-empty">
+          <span className="material-symbols-outlined favorites-empty__icon">bookmark</span>
+          <p>No has guardado ningún plan aún.</p>
+          <p>Visita la pantalla de explorar para encontrar actividades familiares que te encanten.</p>
+        </div>
+      )}
     </main>
   );
 }

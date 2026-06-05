@@ -1,11 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import "../i18n";
 
 import App from "../App.jsx";
 
 describe("App", () => {
-  it("renderiza el título técnico DESAFIO-26", () => {
+  it("renderiza el título principal de la landing page", () => {
     render(
       <MemoryRouter>
         <App />
@@ -13,11 +14,11 @@ describe("App", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "DESAFIO-26" }),
+      screen.getByRole("heading", { name: "Haz planes y disfruta con tus peques" }),
     ).toBeInTheDocument();
   });
 
-  it("muestra el texto provisional del proyecto", () => {
+  it("muestra el botón para buscar planes", () => {
     render(
       <MemoryRouter>
         <App />
@@ -25,7 +26,7 @@ describe("App", () => {
     );
 
     expect(
-      screen.getByText("App provisional para planes familiares en Euskadi"),
+      screen.getAllByText("Buscar planes")[0],
     ).toBeInTheDocument();
   });
 });

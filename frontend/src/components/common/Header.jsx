@@ -102,11 +102,10 @@ function Header() {
 
           {user && (
             <button
-              aria-label="Logout"
               className="icon-button icon-danger"
               onClick={handleLogout}
             >
-              <span className="material-symbols-outlined">logout</span>
+              Cerrar sesión
             </button>
           )}
         </div>
@@ -146,7 +145,6 @@ function Header() {
                 className="menu-item menu-item-danger"
                 onClick={handleLogout}
               >
-                <span className="material-symbols-outlined menu-item-icon">logout</span>
                 Cerrar sesión
               </button>
             )}
