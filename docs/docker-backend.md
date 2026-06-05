@@ -12,7 +12,7 @@ sin depender de su instalación local de Node.
 
 | Servicio | Descripción | Puerto host | Uso |
 |---|---|---|---|
-| `postgres` | PostgreSQL 16 local de desarrollo | 5432 | DB real |
+| `postgres` | PostgreSQL 16 local de desarrollo | 5434 | DB real |
 | `backend` | API Express DESAFIO-26 (Prisma) | 3000 | API REST |
 
 Definidos en [`compose.yaml`](../compose.yaml). El `backend` se construye desde
@@ -51,6 +51,7 @@ nodemon src/server.js
 ## 4. Arquitectura local
 
 - Desde el **host** accedes a la API en `http://localhost:3000`.
+- Desde el **host** accedes a PostgreSQL en `localhost:5434`.
 - **Dentro de Docker**, el backend conecta a PostgreSQL usando el host **`postgres`**
   (nombre del servicio en la red de Compose), **no** `localhost`.
 - Por eso `DATABASE_URL` en Docker **no** usa `localhost`:
@@ -105,7 +106,7 @@ docker compose exec backend node prisma/seed.js
 > Se usa `prisma migrate deploy` (no `migrate dev`): aplica las migraciones versionadas de forma
 > no interactiva y sin shadow DB, lo apropiado para un contenedor. Es idempotente.
 
-**Alternativa desde el host** (la DB expone el puerto 5432):
+**Alternativa desde el host** (la DB expone el puerto `5434`):
 
 ```bash
 npm run prisma:migrate --workspace backend
@@ -145,8 +146,9 @@ La colección Postman funciona igual contra el backend Docker (mismo `baseUrl`):
 
 - **Puerto 3000 ocupado**: un backend de host (`npm run dev:backend`) ya usa el 3000. Párelo antes
   de `docker compose up backend`, o cambia el mapeo de puerto del servicio backend.
-- **Puerto 5432 ocupado**: un PostgreSQL nativo en la máquina choca con el contenedor. Párelo
-  (`brew services stop postgresql`) o cambia el puerto izquierdo del servicio postgres.
+- **Puerto 5434 ocupado**: otro servicio local choca con el mapeo host del contenedor. Párelo
+  o cambia el puerto izquierdo del servicio postgres. Dentro de Docker debe seguir siendo
+  `postgres:5432`.
 - **`DATABASE_URL` con `localhost` dentro del contenedor**: error de conexión. Dentro de Docker
   debe ser host `postgres`. Ya está fijado así en `compose.yaml`.
 - **DB sin migraciones**: `/api/events` falla. Ejecuta `docker compose exec backend npx prisma migrate deploy`.

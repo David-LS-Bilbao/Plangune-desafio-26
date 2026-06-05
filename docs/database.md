@@ -3,8 +3,11 @@
 > **Fuente de verdad del schema:** [`docs/data/schema-real/init.sql`](data/schema-real/init.sql)
 > · `backend/prisma/schema.prisma` es su espejo fiel (11 modelos).
 > · **La migración inicial existe** en `backend/prisma/migrations/` y debe aplicarse antes del seed.
-> · **Runtime de `/api/events`:** Prisma/PostgreSQL (cuando la DB está levantada).
-> · **Resto de endpoints:** mock en memoria todavía. Ver [ADR-0004](adr/0004-real-schema-source-of-truth.md).
+> · **Runtime real:** `/api/events`, `/api/recommendations` y `/api/favorites` usan
+> Prisma/PostgreSQL cuando la DB está levantada.
+> · **Fallback:** `/api/recommendations` cae al recomendador local sobre Prisma/PostgreSQL si
+> Data no está disponible; `/api/assistant/family-plan` también usa fallback local si el LLM falla.
+> Ver [ADR-0004](adr/0004-real-schema-source-of-truth.md).
 >
 > `docs/data/BBDD.sql` es referencia histórica, **no el contrato activo**.
 
@@ -31,6 +34,10 @@ El archivo `backend/.env` ya contiene la `DATABASE_URL` correcta para el contene
 ```
 DATABASE_URL="postgresql://desafio26:desafio26_dev_password@localhost:5434/desafio26_dev?schema=public"
 ```
+
+Desde el **host** la DB se expone en `localhost:5434` para evitar conflictos con otros proyectos
+que usan `5432`. Dentro de la red Docker, el backend sigue conectando con `postgres:5432`
+(`postgres` es el nombre del servicio Compose).
 
 ## 2. Levantar la base de datos
 
@@ -69,10 +76,13 @@ npm run prisma:studio   --workspace backend    # abre la GUI de la DB (opcional)
 > la DB local con `prisma migrate` sin necesidad de construir el schema manualmente.
 >
 > **Estado del runtime por endpoint:**
-> - `GET /api/events`, `GET /api/events/:id` → **Prisma/PostgreSQL** cuando la DB local
->   está levantada y sembrada (ver [features/backend-events-prisma-runtime.md](features/backend-events-prisma-runtime.md)).
-> - Resto de endpoints (`/api/activities`, `/api/recommendations`, `/api/reviews`,
->   `/api/incidents`, `/api/favorites`, `/api/assistant`) → **mock en memoria** todavía.
+> - `GET /api/events`, `GET /api/events/:id` → **Prisma/PostgreSQL**.
+> - `GET /api/recommendations` → Data recommender si está habilitado; si falla o está apagado,
+>   **fallback local Prisma/PostgreSQL**.
+> - `GET/POST/DELETE /api/favorites` → **Prisma/PostgreSQL** (`user_favorite_events`).
+> - `POST /api/assistant/family-plan` → chatbot/LLM opcional; si falla, fallback local sobre
+>   recomendaciones.
+> - `/api/activities`, `/api/reviews`, `/api/incidents` → mock/legacy todavía.
 > - La base real sigue siendo `data/schema-real/init.sql` (ADR-0004).
 
 ## Seed Prisma (desarrollo local / demo)
@@ -128,12 +138,12 @@ npm run db:seed --workspace backend
 ```
 
 > **Después del seed**, `/api/events` y `/api/events/:id` consultan PostgreSQL directamente.
-> El resto de endpoints (`/api/activities`, `/api/recommendations`, `/api/reviews`,
-> `/api/incidents`, `/api/favorites`, `/api/assistant`) siguen usando mock en memoria y
-> no se ven afectados por el seed.
+> `/api/recommendations` y `/api/favorites` también consumen `events` reales. El asistente reutiliza
+> recomendaciones en fallback. `/api/activities`, `/api/reviews` y `/api/incidents` siguen en
+> mock/legacy y no se ven afectados por el seed.
 >
-> **Siguiente paso futuro:** migrar el resto de services de memoria a Prisma, manteniendo
-> el contrato de endpoints intacto.
+> **Siguiente paso futuro:** migrar `activities`/`reviews`/`incidents` a entidades reales,
+> manteniendo el contrato de endpoints intacto.
 >
 > ⚠️ **Riesgo timezone:** `mockEvents.js` usa strings sin timezone (`"2026-06-10T10:00:00"`).
 > `new Date(string)` los interpreta en la timezone local del servidor, por lo que la hora
@@ -175,6 +185,46 @@ curl http://localhost:3000/api/events/999999                               # 404
 
 > **Nota:** los tests (`npm run test:backend`) no requieren PostgreSQL — el repository
 > se mockea con `vi.mock`. Pueden ejecutarse en cualquier momento sin levantar Docker.
+
+## Importador CSV seguro (Data events)
+
+PR #40 añadió [../backend/prisma/import-events-from-csv.js](../backend/prisma/import-events-from-csv.js),
+un importador controlado para ampliar la tabla `events` desde CSV de Data. **No sustituye** al
+seed demo: el seed sigue creando la base mínima de 6 users, 5 businesses y 10 events.
+
+Características de seguridad:
+
+- soporta `--dry-run` para auditar sin insertar;
+- soporta `--limit <n>` para cargas parciales;
+- soporta `--skip-duplicates` para deduplicar por clave compuesta
+  (`title + municipio + fecha_inicio + lugar`) y contra eventos ya existentes en DB;
+- no usa `TRUNCATE`;
+- no borra datos;
+- no toca users/businesses salvo lectura de businesses para validar FK opcional;
+- la carga completa del CSV queda pendiente de decisión por duplicados y truncamientos detectados.
+
+Dry-run recomendado:
+
+```bash
+node --env-file=backend/.env backend/prisma/import-events-from-csv.js \
+  --file /ruta/events_2026-06-02.csv \
+  --limit=20 \
+  --skip-duplicates \
+  --dry-run
+```
+
+Carga parcial controlada (solo tras revisar el dry-run):
+
+```bash
+node --env-file=backend/.env backend/prisma/import-events-from-csv.js \
+  --file /ruta/events_2026-06-02.csv \
+  --limit=20 \
+  --skip-duplicates
+```
+
+> **No ejecutar carga completa sin validación previa.** El CSV completo tiene duplicados de
+> `external_id`, duplicados por clave compuesta y campos que requieren truncamiento para encajar
+> en el schema actual.
 
 ## 6. Parar el contenedor
 
