@@ -1,10 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { usePlansStore, useUserStore } from "../store";
+import { useUserStore } from "../store";
+import { fetchEventById, eventToPlan } from "../services/events";
 
 function PlanDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [plan, setPlan] = useState(null);
+  const [status, setStatus] = useState("loading"); // loading | done | error
   const [reportStatus, setReportStatus] = useState("");
   const [reserved, setReserved] = useState(false);
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -21,12 +24,33 @@ function PlanDetail() {
     }
   ]);
 
-  const plan = usePlansStore((state) => state.getPlanById(id));
-
   const isFavorite = useUserStore((state) => state.isFavorite(parseInt(id)));
   const toggleFavorite = useUserStore((state) => state.toggleFavorite);
 
-  if (!plan) {
+  useEffect(() => {
+    let active = true;
+    setStatus("loading");
+    fetchEventById(id)
+      .then((event) => {
+        if (!active) return;
+        setPlan(eventToPlan(event));
+        setStatus("done");
+      })
+      .catch(() => active && setStatus("error"));
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  if (status === "loading") {
+    return (
+      <main className="plan-detail-main" style={{ padding: "2rem", textAlign: "center" }}>
+        <p style={{ color: "var(--on-surface-variant)" }}>Cargando plan…</p>
+      </main>
+    );
+  }
+
+  if (status === "error" || !plan) {
     return (
       <main
         className="plan-detail-main"
