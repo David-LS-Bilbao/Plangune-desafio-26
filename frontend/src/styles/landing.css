@@ -45,7 +45,6 @@
             h1 {
                 font-size: clamp(2.8rem, 2.137rem + 2.885vw, 4.3rem);
                 font-family: var(--font-fredoka);
-                font-weight: 500;
                 color: var(--white);
                 letter-spacing: 0.1rem;
                 line-height: clamp(2.7rem, 1.837rem + 2.885vw, 4.2rem);

@@ -25,7 +25,7 @@ function Login() {
         <div className="login-card">
 
           <div className="login-header">
-            <h1>Tu familia, <br /><span>tus planes.</span></h1>
+            <h1>Tu familia, <span>tus planes.</span></h1>
             <p>
               Regístrate y disfruta más, buscando menos.
             </p>
@@ -47,7 +47,7 @@ function Login() {
                 type="button"
                 onClick={() => {
                   login("family");
-                  navigate("/planes");
+                  navigate("/perfil");
                 }}
               >
                 <img

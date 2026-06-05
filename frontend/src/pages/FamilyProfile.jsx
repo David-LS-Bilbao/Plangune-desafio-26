@@ -1,13 +1,17 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthStore, useUserStore } from "../store";
 
 function FamilyProfile() {
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
   const updateUser = useAuthStore((state) => state.updateUser);
   const { children, addChild, removeChild } = useUserStore();
   const [preferences, setPreferences] = useState({
     carrito: true,
     cambiador: true,
+    mascota: false,
     interior: false,
     presupuesto: true,
     tranquilos: false,
@@ -16,7 +20,7 @@ function FamilyProfile() {
   const [saved, setSaved] = useState(false);
 
   const [showAddChildForm, setShowAddChildForm] = useState(false);
-  const [newChildGender, setNewChildGender] = useState("Niño/a");
+  const [newChildGender, setNewChildGender] = useState("Sin especificar");
   const [newChildAge, setNewChildAge] = useState("");
 
   const togglePreference = (key) => {
@@ -39,7 +43,7 @@ function FamilyProfile() {
     if (newChildAge) {
       addChild({ type: newChildGender, age: `${newChildAge} años` });
       setShowAddChildForm(false);
-      setNewChildGender("Niño/a");
+      setNewChildGender("Sin especificar");
       setNewChildAge("");
     }
   };
@@ -69,11 +73,20 @@ function FamilyProfile() {
         </div>
 
         <p className="profile-description">
-          ¡Hola {user?.name || "Familia"}! Personaliza tu perfil para que
-          podamos recomendarte los mejores planes para tu familia.
+          ¡Hola {user?.name || "Familia"}! Si personalizas el perfil, 
+          podremos recomendarte los mejores planes para tu familia.
         </p>
+
+        <button
+          type="button"
+          className="btn-text-danger"
+          onClick={() => { logout(); navigate('/login'); }}
+        >
+          Cerrar sesión
+        </button>
       </section>
 
+      <div className="profile-form-card">
       <section className="profile-section">
         <label htmlFor="location" className="section-label">
           Ubicación habitual
@@ -103,45 +116,50 @@ function FamilyProfile() {
         </div>
 
         {showAddChildForm && (
-          <div className="add-child-form" style={{ marginBottom: "1rem", padding: "1rem", backgroundColor: "var(--surface-container-lowest)", borderRadius: "8px", border: "1px solid var(--outline-variant)" }}>
-            <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
-              <div style={{ flex: 1 }}>
-                <label className="section-label" style={{ fontSize: "0.875rem", marginBottom: "0.5rem", display: "block" }}>Sexo</label>
-                <select 
-                  value={newChildGender} 
-                  onChange={(e) => setNewChildGender(e.target.value)}
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "8px", border: "1px solid var(--outline)", backgroundColor: "transparent", color: "var(--on-surface)" }}
-                >
-                  <option value="Niño/a">Prefiero no decirlo</option>
-                  <option value="Niña">Niña</option>
-                  <option value="Niño">Niño</option>
-                </select>
+          <div className="add-child-form">
+            <div className="add-child-fields">
+              <div className="add-child-field">
+                <label className="section-label">Sexo</label>
+                <div className="gender-selector">
+                  {[
+                    { value: "Sin especificar", label: "Sin especificar" },
+                    { value: "Niña", label: "Niña" },
+                    { value: "Niño", label: "Niño" },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      className={`gender-pill${newChildGender === opt.value ? " active" : ""}`}
+                      onClick={() => setNewChildGender(opt.value)}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div style={{ flex: 1 }}>
-                <label className="section-label" style={{ fontSize: "0.875rem", marginBottom: "0.5rem", display: "block" }}>Edad</label>
-                <input 
-                  type="number" 
-                  value={newChildAge} 
+              <div className="add-child-field">
+                <label className="section-label">Edad</label>
+                <input
+                  className="child-input"
+                  type="number"
+                  value={newChildAge}
                   onChange={(e) => setNewChildAge(e.target.value)}
                   placeholder="Ej: 5"
-                  style={{ width: "100%", padding: "0.5rem", borderRadius: "8px", border: "1px solid var(--outline)", backgroundColor: "transparent", color: "var(--on-surface)" }}
                 />
               </div>
             </div>
-            <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
-              <button 
-                className="btn-outline-sm" 
+            <div className="add-child-actions">
+              <button
+                className="btn-child-cancel"
                 type="button"
                 onClick={() => setShowAddChildForm(false)}
-                style={{ padding: "0.5rem 1rem" }}
               >
                 Cancelar
               </button>
-              <button 
-                className="btn-primary-sm" 
+              <button
+                className="btn-child-save"
                 type="button"
                 onClick={submitChild}
-                style={{ padding: "0.5rem 1rem" }}
                 disabled={!newChildAge}
               >
                 Guardar
@@ -154,7 +172,7 @@ function FamilyProfile() {
           {children.map((child) => (
             <div key={child.id} className="child-item">
               <div className="child-info">
-                <div className="child-icon bg-primary-light">
+                <div className="child-icon">
                   <span className="material-symbols-outlined">child_care</span>
                 </div>
                 <div className="child-details">
@@ -206,6 +224,23 @@ function FamilyProfile() {
                 type="checkbox"
                 checked={preferences.cambiador}
                 onChange={() => togglePreference("cambiador")}
+              />
+              <span className="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div className="preference-item">
+            <div className="preference-info">
+              <span className="material-symbols-outlined text-primary">
+                pets
+              </span>
+              <span className="preference-text">Con mascota</span>
+            </div>
+            <label className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={preferences.mascota}
+                onChange={() => togglePreference("mascota")}
               />
               <span className="toggle-slider"></span>
             </label>
@@ -276,6 +311,7 @@ function FamilyProfile() {
           <p className="status-message">Perfil guardado correctamente.</p>
         )}
       </section>
+      </div>
     </main>
   );
 }

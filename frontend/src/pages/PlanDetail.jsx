@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { usePlansStore, useUserStore } from "../store";
+import { usePlansStore, useUserStore, useAuthStore } from "../store";
 
 function PlanDetail() {
   const { id } = useParams();
@@ -18,210 +18,130 @@ function PlanDetail() {
       time: "Hace 2 semanas",
       text: "Excelente plan para el fin de semana. Muy bien acondicionado para carritos.",
       rating: 5,
-    }
+    },
   ]);
 
   const plan = usePlansStore((state) => state.getPlanById(id));
-
+  const user = useAuthStore((state) => state.user);
   const isFavorite = useUserStore((state) => state.isFavorite(parseInt(id)));
   const toggleFavorite = useUserStore((state) => state.toggleFavorite);
 
   if (!plan) {
     return (
-      <main
-        className="plan-detail-main"
-        style={{ padding: "2rem", textAlign: "center" }}
-      >
+      <main className="plan-detail-main">
         <h2>Plan no encontrado</h2>
-        <button
-          onClick={() => navigate("/planes")}
-          className="btn-primary"
-          style={{ marginTop: "1rem", padding: "0.5rem 1rem" }}
-        >
+        <button className="detail-btn detail-btn--primary" onClick={() => navigate("/planes")}>
           Volver
         </button>
       </main>
     );
   }
 
+  const infoCards = [
+    { icon: "child_care",  label: "Edad",       value: plan.ageRange,                              color: "tertiary" },
+    { icon: "euro_symbol", label: "Precio",      value: plan.price,                                 color: "primary"  },
+    { icon: "category",    label: "Categoría",   value: plan.category,                              color: "accent"   },
+    { icon: "stroller",    label: "Carrito",      value: plan.tags?.includes("Apto Carrito") ? "Sí" : "No", color: "tertiary" },
+    { icon: "sentiment_calm", label: "Recomendado", value: plan.isIdeal ? "Ideal para ti" : "Buen plan", color: "primary", span2: true },
+  ];
+
   return (
     <main className="plan-detail-main">
-      {/* Header Section */}
+
       <div className="detail-header">
         <h1 className="detail-title">{plan.title}</h1>
         <div className="detail-location">
-          <span className="material-symbols-outlined text-sm">location_on</span>
+          <span className="material-symbols-outlined">location_on</span>
           <span>{plan.location}</span>
         </div>
       </div>
 
-      {/* Hero Image */}
       <div className="detail-hero-image">
         <img alt={`Imagen de ${plan.title}`} src={plan.image} />
-        <button className="map-toggle-btn">
-          <span className="material-symbols-outlined text-lg">map</span>
+        <button className="detail-map-btn" type="button">
+          <span className="material-symbols-outlined">map</span>
           Ver Mapa
         </button>
       </div>
 
-      <div style={{ padding: "0 var(--spacing-margin-mobile)" }}>
-        <p
-          style={{
-            marginTop: "1rem",
-            color: "var(--on-surface-variant)",
-            fontSize: "16px",
-            lineHeight: "1.5",
-          }}
-        >
-          {plan.description}
-        </p>
-      </div>
+      <p className="detail-description">{plan.description}</p>
 
-      {/* Practical Info Bento Grid */}
-      <section className="practical-info-grid">
-        <div className="info-card">
-          <div className="info-icon bg-secondary">
-            <span className="material-symbols-outlined">child_care</span>
+      <section className="detail-info-grid">
+        {infoCards.map((card, i) => (
+          <div
+            key={card.label}
+            className={`detail-info-card detail-info-card--${card.color}${card.span2 ? " detail-info-card--span2" : ""} detail-info-card--${i % 2 === 0 ? "odd" : "even"}`}
+          >
+            <div className="detail-info-icon">
+              <span className="material-symbols-outlined">{card.icon}</span>
+            </div>
+            <div className="detail-info-text">
+              <span className="detail-info-label">{card.label}</span>
+              <span className="detail-info-value">{card.value}</span>
+            </div>
           </div>
-          <div className="info-text">
-            <span className="info-label">Edad</span>
-            <span className="info-value">{plan.ageRange}</span>
-          </div>
-        </div>
-
-        <div className="info-card">
-          <div className="info-icon bg-surface">
-            <span className="material-symbols-outlined">euro_symbol</span>
-          </div>
-          <div className="info-text">
-            <span className="info-label">Precio</span>
-            <span className="info-value">{plan.price}</span>
-          </div>
-        </div>
-
-        <div className="info-card">
-          <div className="info-icon bg-primary">
-            <span className="material-symbols-outlined">category</span>
-          </div>
-          <div className="info-text">
-            <span className="info-label">Categoría</span>
-            <span className="info-value">{plan.category}</span>
-          </div>
-        </div>
-
-        <div className="info-card">
-          <div className="info-icon bg-tertiary">
-            <span className="material-symbols-outlined">stroller</span>
-          </div>
-          <div className="info-text">
-            <span className="info-label">Carrito</span>
-            <span className="info-value">
-              {plan.tags?.includes("Apto Carrito") ? "Sí" : "No"}
-            </span>
-          </div>
-        </div>
-
-        <div className="info-card col-span-2">
-          <div className="info-icon bg-primary">
-            <span className="material-symbols-outlined">sentiment_calm</span>
-          </div>
-          <div className="info-text">
-            <span className="info-label">Recomendado</span>
-            <span className="info-value">
-              {plan.isIdeal ? "Ideal para ti" : "Buen plan"}
-            </span>
-          </div>
-        </div>
+        ))}
       </section>
 
-      {/* Main Actions */}
-      <section className="main-actions" style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+      <section className="detail-actions">
         <button
-          className="btn-primary-large"
+          className={`detail-btn detail-btn--primary${reserved ? " detail-btn--reserved" : ""}`}
           type="button"
-          style={{ flex: 1, opacity: reserved ? 0.75 : 1 }}
           disabled={reserved}
-          onClick={() => {
-            useUserStore.getState().addReservation(plan);
-            setReserved(true);
-          }}
+          onClick={() => { useUserStore.getState().addReservation(plan); setReserved(true); }}
         >
           <span className="material-symbols-outlined">
             {reserved ? "check_circle" : "calendar_today"}
           </span>
           {reserved ? "¡Reservado!" : "Reservar"}
         </button>
+
         <button
-          className="btn-primary-large"
+          className="detail-btn detail-btn--secondary"
           type="button"
-          style={{ flex: 1, backgroundColor: 'var(--secondary)', color: 'var(--on-secondary)' }}
-          onClick={() =>
-            window.open(
-              `https://www.google.com/maps/search/${encodeURIComponent(plan.location)}`,
-              "_blank",
-            )
-          }
+          onClick={() => window.open(`https://www.google.com/maps/search/${encodeURIComponent(plan.location)}`, "_blank")}
         >
           <span className="material-symbols-outlined">directions</span>
           Cómo llegar
         </button>
+
         <button
-          className="btn-outline-large"
-          onClick={() => toggleFavorite(parseInt(id))}
-          style={{
-            flex: 1,
-            backgroundColor: isFavorite
-              ? "var(--primary-container)"
-              : "transparent",
-            borderColor: isFavorite
-              ? "var(--primary-container)"
-              : "var(--outline-variant)",
-            color: isFavorite
-              ? "var(--on-primary-container)"
-              : "var(--on-surface)",
-          }}
+          className={`detail-btn detail-btn--outline${isFavorite ? " detail-btn--active" : ""}`}
+          type="button"
+          onClick={() => user ? toggleFavorite(parseInt(id)) : navigate("/login")}
         >
-          <span
-            className={`material-symbols-outlined ${isFavorite ? "fill" : "outline"}`}
-          >
-            favorite
-          </span>
+          <span className={`material-symbols-outlined${isFavorite ? " fill" : ""}`}>favorite</span>
           {isFavorite ? "Guardado" : "Favorito"}
         </button>
       </section>
 
-      {/* Report Button */}
-      <div className="report-action">
+      <div className="detail-report">
         <button
-          className="btn-report"
+          className="detail-report-btn"
           type="button"
-          onClick={() =>
-            setReportStatus("Tu reporte ha sido enviado. Gracias.")
-          }
+          onClick={() => setReportStatus("Tu reporte ha sido enviado. Gracias.")}
         >
-          <span className="material-symbols-outlined text-lg">report</span>
-          <span>Reportar incidencia</span>
+          <span className="material-symbols-outlined">report</span>
+          Reportar incidencia
         </button>
+        {reportStatus && <p className="detail-status">{reportStatus}</p>}
       </div>
-      {reportStatus && <p className="status-message">{reportStatus}</p>}
 
-      {/* Reviews Section */}
-      <section className="reviews-section">
-        <div className="reviews-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <section className="detail-reviews">
+        <div className="detail-reviews__header">
           <div>
-            <h3 className="reviews-title">Reseñas familiares</h3>
-            <div className="overall-rating">
-              <span className="rating-score">{plan.rating}</span>
-              <span className="material-symbols-outlined fill text-sm">star</span>
-              <span className="material-symbols-outlined fill text-sm">star</span>
-              <span className="material-symbols-outlined fill text-sm">star</span>
-              <span className="material-symbols-outlined fill text-sm">star</span>
-              <span className="material-symbols-outlined text-sm">star_half</span>
+            <h3 className="detail-reviews__title">Reseñas familiares</h3>
+            <div className="detail-reviews__rating">
+              <span className="detail-reviews__score">{plan.rating}</span>
+              {[...Array(4)].map((_, i) => (
+                <span key={i} className="material-symbols-outlined fill">star</span>
+              ))}
+              <span className="material-symbols-outlined">star_half</span>
             </div>
           </div>
-          <button 
-            className="btn-primary" 
-            style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+          <button
+            className="btn-text-danger"
+            type="button"
             onClick={() => setShowReviewForm(!showReviewForm)}
           >
             {showReviewForm ? "Cancelar" : "Añadir reseña"}
@@ -229,38 +149,31 @@ function PlanDetail() {
         </div>
 
         {showReviewForm && (
-          <div className="review-form" style={{ marginBottom: "1.5rem", padding: "1rem", backgroundColor: "var(--surface-container-lowest)", borderRadius: "12px", border: "1px solid var(--outline-variant)" }}>
-            <h4 style={{ marginBottom: "0.5rem" }}>Tu valoración</h4>
-            <div style={{ display: "flex", gap: "4px", marginBottom: "1rem" }}>
+          <div className="detail-review-form">
+            <h4 className="detail-review-form__title">Tu valoración</h4>
+            <div className="detail-review-form__stars">
               {[1, 2, 3, 4, 5].map((star) => (
-                <span 
-                  key={star} 
-                  className={`material-symbols-outlined ${newReviewRating >= star ? "fill" : ""}`}
-                  style={{ cursor: "pointer", color: "var(--md-sys-color-primary)" }}
+                <span
+                  key={star}
+                  className={`material-symbols-outlined${newReviewRating >= star ? " fill" : ""}`}
                   onClick={() => setNewReviewRating(star)}
                 >
                   star
                 </span>
               ))}
             </div>
-            <textarea 
+            <textarea
+              className="detail-review-form__textarea"
               value={newReviewText}
               onChange={(e) => setNewReviewText(e.target.value)}
               placeholder="Cuéntanos tu experiencia..."
-              style={{ width: "100%", padding: "0.75rem", borderRadius: "8px", border: "1px solid var(--outline)", marginBottom: "1rem", minHeight: "80px", backgroundColor: "transparent", color: "var(--on-surface)", fontFamily: "inherit" }}
             />
-            <button 
-              className="btn-primary-full" 
+            <button
+              className="detail-btn detail-btn--primary"
+              type="button"
               onClick={() => {
                 if (newReviewText.trim()) {
-                  setReviews([{
-                    id: Date.now(),
-                    author: "Tú",
-                    avatar: "TU",
-                    time: "Justo ahora",
-                    text: newReviewText,
-                    rating: newReviewRating
-                  }, ...reviews]);
+                  setReviews([{ id: Date.now(), author: "Tú", avatar: "TU", time: "Justo ahora", text: newReviewText, rating: newReviewRating }, ...reviews]);
                   setNewReviewText("");
                   setNewReviewRating(5);
                   setShowReviewForm(false);
@@ -272,28 +185,27 @@ function PlanDetail() {
           </div>
         )}
 
-        {reviews.map(review => (
-          <div className="review-card" key={review.id} style={{ marginBottom: "1rem" }}>
-            <div className="review-author" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
-              <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-                <div className="author-avatar">{review.avatar}</div>
-                <div className="author-info">
-                  <span className="author-name">{review.author}</span>
-                  <span className="review-time">{review.time}</span>
+        {reviews.map((review) => (
+          <div className="detail-review-card" key={review.id}>
+            <div className="detail-review-card__header">
+              <div className="detail-review-card__author">
+                <div className="detail-review-card__avatar">{review.avatar}</div>
+                <div>
+                  <span className="detail-review-card__name">{review.author}</span>
+                  <span className="detail-review-card__time">{review.time}</span>
                 </div>
               </div>
-              <div style={{ display: "flex", gap: "2px" }}>
+              <div className="detail-review-card__stars">
                 {[...Array(5)].map((_, i) => (
-                  <span key={i} className={`material-symbols-outlined text-sm ${i < review.rating ? "fill" : ""}`} style={{ color: "var(--primary)" }}>
-                    star
-                  </span>
+                  <span key={i} className={`material-symbols-outlined${i < review.rating ? " fill" : ""}`}>star</span>
                 ))}
               </div>
             </div>
-            <p className="review-text">"{review.text}"</p>
+            <p className="detail-review-card__text">"{review.text}"</p>
           </div>
         ))}
       </section>
+
     </main>
   );
 }

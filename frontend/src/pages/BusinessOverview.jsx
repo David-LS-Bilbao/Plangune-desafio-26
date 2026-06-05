@@ -20,7 +20,7 @@ function BusinessOverview() {
       <section className="quick-actions-grid">
         {/* Action 1: Primary Prominent */}
         <button
-          className="action-card primary col-span-2 md:col-span-1"
+          className="action-card primary"
           type="button"
           onClick={() => navigate("/negocio")}
         >
@@ -28,7 +28,7 @@ function BusinessOverview() {
             <span className="material-symbols-outlined fill">add_circle</span>
           </div>
           <h3 className="action-title">
-            Crear
+            Gestionar
             <br />
             actividad
           </h3>
@@ -44,7 +44,7 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">sell</span>
           </div>
           <h3 className="action-title">
-            Crear
+            Gestionar
             <br />
             oferta
           </h3>
@@ -60,9 +60,9 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">insights</span>
           </div>
           <h3 className="action-title-utility">
-            Mi
+            Plan de
             <br />
-            estrategia
+            visibilidad
           </h3>
         </button>
 
@@ -76,29 +76,13 @@ function BusinessOverview() {
             <span className="material-symbols-outlined">payments</span>
           </div>
           <h3 className="action-title-utility">
-            Suscripciones
+            Planes
             <br />
             de pago
           </h3>
         </button>
 
         {/* Action 5: Utility */}
-        <button
-          className="action-card utility"
-          type="button"
-          onClick={() => navigate("/negocio/perfil")}
-        >
-          <div className="action-icon-utility text-primary">
-            <span className="material-symbols-outlined">edit</span>
-          </div>
-          <h3 className="action-title-utility">
-            Editar
-            <br />
-            perfil
-          </h3>
-        </button>
-
-        {/* Action 6: Utility */}
         <button
           className="action-card utility"
           type="button"
@@ -113,6 +97,22 @@ function BusinessOverview() {
             reseñas
           </h3>
         </button>
+
+        {/* Action 6: Utility */}
+        <button
+          className="action-card utility"
+          type="button"
+          onClick={() => navigate("/negocio/perfil")}
+        >
+          <div className="action-icon-utility text-primary">
+            <span className="material-symbols-outlined">edit</span>
+          </div>
+          <h3 className="action-title-utility">
+            Editar
+            <br />
+            perfil
+          </h3>
+        </button>
       </section>
 
       {/* KPIs Section */}
@@ -125,9 +125,6 @@ function BusinessOverview() {
             onClick={() => navigate("/negocio/rendimiento")}
           >
             Ver informe detallado
-            <span className="material-symbols-outlined text-sm">
-              arrow_forward
-            </span>
           </button>
         </div>
 

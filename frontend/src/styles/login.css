@@ -1,6 +1,4 @@
-
 .login-wrapper {
-    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -8,13 +6,14 @@
 
     .login-card {
         background-color: var(--surface-container-lowest);
-        border-radius: 1.5rem;
+        border-radius: 2.5rem;
         box-shadow: 0 0.625rem 2.5rem rgba(38, 46, 82, 0.08);
         border: 0.0625rem solid rgba(187, 202, 198, 0.3);
         backdrop-filter: blur(0.25rem);
         width: 100%;
         max-width: 30rem;
         padding: var(--spacing-lg);
+        margin-top: 1.5rem;
 
         .login-header {
             display: flex;
@@ -23,7 +22,7 @@
             h1 {
                 margin: 0 0 0.3rem 0;
                 font-family: var(--font-fredoka);
-                font-size: clamp(2rem, 5vw, 2.75rem);
+                font-size: clamp(2.4rem, 6vw, 3.4rem);
                 color: var(--secondary-color);
                 line-height: 1.15;
 
@@ -38,6 +37,18 @@
                 line-height: 1.6;
                 margin: 0;
                 color: var(--dark-grey);
+            }
+
+            @media (max-width: 900px) {
+                h1 {
+                    font-size: 2.25rem;
+                    text-align: center;
+                    padding-bottom: 1rem;
+                }
+
+                p {
+                    padding-bottom: 1rem;
+                }
             }
         }
 
@@ -151,7 +162,7 @@
 
         .social-divider {
             margin: 1.5rem 0 1rem;
-  
+
             display: flex;
             align-items: center;
 
@@ -175,7 +186,7 @@
             display: flex;
             gap: var(--spacing-sm);
             width: 100%;
-            
+
 
             .btn-social {
                 width: 100%;
@@ -243,7 +254,7 @@
                         border: 0;
                     }
 
-                    & input:checked + .role-card {
+                    & input:checked+.role-card {
                         border-color: var(--accent-color);
                         background-color: var(--accent-color);
 
@@ -379,7 +390,9 @@
     }
 
     /* ============ DESKTOP (>= 900px): header izquierda / form derecha ============ */
-    @media (min-width: 56.25rem) {
+    @media (min-width: 900px) {
+        min-height: unset;
+        align-items: start;
         padding: var(--spacing-xl) var(--spacing-lg);
 
         .login-card {
@@ -410,7 +423,7 @@
     }
 
     /* ============ MÓVIL (< 37.5rem) ============ */
-    @media (max-width: 37.5rem) {
+    @media (max-width: 600px) {
         padding: var(--spacing-lg) var(--spacing-margin-mobile);
 
         .login-card {

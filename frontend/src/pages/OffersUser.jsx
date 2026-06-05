@@ -1,96 +1,124 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBusinessStore } from "../store";
 
-function OffersUser() {
-  const navigate = useNavigate();
-  // Optional: We can use the offers from the business store to make it dynamic
-  // For now we'll combine static design with dynamic offers if any.
-  const dynamicOffers = useBusinessStore((state) => state.offers);
+function OfferCard({ colorVariant, badge, badgeType, date, dateIcon, title, subtitle, location, onNavigate }) {
+  const [expanded, setExpanded] = useState(false);
 
   return (
-    <main className="plans-main-new" style={{ paddingBottom: "5rem" }}>
-      <div className="plans-content">
-        <h1 className="plans-title">Ofertas familiares cerca de ti</h1>
+    <div
+      className={`offer-user-card offer-user-card--${colorVariant}`}
+      onClick={onNavigate}
+    >
+      <div className="offer-user-card__header">
+        <span className={`offer-user-badge offer-user-badge--${badgeType}`}>{badge}</span>
+        <span className="offer-user-date">
+          <span className="material-symbols-outlined">{dateIcon}</span>
+          {date}
+        </span>
+      </div>
+      <h3 className="offer-user-card__title">{title}</h3>
+      <div className="offer-user-card__subtitle">
+        <p className={`offer-user-card__subtitle-text${expanded ? " expanded" : ""}`}>
+          {subtitle}
+        </p>
+        {subtitle && subtitle.length > 120 && (
+          <button
+            className="offer-user-card__read-more"
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
+          >
+            {expanded ? "Leer menos" : "Leer más"}
+          </button>
+        )}
+      </div>
+      <div className="offer-user-card__location">
+        <span className="material-symbols-outlined">location_on</span>
+        {location}
+      </div>
+      <button className="offer-user-card__btn" type="button">
+        Ver oferta
+      </button>
+    </div>
+  );
+}
 
-        <div className="offers-section">
-          <div className="offers-scroll-container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            
-            {/* Dynamic Offers from Store */}
-            {dynamicOffers.filter(o => o.status === 'active').map(offer => (
-              <div key={offer.id} className="offer-card offer-card-primary" style={{ minWidth: '100%' }}>
-                <div className="offer-card-header">
-                  <span className="badge badge-primary">OFERTA</span>
-                  <span className="offer-date">
-                    <span className="material-symbols-outlined text-sm">event</span>
-                    {offer.meta || 'Por tiempo limitado'}
-                  </span>
-                </div>
-                <h3 className="offer-title">{offer.title}</h3>
-                <p className="offer-subtitle">{offer.activity || offer.description}</p>
-                <div className="offer-location">
-                  <span className="material-symbols-outlined text-sm">location_on</span>
-                  {offer.location || 'Bilbao'}
-                </div>
-                <button
-                  className="btn-primary-full"
-                  type="button"
-                  onClick={() => navigate(`/planes/${offer.id}`)}
-                >
-                  Ver oferta
-                </button>
-              </div>
-            ))}
+function OffersUser() {
+  const navigate = useNavigate();
+  const dynamicOffers = useBusinessStore((state) => state.offers);
 
-            {/* Static Card 1 */}
-            <div className="offer-card offer-card-secondary" style={{ minWidth: '100%' }}>
-              <div className="offer-card-header">
-                <span className="badge badge-secondary">OFERTA</span>
-                <span className="offer-date">
-                  <span className="material-symbols-outlined text-sm">calendar_today</span>
-                  Hasta 31 Oct
-                </span>
-              </div>
-              <h3 className="offer-title">2x1 en menú infantil</h3>
-              <p className="offer-subtitle">Comida Familiar de Domingo</p>
-              <div className="offer-location">
-                <span className="material-symbols-outlined text-sm">location_on</span>
-                Bilbao
-              </div>
-              <button
-                className="btn-secondary-full"
-                type="button"
-                onClick={() => navigate("/planes/1")}
-              >
-                Ver oferta
-              </button>
-            </div>
+  const staticOffers = [
+    {
+      id: "static-1",
+      badge: "OFERTA",
+      badgeType: "secondary",
+      date: "Hasta 31 Oct",
+      dateIcon: "calendar_today",
+      title: "2x1 en menú infantil",
+      subtitle: "Comida Familiar de Domingo",
+      location: "Bilbao",
+      planId: "/planes/1",
+    },
+    {
+      id: "static-2",
+      badge: "TALLER",
+      badgeType: "primary",
+      date: "Solo miércoles",
+      dateIcon: "event",
+      title: "Taller gratuito",
+      subtitle: "Taller de Otoño Creativo",
+      location: "Getxo",
+      planId: "/planes/2",
+    },
+    {
+      id: "static-3",
+      badge: "ESPECIAL",
+      badgeType: "accent",
+      date: "Este fin de semana",
+      dateIcon: "event",
+      title: "Ruta en familia por la costa",
+      subtitle: "Descubre los mejores miradores y playas accesibles con carrito de la costa vasca.",
+      location: "Getxo · Costa",
+      planId: "/planes/3",
+    },
+  ];
 
-            {/* Static Card 2 */}
-            <div className="offer-card offer-card-primary" style={{ minWidth: '100%' }}>
-              <div className="offer-card-header">
-                <span className="badge badge-primary">TALLER</span>
-                <span className="offer-date">
-                  <span className="material-symbols-outlined text-sm">event</span>
-                  Solo miércoles
-                </span>
-              </div>
-              <h3 className="offer-title">Taller gratuito</h3>
-              <p className="offer-subtitle">Taller de Otoño Creativo</p>
-              <div className="offer-location">
-                <span className="material-symbols-outlined text-sm">location_on</span>
-                Getxo
-              </div>
-              <button
-                className="btn-primary-full"
-                type="button"
-                onClick={() => navigate("/planes/2")}
-              >
-                Ver oferta
-              </button>
-            </div>
-          </div>
-        </div>
+  const chessPattern = ["tertiary", "primary", "accent"];
+
+  const allOffers = [
+    ...dynamicOffers.filter((o) => o.status === "active").map((offer) => ({
+      id: offer.id,
+      badge: "OFERTA",
+      badgeType: "primary",
+      date: offer.meta || "Por tiempo limitado",
+      dateIcon: "event",
+      title: offer.title,
+      subtitle: offer.activity || offer.description,
+      location: offer.location || "Bilbao",
+      planId: `/planes/${offer.id}`,
+    })),
+    ...staticOffers,
+  ];
+
+  return (
+    <main className="offers-user-main">
+      <h1 className="offers-user-title">Ofertas familiares cerca de ti</h1>
+
+      <div className="offers-user-list">
+        {allOffers.map((offer, i) => (
+          <OfferCard
+            key={offer.id}
+            colorVariant={chessPattern[i % chessPattern.length]}
+            badge={offer.badge}
+            badgeType={offer.badgeType}
+            date={offer.date}
+            dateIcon={offer.dateIcon}
+            title={offer.title}
+            subtitle={offer.subtitle}
+            location={offer.location}
+            onNavigate={() => navigate(offer.planId)}
+          />
+        ))}
       </div>
     </main>
   );

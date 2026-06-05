@@ -16,7 +16,7 @@ function NavbarResponsive() {
     { to: '/planes', icon: 'event', label: 'Planes', exact: false },
     { to: '/', icon: 'home', label: 'Inicio', exact: true },
     { to: '/buscar', icon: 'search', label: 'Buscar', exact: false },
-    { to: user ? '/perfil' : '/login', icon: 'account_circle', label: 'Perfil', exact: false },
+    { to: user ? '/perfil' : '/login', icon: 'account_circle', label: 'Mi perfil', exact: false },
   ];
 
   const adminLinks = [
@@ -25,15 +25,29 @@ function NavbarResponsive() {
   ];
 
   const businessLinks = [
-    { to: '/negocio/dashboard', icon: 'home', label: 'Inicio', exact: true },
-    { to: '/negocio/ofertas', icon: 'local_offer', label: 'Ofertas', exact: false },
-    { to: '/negocio', icon: 'add_circle', label: 'Actividad', exact: true },
+    { to: '/negocio/dashboard', icon: 'dashboard', label: 'Dashboard', exact: true },
+    { to: '/negocio/rendimiento', icon: 'bar_chart', label: 'Rendimiento', exact: false },
+    { to: '/negocio/estrategia', icon: 'rocket_launch', label: 'Estrategia', exact: false },
+    { to: '/negocio/suscripciones', icon: 'workspace_premium', label: 'Suscripción', exact: false },
   ];
 
   const links =
     user?.role === 'admin' ? adminLinks :
     user?.role === 'business' ? businessLinks :
     defaultLinks;
+
+  const defaultDesktopLinks = [
+    { to: '/ofertas', label: 'Ofertas', exact: false },
+    { to: '/planes', label: 'Planes', exact: false },
+    { to: '/favoritos', label: 'Favoritos', exact: false },
+    { to: '/buscar', label: 'Buscar', exact: false },
+    { to: user ? '/perfil' : '/login', label: 'Perfil', exact: false },
+  ];
+
+  const desktopLinks =
+    user?.role === 'admin' ? adminLinks :
+    user?.role === 'business' ? [] :
+    defaultDesktopLinks;
 
   const isActive = (to, exact) =>
     exact ? location.pathname === to : location.pathname.startsWith(to);
@@ -55,10 +69,11 @@ function NavbarResponsive() {
       { label: 'Explorar planes', path: '/planes', icon: 'explore' },
     ];
     if (user.role === 'family') return [
-      { label: 'Explorar planes', path: '/planes', icon: 'explore' },
+      { label: 'Buscar', path: '/buscar', icon: 'search' },
+      { label: 'Ofertas', path: '/ofertas', icon: 'local_offer' },
+      { label: 'Planes', path: '/planes', icon: 'explore' },
       { label: 'Favoritos', path: '/favoritos', icon: 'favorite' },
       { label: 'Mi perfil', path: '/perfil', icon: 'person' },
-      { label: 'Ofertas', path: '/ofertas', icon: 'local_offer' },
     ];
     if (user.role === 'business') return [
       { label: 'Dashboard', path: '/negocio/dashboard', icon: 'dashboard' },
@@ -130,50 +145,46 @@ function NavbarResponsive() {
 
       {/* ── MOBILE: barra inferior con iconos (< 768px) ───────────────────── */}
       <nav className="nr-bottom-nav">
-        {links.slice(0, 2).map(({ to, icon, label, exact }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={exact}
-            className={({ isActive }) =>
-              `nr-bottom-link${isActive ? ' nr-bottom-link--active' : ''}`
-            }
-          >
-            <span className={`material-symbols-outlined${isActive(to, exact) ? ' fill' : ''}`}>{icon}</span>
-            <span className="nr-bottom-label">{label}</span>
-          </NavLink>
-        ))}
+        {(() => {
+          const fabIndex = links.length === 3 ? 1 : 2;
+          const leftLinks = links.slice(0, fabIndex);
+          const rightLinks = links.slice(fabIndex + 1);
+          const fab = links[fabIndex];
 
-        {/* Hueco central para el FAB */}
-        <div className="nr-bottom-gap" aria-hidden="true" />
+          const renderLink = ({ to, icon, label, exact }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={exact}
+              className={({ isActive }) =>
+                `nr-bottom-link${isActive ? ' nr-bottom-link--active' : ''}`
+              }
+            >
+              <span className={`material-symbols-outlined${isActive(to, exact) ? ' fill' : ''}`}>{icon}</span>
+              <span className="nr-bottom-label">{label}</span>
+            </NavLink>
+          );
 
-        {links.slice(3).map(({ to, icon, label, exact }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={exact}
-            className={({ isActive }) =>
-              `nr-bottom-link${isActive ? ' nr-bottom-link--active' : ''}`
-            }
-          >
-            <span className={`material-symbols-outlined${isActive(to, exact) ? ' fill' : ''}`}>{icon}</span>
-            <span className="nr-bottom-label">{label}</span>
-          </NavLink>
-        ))}
-
-        {/* FAB flotante — fuera del flujo, centrado con CSS */}
-        {(() => { const h = links[2]; return (
-          <NavLink
-            to={h.to}
-            end={h.exact}
-            className={({ isActive }) =>
-              `nr-bottom-fab${isActive ? ' nr-bottom-link--active' : ''}`
-            }
-            aria-label="Inicio"
-          >
-            <span className={`material-symbols-outlined${isActive(h.to, h.exact) ? ' fill' : ''}`}>{h.icon}</span>
-          </NavLink>
-        ); })()}
+          return (
+            <>
+              {leftLinks.map(renderLink)}
+              {/* Hueco central para el FAB */}
+              <div className="nr-bottom-gap" aria-hidden="true" />
+              {rightLinks.map(renderLink)}
+              {/* FAB flotante — fuera del flujo, centrado con CSS */}
+              <NavLink
+                to={fab.to}
+                end={fab.exact}
+                className={({ isActive }) =>
+                  `nr-bottom-fab${isActive ? ' nr-bottom-link--active' : ''}`
+                }
+                aria-label={fab.label}
+              >
+                <span className={`material-symbols-outlined${isActive(fab.to, fab.exact) ? ' fill' : ''}`}>{fab.icon}</span>
+              </NavLink>
+            </>
+          );
+        })()}
       </nav>
 
       {/* ── DESKTOP: navbar horizontal superior (>= 768px) ───────────────── */}
@@ -183,7 +194,7 @@ function NavbarResponsive() {
             <img src={logo} alt="TxikiPlan logo" />
           </Link>
           <ul role="list">
-            {links.map(({ to, label, exact }) => (
+            {desktopLinks.map(({ to, label, exact }) => (
               <li key={to}>
                 <NavLink
                   to={to}
@@ -196,6 +207,13 @@ function NavbarResponsive() {
                 </NavLink>
               </li>
             ))}
+            {user && (
+              <li>
+                <button className="nr-top-link nr-top-link--logout" onClick={handleLogout}>
+                  CERRAR SESIÓN
+                </button>
+              </li>
+            )}
           </ul>
         </div>
       </nav>

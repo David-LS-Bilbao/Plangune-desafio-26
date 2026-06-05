@@ -123,7 +123,7 @@ function Landing() {
           <div className="business-container">
             <div className="business-content">
               <span className="business-label">Para empresas y entidades</span>
-              <h2>Haz visible tu actividad familiar</h2>
+              <h2>Haz visible tu actividad para familias</h2>
               <ul>
                 <li>
                   <span className="material-symbols-outlined">check_circle</span>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBusinessStore } from "../store";
 
@@ -9,14 +9,8 @@ function BusinessDashboard() {
   const [services, setServices] = useState(["Carrito", "Cambiador"]);
   const [newService, setNewService] = useState("");
   const [message, setMessage] = useState("");
-  const formRef = useRef(null);
 
   const addOffer = useBusinessStore((state) => state.addOffer);
-
-  const handleCreateActivity = () => {
-    formRef.current?.scrollIntoView({ behavior: "smooth" });
-    setMessage("Listo para añadir una nueva actividad.");
-  };
 
   const handleServiceAdd = () => {
     const trimmed = newService.trim();
@@ -34,20 +28,12 @@ function BusinessDashboard() {
   };
 
   const handleServiceRemove = (serviceToRemove) => {
-    setServices((prev) =>
-      prev.filter((service) => service !== serviceToRemove),
-    );
+    setServices((prev) => prev.filter((s) => s !== serviceToRemove));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    addOffer({
-      title: activityName,
-      category,
-      tags: services,
-      price: 'Consultar',
-      location: 'Bilbao'
-    });
+    addOffer({ title: activityName, category, tags: services, price: "Consultar", location: "Bilbao" });
     setMessage("Tu actividad se ha enviado a revisión.");
     setActivityName("");
     setCategory("");
@@ -55,165 +41,120 @@ function BusinessDashboard() {
   };
 
   return (
-    <main className="business-dashboard-main">
-      {/* Header */}
-      <div className="dashboard-header">
-        <h1 className="dashboard-title">Panel negocio</h1>
-        <p className="dashboard-subtitle">Gestiona tus planes y promociones.</p>
+    <main className="biz-dashboard-main">
+
+      <div className="biz-dashboard-header">
+        <h1 className="biz-dashboard-title">Gestionar actividad</h1>
+        <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
+          Volver atrás
+        </button>
       </div>
 
-      {/* Stats Bento Grid */}
-      <section className="stats-grid">
-        <div className="stat-card col-span-2 flex-row">
-          <div className="stat-info">
-            <span className="stat-label">Mis actividades activas</span>
-            <span className="stat-value text-primary">2</span>
-          </div>
-          <div className="stat-icon bg-primary-container text-on-primary-container">
-            <span className="material-symbols-outlined fill">
-              event_available
-            </span>
-          </div>
-        </div>
+      <div className="biz-dashboard-grid">
 
-        <div className="stat-card">
-          <span className="material-symbols-outlined text-tertiary mb-2">
-            pending_actions
-          </span>
-          <div className="stat-info">
-            <span className="stat-value block">1</span>
-            <span className="stat-label">Pendiente</span>
-          </div>
-        </div>
+        {/* Columna izquierda: panel de negocio */}
+        <section className="biz-panel">
+          <h2 className="biz-panel__title">Panel negocio</h2>
+          <p className="biz-panel__subtitle">Actividades y promociones.</p>
 
-        <div className="stat-card">
-          <span className="material-symbols-outlined text-secondary mb-2 fill">
-            star
-          </span>
-          <div className="stat-info">
-            <span className="stat-value block">12</span>
-            <span className="stat-label">Reseñas</span>
-          </div>
-        </div>
-      </section>
-
-      {/* Primary Action */}
-      <button
-        className="btn-primary-large mt-4 w-full"
-        type="button"
-        onClick={handleCreateActivity}
-      >
-        <span className="material-symbols-outlined">add_circle</span>
-        Crear actividad
-      </button>
-
-      {message && <p className="status-message">{message}</p>}
-
-      <div className="divider"></div>
-
-      {/* New Activity Form */}
-      <section className="new-activity-section" ref={formRef}>
-        <h2 className="section-title">Nueva actividad</h2>
-
-        <form className="activity-form" onSubmit={handleSubmit}>
-          {/* Field: Nombre */}
-          <div className="form-group">
-            <label htmlFor="nombre" className="form-label">
-              Nombre actividad
-            </label>
-            <input
-              type="text"
-              id="nombre"
-              className="form-input"
-              placeholder="Ej: Taller de cuentos"
-              value={activityName}
-              onChange={(e) => setActivityName(e.target.value)}
-              required
-            />
+          <div className="biz-stat-btns">
+            <button type="button" className="biz-stat-btn">
+              <span className="material-symbols-outlined">event_available</span>
+              Activas: <strong>2</strong>
+            </button>
+            <button type="button" className="biz-stat-btn">
+              <span className="material-symbols-outlined">pending_actions</span>
+              Pendientes: <strong>1</strong>
+            </button>
+            <button type="button" className="biz-stat-btn">
+              <span className="material-symbols-outlined">star</span>
+              Reseñas: <strong>12</strong>
+            </button>
           </div>
 
-          {/* Field: Categoría / Edad / Zona */}
-          <div className="form-group">
-            <label htmlFor="categoria" className="form-label">
-              Categoría / edad / zona
-            </label>
-            <div className="input-with-icon">
+          {message && <p className="status-message">{message}</p>}
+        </section>
+
+        {/* Columna derecha: nueva actividad */}
+        <section className="biz-activity-form">
+          <h2 className="biz-panel__title">Nueva actividad</h2>
+
+          <form className="create-family-form" onSubmit={handleSubmit}>
+
+            <div className="create-family-form__group">
+              <label className="section-label biz-label" htmlFor="nombre">Nombre actividad</label>
+              <input
+                type="text"
+                id="nombre"
+                className="biz-input"
+                placeholder="Ej: Taller de cuentos"
+                value={activityName}
+                onChange={(e) => setActivityName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="create-family-form__group">
+              <label className="section-label biz-label" htmlFor="categoria">Categoría / edad / zona</label>
               <select
                 id="categoria"
-                className="form-select"
+                className="biz-input"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 required
               >
-                <option value="" disabled>
-                  Selecciona una opción...
-                </option>
-                <option value="Interior · 0-3 años · Bilbao">
-                  Interior · 0-3 años · Bilbao
-                </option>
-                <option value="Exterior · 3-6 años · Getxo">
-                  Exterior · 3-6 años · Getxo
-                </option>
-                <option value="Museo · Todas · Barakaldo">
-                  Museo · Todas · Barakaldo
-                </option>
+                <option value="" disabled>Selecciona una opción...</option>
+                <option value="Interior · 0-3 años · Bilbao">Interior · 0-3 años · Bilbao</option>
+                <option value="Exterior · 3-6 años · Getxo">Exterior · 3-6 años · Getxo</option>
+                <option value="Museo · Todas · Barakaldo">Museo · Todas · Barakaldo</option>
               </select>
-              <span className="material-symbols-outlined icon pointer-events-none">
-                expand_more
-              </span>
             </div>
-          </div>
 
-          {/* Field: Servicios */}
-          <div className="form-group">
-            <label htmlFor="servicios" className="form-label">
-              Servicios
-            </label>
-            <div className="input-with-icon">
-              <input
-                type="text"
-                id="servicios"
-                className="form-input pr-10"
-                placeholder="Ej: menú infantil, zona de juego..."
-                value={newService}
-                onChange={(e) => setNewService(e.target.value)}
-                onKeyDown={handleServiceKeyDown}
-              />
-              <button
-                type="button"
-                className="icon"
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)', padding: 0 }}
-                onClick={handleServiceAdd}
-                aria-label="Añadir servicio"
-              >
-                <span className="material-symbols-outlined">add</span>
+            <div className="create-family-form__group">
+              <label className="section-label biz-label" htmlFor="servicios">Servicios</label>
+              <div className="biz-service-input">
+                <input
+                  className="biz-input"
+                  type="text"
+                  id="servicios"
+                  placeholder="Ej: menú infantil..."
+                  value={newService}
+                  onChange={(e) => setNewService(e.target.value)}
+                  onKeyDown={handleServiceKeyDown}
+                />
+                <button
+                  type="button"
+                  className="biz-service-add"
+                  onClick={handleServiceAdd}
+                >
+                  <span className="material-symbols-outlined">add</span>
+                </button>
+              </div>
+              <div className="search-form__pills" style={{ marginTop: "0.4rem" }}>
+                {services.map((service) => (
+                  <span key={service} className="biz-service-tag">
+                    {service}
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ fontSize: "0.9rem", cursor: "pointer" }}
+                      onClick={() => handleServiceRemove(service)}
+                    >close</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className="create-family-form__actions">
+              <button type="submit" className="btn-primary">
+                <span className="material-symbols-outlined">send</span>
+                Enviar a revisión
               </button>
             </div>
 
-            {/* Chips context */}
-            <div className="chips-container mt-2">
-              {services.map((service) => (
-                <span key={service} className="chip">
-                  {service}
-                  <button
-                    type="button"
-                    className="btn-chip-delete"
-                    onClick={() => handleServiceRemove(service)}
-                  >
-                    <span className="material-symbols-outlined text-sm">
-                      close
-                    </span>
-                  </button>
-                </span>
-              ))}
-            </div>
-          </div>
+          </form>
+        </section>
 
-          <button type="submit" className="btn-outline-secondary w-full mt-4">
-            Enviar a revisión
-          </button>
-        </form>
-      </section>
+      </div>
     </main>
   );
 }
