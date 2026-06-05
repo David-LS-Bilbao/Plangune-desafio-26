@@ -51,7 +51,11 @@ Estado actual:
   sin IA.
 * El campo actual para planes interiores/a cubierto es `events.es_interior`.
 * Existe una migración incremental segura para renombrar `es_lluvia` a `es_interior`.
-* Tests backend actuales: **10 suites · 73/73 verdes**.
+* Tests backend actuales: **11 suites · 91/91 verdes**.
+* PostgreSQL local usa `localhost:5434` desde el host para evitar conflictos con otros
+  proyectos en `5432`; dentro de Docker el backend sigue usando `postgres:5432`.
+* Existe un importador CSV seguro (`backend/prisma/import-events-from-csv.js`) para ampliar
+  eventos con datos de Data bajo validación explícita. Ver [docs/database.md](docs/database.md).
 
 Endpoints actuales:
 
@@ -70,7 +74,13 @@ DATA_API_URL=http://localhost:5000
 DATA_API_TIMEOUT_MS=2000
 ```
 
-Pendiente técnico: dockerizar `data-api` en Compose para activar Data en local de forma reproducible.
+Para activar Data en local:
+
+* Windows/Linux: `DATA_API_URL=http://localhost:5000`.
+* Mac: usar `DATA_API_URL=http://localhost:5050` si AirPlay/Control Center ocupa el puerto `5000`.
+
+Data vive en el repo externo `Desafio-Data`. Express sigue siendo la única fachada pública para
+frontend; el frontend nunca llama directamente a Data.
 
 Variables LLM local (`backend/.env.example`):
 
@@ -78,16 +88,21 @@ Variables LLM local (`backend/.env.example`):
 LLM_ASSISTANT_ENABLED=false
 LLM_ASSISTANT_API_URL=http://localhost:5001
 LLM_ASSISTANT_TIMEOUT_MS=8000
+LLM_ASSISTANT_CONTRACT=get-question
 ```
 
-Documentación completa del asistente local: [docs/integration-ai-ollama-local.md](docs/integration-ai-ollama-local.md).
-Pendiente técnico: dockerizar `ai-service` en una fase posterior; hoy es solo demo local controlada.
+Con `LLM_ASSISTANT_CONTRACT=get-question`, Express consume el chatbot Data por contrato `GET
+/<pregunta>` y mantiene fallback local si Data falla. Documentación completa:
+[docs/integration-ai-ollama-local.md](docs/integration-ai-ollama-local.md).
 
 Arranque y tests (monorepo npm workspaces):
 
 ```bash
 npm install
 npm run dev:backend     # API en http://localhost:3000
+npm run prisma:generate --workspace backend
+npm run prisma:migrate  --workspace backend
+npm run db:seed         --workspace backend
 npm run test:backend    # tests con Vitest + Supertest
 ```
 
@@ -685,7 +700,7 @@ Variables previstas:
 ```env
 PORT=3000
 NODE_ENV=development
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/desafio26_dev?schema=public
+DATABASE_URL=postgresql://desafio26:desafio26_dev_password@localhost:5434/desafio26_dev?schema=public
 JWT_SECRET=change_me
 JWT_EXPIRES_IN=7d
 CLIENT_URL=http://localhost:5173

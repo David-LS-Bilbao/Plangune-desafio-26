@@ -2,7 +2,7 @@
 
 - **Fecha:** 2026-06-03
 - **Rama:** `feat/backend-data-recommender-primary` (desde `feature/backend`)
-- **Estado:** implementada · tests 67/67 verdes · pendiente de PR a `feature/backend`
+- **Estado:** integrada en `feature/backend` · validada con fallback local y Data externo · tests backend 91/91 verdes
 - **Spec:** [../agents/data-recommender-primary-integration.md](../agents/data-recommender-primary-integration.md)
 
 > **Nombre técnico estable:** DESAFIO-26. App provisional: *TxikiPlan Euskadi* (lo define Marketing).
@@ -17,7 +17,7 @@ y el **recomendador local** (Family Score sobre `events` de Prisma/PostgreSQL) q
 
 - **Data como fuente principal**: si `DATA_RECOMMENDER_ENABLED=true`, Express llama a `GET {DATA_API_URL}/planes`.
 - **Fallback local**: si Data está deshabilitado, falla, agota timeout, devuelve 5xx, o responde algo vacío/inválido → se usa el recomendador local.
-- **Express sigue siendo la única API pública**: el frontend **nunca** llama a Flask directamente.
+- **Express sigue siendo la única API pública**: el frontend **nunca** llama a Flask/Data directamente.
 - **Contrato estable**: el shape de cada item se mantiene; se añade el campo `source`.
 - **Límite estable**: Express devuelve **como máximo 3** por defecto (o el valor de `limit`), también cuando Data responde OK. A Data se le envía siempre `limite = limit ?? 3` y, tras mapear, Express aplica `slice(0, limit ?? 3)` por seguridad.
 - **Campo DB actualizado**: el campo interno de eventos para planes interiores/a cubierto es `es_interior`; la migración incremental `20260603165855_rename_es_lluvia_to_es_interior` renombra la columna sin pérdida de datos.
@@ -47,8 +47,20 @@ GET /api/recommendations
 | `DATA_API_URL` | `http://localhost:5000` | Base URL de la API Flask de Data |
 | `DATA_API_TIMEOUT_MS` | `2000` | Timeout de la llamada a Data (ms) |
 
-> Se deja en **`false`** porque la API de Data aún **no corre en local** (pendiente de dockerizar).
-> Con `true` y Data caída, cada petición esperaría el timeout antes del fallback.
+Data vive en el repo externo `Desafio-Data`. Puertos locales habituales:
+
+```env
+# Windows/Linux
+DATA_RECOMMENDER_ENABLED=true
+DATA_API_URL=http://localhost:5000
+
+# Mac (AirPlay/Control Center puede ocupar 5000)
+DATA_RECOMMENDER_ENABLED=true
+DATA_API_URL=http://localhost:5050
+```
+
+> Se deja en **`false`** por defecto para que el backend use directamente el fallback local si Data
+> no está levantado. Con `true` y Data caída, cada petición esperaría el timeout antes del fallback.
 
 ---
 
@@ -130,7 +142,8 @@ curl "http://localhost:3000/api/recommendations?childrenAges=2&strollerFriendly=
 ```bash
 # En backend/.env:
 #   DATA_RECOMMENDER_ENABLED=true
-#   DATA_API_URL=http://localhost:5000
+#   DATA_API_URL=http://localhost:5000   # Windows/Linux
+#   DATA_API_URL=http://localhost:5050   # Mac si 5000 está ocupado por AirPlay
 # (requiere la API Flask de Data corriendo en esa URL)
 npm run dev:backend
 curl "http://localhost:3000/api/recommendations?municipality=Bilbao&childrenAges=2"
@@ -142,7 +155,7 @@ curl "http://localhost:3000/api/recommendations?municipality=Bilbao&childrenAges
 ```bash
 npm run prisma:generate --workspace backend
 npm run test:backend
-# → 10 suites · 67/67 verdes
+# → 11 suites · 91/91 verdes
 ```
 
 Los tests mockean el cliente de Data (`dataRecommender.client.js`) y el repositorio de eventos
@@ -163,7 +176,8 @@ Los tests mockean el cliente de Data (`dataRecommender.client.js`) y el reposito
 
 ## Pendiente
 
-- **Dockerizar la API de Data** (`data-api`) y añadirla a Compose para poder activar `DATA_RECOMMENDER_ENABLED=true` en local de forma reproducible.
+- Mantener documentada la coordinación con el repo externo `Desafio-Data` y sus puertos locales
+  (`5000` Windows/Linux, `5050` Mac cuando AirPlay ocupa `5000`).
 - Confirmar con Data el **contrato exacto de cada "plan"** dentro de `resultados` (campos disponibles, si traen `score`/`reasons` propios) y afinar el mapper si procede.
 - Cuando el frontend migre a `event`, retirar el alias `activity`.
 
