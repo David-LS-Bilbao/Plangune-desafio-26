@@ -97,4 +97,36 @@ describe("FamilyChatPlayground", () => {
       screen.getByRole("button", { name: "Aplicar preferencias" }),
     ).toBeInTheDocument();
   });
+
+  it("mapea las preferencias del drawer al familyProfile que espera el backend", async () => {
+    sendFamilyPlanMessage.mockResolvedValueOnce({ message: "Ok" });
+
+    const user = userEvent.setup();
+    render(<FamilyChatPlayground />);
+
+    // Abre el drawer y configura preferencias.
+    await user.click(
+      screen.getByRole("button", { name: "Abrir preferencias familiares" }),
+    );
+    await user.click(screen.getByRole("button", { name: "3-5 años" }));
+    await user.click(screen.getByText("Carrito"));
+    await user.click(screen.getByText("Cubierto o interior"));
+    await user.click(screen.getByText("Gratis o bajo coste"));
+    await user.click(
+      screen.getByRole("button", { name: "Aplicar preferencias" }),
+    );
+
+    // Envía un mensaje y comprueba el payload mapeado.
+    await user.click(screen.getByRole("button", { name: "Algo tranquilo" }));
+
+    expect(sendFamilyPlanMessage).toHaveBeenCalledWith({
+      message: "Algo tranquilo",
+      familyProfile: expect.objectContaining({
+        childrenAges: [4],
+        strollerFriendly: true,
+        rainSuitable: true,
+        budget: 0,
+      }),
+    });
+  });
 });

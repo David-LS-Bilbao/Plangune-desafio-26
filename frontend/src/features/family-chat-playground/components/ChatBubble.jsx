@@ -8,8 +8,8 @@ import GuniMascot from "./GuniMascot";
  *  - GUNI: fondo blanco con borde suave, alineada a la izquierda,
  *    con avatar pequeño de GUNI junto a la respuesta.
  *
- * Renderiza texto plano respetando saltos de línea SIN usar
- * dangerouslySetInnerHTML (se parte el texto por "\n").
+ * Renderiza texto plano de forma segura, separando por saltos de línea
+ * (se parte el texto por "\n").
  *
  * @param {Object} props
  * @param {"user"|"guni"} props.role - Autor del mensaje.

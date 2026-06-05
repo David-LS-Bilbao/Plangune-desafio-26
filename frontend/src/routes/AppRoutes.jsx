@@ -45,8 +45,11 @@ function AppRoutes() {
         <Route path="/perfil" element={<FamilyProfile />} />
         <Route path="/ofertas" element={<OffersUser />} />
         <Route path="/buscar" element={<PlansSearch />} />
-        {/* Ruta temporal de desarrollo: playground del chat con GUNI */}
-        <Route path="/dev/family-chat" element={<FamilyChatPlayground />} />
+        {/* Ruta temporal de desarrollo: playground del chat con GUNI.
+            Solo se registra en desarrollo; en build de producción se elimina. */}
+        {import.meta.env.DEV && (
+          <Route path="/dev/family-chat" element={<FamilyChatPlayground />} />
+        )}
       </Route>
 
       {/* Registration / Account Creation */}

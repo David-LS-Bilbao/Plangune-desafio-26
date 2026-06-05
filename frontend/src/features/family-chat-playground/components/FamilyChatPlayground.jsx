@@ -42,13 +42,24 @@ const BOTTOM_NAV = [
   { key: "guardados", label: "Guardados", icon: "🔖" },
 ];
 
+// El backend espera childrenAges como números (edad de referencia por rango).
+const AGE_RANGE_TO_NUMBER = {
+  "0-2 años": 1,
+  "3-5 años": 4,
+  "6-10 años": 8,
+  "11+": 11,
+};
+
 /**
  * Mapea las preferencias del drawer al perfil familiar que espera el backend.
+ *  - Rangos de edad -> número de referencia (childrenAges como array de números).
  *  - "Gratis o bajo coste" -> budget bajo (0).
  */
 function prefsToFamilyProfile(prefs) {
   return {
-    childrenAges: prefs.childrenAges,
+    childrenAges: prefs.childrenAges
+      .map((range) => AGE_RANGE_TO_NUMBER[range])
+      .filter((age) => age != null),
     municipality: prefs.municipality,
     strollerFriendly: prefs.strollerFriendly,
     rainSuitable: prefs.rainSuitable,
@@ -64,7 +75,6 @@ function FamilyChatPlayground() {
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [prefs, setPrefs] = useState(DEFAULT_PREFS);
 
@@ -88,7 +98,6 @@ function FamilyChatPlayground() {
     const text = String(rawText ?? "").trim();
     if (!text || loading) return;
 
-    setError(false);
     setInputValue("");
     setMessages((prev) => [
       ...prev,
@@ -122,7 +131,6 @@ function FamilyChatPlayground() {
         },
       ]);
     } catch (err) {
-      setError(true);
       setMessages((prev) => [
         ...prev,
         {
@@ -244,6 +252,7 @@ function FamilyChatPlayground() {
           className="fcp-inputbar__field"
           placeholder="Cuéntale a GUNI qué necesitas..."
           value={inputValue}
+          maxLength={500}
           disabled={loading}
           onChange={(event) => setInputValue(event.target.value)}
           aria-label="Mensaje para GUNI"
