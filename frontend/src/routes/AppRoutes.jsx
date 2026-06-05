@@ -16,6 +16,7 @@ import Favorites from "../pages/Favorites";
 import CreateFamily from "../pages/CreateFamily";
 import OffersUser from "../pages/OffersUser";
 import PlansSearch from "../pages/PlansSearch";
+import PlanificadorRapido from "../pages/PlanificadorRapido";
 import CreateBusiness from "../pages/CreateBusiness";
 import BusinessDashboard from "../pages/BusinessDashboard";
 import BusinessOverview from "../pages/BusinessOverview";
@@ -42,6 +43,7 @@ function AppRoutes() {
         <Route path="/perfil" element={<FamilyProfile />} />
         <Route path="/ofertas" element={<OffersUser />} />
         <Route path="/buscar" element={<PlansSearch />} />
+        <Route path="/planificador" element={<PlanificadorRapido />} />
       </Route>
 
       {/* Registration / Account Creation */}

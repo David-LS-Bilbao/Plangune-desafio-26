@@ -43,6 +43,7 @@ function Navigation() {
   const defaultLinks = [
     { to: "/", icon: "home", label: "Inicio", exact: true },
     { to: "/planes", icon: "event", label: "Planes", exact: false },
+    { to: "/planificador", icon: "auto_awesome", label: "Planificar", exact: false },
     { to: "/ofertas", icon: "local_offer", label: "Ofertas", exact: false },
     { to: "/buscar", icon: "search", label: "Buscar", exact: false },
     { to: "/perfil", icon: "account_circle", label: "Perfil" },
