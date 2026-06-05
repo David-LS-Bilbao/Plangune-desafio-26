@@ -13,10 +13,10 @@ function FamilyProfile() {
   const [preferences, setPreferences] = useState({
     carrito: true,
     cambiador: true,
-    mascota: false,
+    mascotas: false,
     interior: false,
     presupuesto: true,
-    tranquilos: false,
+    accesible: false,
   });
   const [avatar, setAvatar] = useState(user?.avatar || "FA");
   const [saved, setSaved] = useState(false);
@@ -236,13 +236,13 @@ function FamilyProfile() {
               <span className="material-symbols-outlined text-primary">
                 pets
               </span>
-              <span className="preference-text">Con mascota</span>
+              <span className="preference-text">Mascotas</span>
             </div>
             <label className="toggle-switch">
               <input
                 type="checkbox"
-                checked={preferences.mascota}
-                onChange={() => togglePreference("mascota")}
+                checked={preferences.mascotas}
+                onChange={() => togglePreference("mascotas")}
               />
               <span className="toggle-slider"></span>
             </label>
@@ -285,15 +285,15 @@ function FamilyProfile() {
           <div className="preference-item border-none">
             <div className="preference-info">
               <span className="material-symbols-outlined text-primary">
-                self_improvement
+                accessible
               </span>
-              <span className="preference-text">Planes tranquilos</span>
+              <span className="preference-text">Accesible</span>
             </div>
             <label className="toggle-switch">
               <input
                 type="checkbox"
-                checked={preferences.tranquilos}
-                onChange={() => togglePreference("tranquilos")}
+                checked={preferences.accesible}
+                onChange={() => togglePreference("accesible")}
               />
               <span className="toggle-slider"></span>
             </label>

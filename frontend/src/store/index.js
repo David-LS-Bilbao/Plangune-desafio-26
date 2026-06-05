@@ -24,12 +24,43 @@ export const useUserStore = create((set, get) => ({
     { id: 1, name: "Ibai", age: 5 },
     { id: 2, name: "Ane", age: 8 },
   ],
-  toggleFavorite: (planId) => {
+  fetchFavorites: async () => {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      const response = await fetch(`${apiUrl}/favorites`);
+      if (response.ok) {
+        const data = await response.json();
+        const ids = data.map((fav) => fav.id);
+        set({ favorites: ids });
+      }
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+    }
+  },
+  toggleFavorite: async (planId) => {
     const { favorites } = get();
-    if (favorites.includes(planId)) {
-      set({ favorites: favorites.filter((id) => id !== planId) });
-    } else {
-      set({ favorites: [...favorites, planId] });
+    const isFav = favorites.includes(planId);
+    
+    // Optimistic update
+    const nextFavorites = isFav
+      ? favorites.filter((id) => id !== planId)
+      : [...favorites, planId];
+    
+    set({ favorites: nextFavorites });
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      const response = await fetch(`${apiUrl}/favorites/${planId}`, {
+        method: isFav ? "DELETE" : "POST",
+      });
+      if (!response.ok) {
+        // Rollback
+        set({ favorites });
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      // Rollback
+      set({ favorites });
     }
   },
   isFavorite: (planId) => get().favorites.includes(planId),
@@ -87,6 +118,54 @@ export const useAdminStore = create((set, get) => ({
 // --- PLANS STORE (Search, Filters, Data) ---
 export const usePlansStore = create((set, get) => ({
   allPlans: mockPlans,
+  loading: false,
+  error: null,
+
+  fetchPlans: async () => {
+    set({ loading: true, error: null });
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      const response = await fetch(`${apiUrl}/events`);
+      if (!response.ok) throw new Error("Error fetching plans");
+      const data = await response.json();
+
+      const mapped = data.map((event) => {
+        let cat = event.categoria || "Otros";
+        cat = cat.charAt(0).toUpperCase() + cat.slice(1);
+
+        return {
+          id: event.id,
+          title: event.title,
+          location: event.lugar || event.address || event.municipio || "",
+          category: cat,
+          price: event.price || "Gratis",
+          rating: event.rating || 4.5,
+          reviews: event.reviews || 0,
+          distance: "A 2km de ti",
+          ageRange: event.edad_minima !== null 
+            ? (Number(event.edad_minima) === 0 ? "Todas las edades" : `${Math.floor(Number(event.edad_minima))}+ años`)
+            : "Todas las edades",
+          tags: [
+            event.es_interior ? "Interior" : "Aire Libre",
+            event.es_carrito ? "Apto Carrito" : null,
+            event.es_cambiador ? "Cambiador" : null,
+            event.es_silla_ruedas ? "Accesible" : null,
+            event.es_mascotas ? "Mascotas" : null,
+          ].filter(Boolean),
+          isIdeal: event.multiplicador > 1,
+          subscriptionTier: event.business_id ? (event.business_id === 1 ? "Premium" : "Pro") : "None",
+          description: event.description || "",
+          image: event.imagen_url || "https://images.unsplash.com/photo-1543325164-9ed3ebc18221?q=80&w=600&auto=format&fit=crop",
+        };
+      });
+
+      set({ allPlans: mapped, loading: false });
+    } catch (error) {
+      console.warn("Backend API failed. Falling back to local mock plans:", error);
+      set({ allPlans: mockPlans, loading: false, error: error.message });
+    }
+  },
+
   searchQuery: "",
   setSearchQuery: (query) => set({ searchQuery: query }),
 

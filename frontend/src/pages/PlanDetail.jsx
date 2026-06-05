@@ -28,6 +28,30 @@ function PlanDetail() {
   const isFavorite = useUserStore((state) => state.isFavorite(parseInt(id)));
   const toggleFavorite = useUserStore((state) => state.toggleFavorite);
 
+  const handleReport = async () => {
+    if (!plan) return;
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      const response = await fetch(`${apiUrl}/incidents`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          activityId: String(plan.id),
+          type: "datos-incorrectos",
+          description: "Incidencia reportada desde la página de detalle del plan",
+        }),
+      });
+      if (response.ok) {
+        setReportStatus("Tu reporte ha sido enviado. Gracias.");
+      } else {
+        setReportStatus("Error al enviar el reporte.");
+      }
+    } catch (err) {
+      console.error(err);
+      setReportStatus("Error de conexión al enviar el reporte.");
+    }
+  };
+
   if (!plan) {
     return (
       <main className="plan-detail-main">
@@ -121,7 +145,7 @@ function PlanDetail() {
         <button
           className="detail-report-btn"
           type="button"
-          onClick={() => setReportStatus("Tu reporte ha sido enviado. Gracias.")}
+          onClick={handleReport}
         >
           <span className="material-symbols-outlined">report</span>
           Reportar incidencia
@@ -173,12 +197,29 @@ function PlanDetail() {
             <button
               className="detail-btn detail-btn--primary"
               type="button"
-              onClick={() => {
+              onClick={async () => {
                 if (newReviewText.trim()) {
-                  setReviews([{ id: Date.now(), author: "Tú", avatar: "TU", time: "Justo ahora", text: newReviewText, rating: newReviewRating }, ...reviews]);
+                  const text = newReviewText;
+                  const rating = newReviewRating;
+                  setReviews([{ id: Date.now(), author: "Tú", avatar: "TU", time: "Justo ahora", text, rating }, ...reviews]);
                   setNewReviewText("");
                   setNewReviewRating(5);
                   setShowReviewForm(false);
+
+                  try {
+                    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+                    await fetch(`${apiUrl}/reviews`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        activityId: String(plan.id),
+                        rating,
+                        comment: text,
+                      }),
+                    });
+                  } catch (err) {
+                    console.error("Error submitting review:", err);
+                  }
                 }
               }}
             >

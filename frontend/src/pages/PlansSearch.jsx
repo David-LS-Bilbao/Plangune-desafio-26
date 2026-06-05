@@ -3,7 +3,7 @@ import { usePlansStore } from "../store";
 import PlanCard from "../components/common/PlanCard";
 
 const AGE_OPTIONS = ["Bebé", "1-3 años", "4-6 años", "7-9 años", "10-12 años"];
-const FEATURE_OPTIONS = ["Carrito", "Cambiador", "Mascota", "Interior", "Tranquilo", "Gratis"];
+const FEATURE_OPTIONS = ["Carrito", "Cambiador", "Mascotas", "Interior", "Accesible", "Gratis"];
 
 function PlansSearch() {
   const getFilteredPlans = usePlansStore((state) => state.getFilteredPlans);
