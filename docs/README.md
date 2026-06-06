@@ -45,7 +45,17 @@ docs/
 - [Calidad y cobertura](quality/) — estrategia 100/80/0 y estado de tests.
 - [Propuesta de modelo de Data](data/README.md) — `BBDD.sql` (no ejecutable, pendiente de reconciliar).
 - [Plan de integración Frontend ↔ Backend](integration-frontend-backend.md) — mapeo pantallas ↔ endpoints.
+- [Contrato Frontend ↔ Backend](contracts/frontend-backend-api-contract.md) — fuente de verdad del contrato de API.
 - [Decisiones de arquitectura (ADR)](adr/) — `0001` Prisma no-runtime, `0002` Family Score, `0003` divergencia SQL.
+
+## Features documentadas
+
+Fichas técnicas por feature en [features/](features/). Destacadas:
+
+- [Frontend · Playground del chat familiar GUNI](features/frontend-family-chat-playground-guni.md) — asistente `/dev/family-chat` que consume `POST /api/assistant/family-plan`.
+- [Backend · Favoritos sobre events runtime](features/backend-favorites-events-runtime.md)
+- [Backend · Recomendaciones sobre events runtime](features/backend-recommendations-events-runtime.md)
+- [Backend · Data como recomendador principal](features/backend-data-recommender-primary.md)
 
 ## Documentación técnica prevista (futuras ramas)
 

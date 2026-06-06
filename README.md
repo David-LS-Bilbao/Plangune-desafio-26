@@ -51,7 +51,7 @@ Estado actual:
   sin IA.
 * El campo actual para planes interiores/a cubierto es `events.es_interior`.
 * Existe una migración incremental segura para renombrar `es_lluvia` a `es_interior`.
-* Tests backend actuales: **11 suites · 91/91 verdes**.
+* Tests backend actuales: **11 suites · 94/94 verdes**.
 * PostgreSQL local usa `localhost:5434` desde el host para evitar conflictos con otros
   proyectos en `5432`; dentro de Docker el backend sigue usando `postgres:5432`.
 * Existe un importador CSV seguro (`backend/prisma/import-events-from-csv.js`) para ampliar
@@ -107,6 +107,30 @@ npm run test:backend    # tests con Vitest + Supertest
 ```
 
 Contrato detallado en [docs/api.md](docs/api.md) · base de datos y seed en [docs/database.md](docs/database.md) · seguridad en [docs/security.md](docs/security.md) · calidad y cobertura en [docs/quality/](docs/quality/).
+
+### Frontend · Asistente familiar GUNI (playground)
+
+El frontend incluye **GUNI**, el asistente familiar conversacional, como **playground visual aislado**
+en la ruta de desarrollo **`/dev/family-chat`**.
+
+* Es la **única parte del frontend que consume el backend real**
+  (`POST /api/assistant/family-plan` vía `VITE_API_URL`). El resto de pantallas (planes, login,
+  favoritos, negocio, admin) funciona de momento con datos mock.
+* La ruta **solo se registra en desarrollo** (`import.meta.env.DEV`); en el build de producción se
+  elimina y no es accesible.
+* Cumple el [contrato Frontend ↔ Backend](docs/contracts/frontend-backend-api-contract.md):
+  distingue `mode:"ai"` (`assistantMessageMarkdown`) y `mode:"fallback"` (`message` +
+  `recommendations`), degrada con un mensaje amable si la IA falla y **no expone `source`/`mode`
+  en crudo** al usuario.
+* Mobile-first, CSS propio namespaced (`.fcp`), accesible. Tests: **6/6 verdes**.
+
+Detalle completo en
+[docs/features/frontend-family-chat-playground-guni.md](docs/features/frontend-family-chat-playground-guni.md).
+
+```bash
+npm run dev:backend                  # API en http://localhost:3000
+npm run dev --workspace frontend     # http://localhost:5173/dev/family-chat
+```
 
 ---
 
