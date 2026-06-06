@@ -43,6 +43,8 @@ Lista eventos. Responde un **array**. Admite filtros opcionales por query string
 | `es_interior` | boolean | `true` | plan a cubierto / apto si llueve |
 | `es_carrito` | boolean | `true` | accesible con carrito |
 | `es_cambiador` | boolean | `true` | dispone de cambiador |
+| `es_silla_ruedas` | boolean | `true` | accesible con silla de ruedas |
+| `es_mascotas` | boolean | `true` | admite mascotas |
 | `edad` | entero | `2` | apto si `edad_minima <= edad` |
 | `fecha_desde` | ISO 8601 | `2026-07-01` | `fecha_inicio >= fecha_desde` |
 | `fecha_hasta` | ISO 8601 | `2026-07-31` | `fecha_inicio <= fecha_hasta` |
@@ -330,7 +332,7 @@ Respuesta `200`:
 | Método | Ruta | Descripción |
 |---|---|---|
 | GET | `/api/health` | Healthcheck |
-| GET | `/api/events` | Lista de eventos (filtros: municipio, territorio, categoria, tipo_evento, es_interior, es_carrito, es_cambiador, edad, fecha_desde, fecha_hasta) |
+| GET | `/api/events` | Lista de eventos (filtros: municipio, territorio, categoria, tipo_evento, es_interior, es_carrito, es_cambiador, es_silla_ruedas, es_mascotas, edad, fecha_desde, fecha_hasta) |
 | GET | `/api/events/:id` | Detalle de evento |
 | GET | `/api/activities` | Lista de actividades aprobadas (mock previo) |
 | GET | `/api/activities/:id` | Detalle de actividad |

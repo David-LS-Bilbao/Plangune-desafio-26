@@ -74,6 +74,8 @@ Devuelve un **array** de eventos (shape real de la tabla `events`, **snake_case*
 | `es_interior` | boolean | `true` | plan a cubierto / apto si llueve |
 | `es_carrito` | boolean | `true` | accesible con carrito |
 | `es_cambiador` | boolean | `true` | dispone de cambiador |
+| `es_silla_ruedas` | boolean | `true` | accesible con silla de ruedas |
+| `es_mascotas` | boolean | `true` | admite mascotas |
 | `edad` | entero | `2` | apto si `edad_minima <= edad` |
 | `fecha_desde` | ISO 8601 | `2026-07-01` | `fecha_inicio >= fecha_desde` |
 | `fecha_hasta` | ISO 8601 | `2026-07-31` | `fecha_inicio <= fecha_hasta` |
@@ -297,6 +299,8 @@ deshabilitado, **fallback local** sin IA. El frontend **siempre** consume este E
 | Municipio | `municipio` | `municipality` |
 | Carrito | `es_carrito` | `strollerFriendly` |
 | Cambiador | `es_cambiador` | `changingTable` |
+| Silla de ruedas | `es_silla_ruedas` | `wheelchairAccessible` |
+| Mascotas | `es_mascotas` | `petsAllowed` |
 | Apto si llueve | `es_interior` | `rainSuitable` |
 | Presupuesto | — | `budget` |
 

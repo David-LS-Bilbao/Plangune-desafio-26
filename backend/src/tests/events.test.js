@@ -40,6 +40,8 @@ function filterMockEvents(filters = {}) {
     if (filters.es_interior    !== undefined && ev.es_interior    !== filters.es_interior)    return false;
     if (filters.es_carrito   !== undefined && ev.es_carrito   !== filters.es_carrito)   return false;
     if (filters.es_cambiador !== undefined && ev.es_cambiador !== filters.es_cambiador) return false;
+    if (filters.es_silla_ruedas !== undefined && ev.es_silla_ruedas !== filters.es_silla_ruedas) return false;
+    if (filters.es_mascotas !== undefined && ev.es_mascotas !== filters.es_mascotas) return false;
 
     if (filters.edad !== undefined && (ev.edad_minima ?? 0) > filters.edad) return false;
 
@@ -134,8 +136,58 @@ describe('GET /api/events', () => {
     ).toBe(true);
   });
 
+  it('filtra por es_silla_ruedas=true (accesible con silla de ruedas)', async () => {
+    const res = await request(app).get('/api/events?es_silla_ruedas=true');
+
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body.length).toBeLessThan(mockEvents.length);
+    expect(res.body.every((ev) => ev.es_silla_ruedas === true)).toBe(true);
+  });
+
+  it('filtra por es_silla_ruedas=false (no accesible con silla de ruedas)', async () => {
+    const res = await request(app).get('/api/events?es_silla_ruedas=false');
+
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body.length).toBeLessThan(mockEvents.length);
+    expect(res.body.every((ev) => ev.es_silla_ruedas === false)).toBe(true);
+  });
+
+  it('filtra por es_mascotas=true (admite mascotas)', async () => {
+    const res = await request(app).get('/api/events?es_mascotas=true');
+
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body.length).toBeLessThan(mockEvents.length);
+    expect(res.body.every((ev) => ev.es_mascotas === true)).toBe(true);
+  });
+
+  it('filtra por es_mascotas=false (no admite mascotas)', async () => {
+    const res = await request(app).get('/api/events?es_mascotas=false');
+
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBeGreaterThan(0);
+    expect(res.body.length).toBeLessThan(mockEvents.length);
+    expect(res.body.every((ev) => ev.es_mascotas === false)).toBe(true);
+  });
+
   it('rechaza un filtro booleano inválido con 422', async () => {
     const res = await request(app).get('/api/events?es_carrito=quizas');
+
+    expect(res.status).toBe(422);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  it('rechaza es_silla_ruedas no booleano con 422', async () => {
+    const res = await request(app).get('/api/events?es_silla_ruedas=quizas');
+
+    expect(res.status).toBe(422);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  it('rechaza es_mascotas no booleano con 422', async () => {
+    const res = await request(app).get('/api/events?es_mascotas=quizas');
 
     expect(res.status).toBe(422);
     expect(res.body).toHaveProperty('error');
