@@ -27,7 +27,7 @@ function LoginForm() {
 
     login(detectedRole);
     
-    if (detectedRole === "family") navigate("/planes");
+    if (detectedRole === "family") navigate("/perfil");
     else if (detectedRole === "business") navigate("/negocio/dashboard");
     else if (detectedRole === "admin") navigate("/admin");
   };

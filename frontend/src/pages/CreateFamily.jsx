@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store";
+import NavbarResponsive from "../components/common/NavbarResponsive";
 
 function CreateFamily() {
   const navigate = useNavigate();
@@ -9,7 +10,6 @@ function CreateFamily() {
     familyName: "",
     location: "",
     members: "",
-    childrenAges: "",
     email: "",
     password: "",
   });
@@ -22,133 +22,78 @@ function CreateFamily() {
   const handleSubmit = (e) => {
     e.preventDefault();
     login("family");
-    navigate("/planes");
+    navigate("/perfil");
   };
 
   return (
-    <main className="create-account-main">
-      <section className="page-header">
-        <p className="page-tag">Registro familiar</p>
-        <h1 className="page-title">Crea tu familia</h1>
-        <p className="page-subtitle">
-          Configura tu perfil para recibir planes y recomendaciones
-          personalizadas.
-        </p>
-      </section>
+    <>
+    <NavbarResponsive />
+    <main className="create-family-main">
+      <div className="create-family-card">
 
-      <section className="create-card">
-        <form className="create-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="familyName">
-              Nombre de la familia
-            </label>
-            <input
-              id="familyName"
-              name="familyName"
-              type="text"
-              className="form-input"
-              value={form.familyName}
-              onChange={handleChange}
-              placeholder="Familia Bilbao"
-              required
-            />
+        <div className="create-family-header">
+          <h1 className="create-family-title">Crea tu familia</h1>
+          <p className="create-family-subtitle">
+            Configura tu perfil para recibir planes y recomendaciones personalizadas.
+          </p>
+        </div>
+
+        <form className="create-family-form" onSubmit={handleSubmit}>
+
+          <div className="create-family-form__group">
+            <label className="section-label" htmlFor="familyName">Nombre de la familia</label>
+            <div className="input-with-icon">
+              <span className="material-symbols-outlined icon">family_restroom</span>
+              <input id="familyName" name="familyName" type="text" value={form.familyName} onChange={handleChange} placeholder="Familia Bilbao" required />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="location">
-              Ubicación
-            </label>
-            <input
-              id="location"
-              name="location"
-              type="text"
-              className="form-input"
-              value={form.location}
-              onChange={handleChange}
-              placeholder="Bilbao"
-              required
-            />
+          <div className="create-family-form__group">
+            <label className="section-label" htmlFor="location">Ubicación</label>
+            <div className="input-with-icon">
+              <span className="material-symbols-outlined icon">location_on</span>
+              <input id="location" name="location" type="text" value={form.location} onChange={handleChange} placeholder="Bilbao" required />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="members">
-              Miembros en el hogar
-            </label>
-            <input
-              id="members"
-              name="members"
-              type="number"
-              className="form-input"
-              value={form.members}
-              onChange={handleChange}
-              placeholder="4"
-              min="1"
-              required
-            />
+          <div className="create-family-form__group">
+            <label className="section-label" htmlFor="members">Miembros en el hogar</label>
+            <div className="input-with-icon">
+              <span className="material-symbols-outlined icon">group</span>
+              <input id="members" name="members" type="number" value={form.members} onChange={handleChange} placeholder="4" min="1" required />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="childrenAges">
-              Edades de los peques
-            </label>
-            <input
-              id="childrenAges"
-              name="childrenAges"
-              type="text"
-              className="form-input"
-              value={form.childrenAges}
-              onChange={handleChange}
-              placeholder="8 meses, 3 años"
-            />
+<div className="create-family-form__group">
+            <label className="section-label" htmlFor="email">Correo electrónico</label>
+            <div className="input-with-icon">
+              <span className="material-symbols-outlined icon">mail</span>
+              <input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="tu@email.com" required />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">
-              Correo electrónico
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              className="form-input"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="tu@email.com"
-              required
-            />
+          <div className="create-family-form__group">
+            <label className="section-label" htmlFor="password">Contraseña</label>
+            <div className="input-with-icon">
+              <span className="material-symbols-outlined icon">lock</span>
+              <input id="password" name="password" type="password" value={form.password} onChange={handleChange} placeholder="••••••••" required />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="password">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              className="form-input"
-              value={form.password}
-              onChange={handleChange}
-              placeholder="••••••••"
-              required
-            />
-          </div>
-
-          <div className="form-actions">
-            <button type="submit" className="btn-primary-full">
+          <div className="create-family-form__actions">
+            <button type="submit" className="btn-primary">
+              <span className="material-symbols-outlined">family_restroom</span>
               Crear familia
             </button>
-            <button
-              type="button"
-              className="btn-link"
-              onClick={() => navigate("/login")}
-            >
+            <button type="button" className="btn-text-danger" onClick={() => navigate("/login")}>
               Volver al inicio
             </button>
           </div>
+
         </form>
-      </section>
+      </div>
     </main>
+    </>
   );
 }
 

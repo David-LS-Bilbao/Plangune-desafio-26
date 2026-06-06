@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBusinessStore } from "../store";
 
 function CreateOffer() {
   const navigate = useNavigate();
+  const addOffer = useBusinessStore((state) => state.addOffer);
   const [offerData, setOfferData] = useState({
     title: "",
     description: "",
@@ -15,13 +16,13 @@ function CreateOffer() {
     endDate: "",
   });
   const [statusMessage, setStatusMessage] = useState("");
+  const [coverImage, setCoverImage] = useState(null);
+  const fileInputRef = useRef(null);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
     setOfferData((prev) => ({ ...prev, [id]: value }));
   };
-
-  const addOffer = useBusinessStore((state) => state.addOffer);
 
   const handleSendReview = () => {
     addOffer({
@@ -30,271 +31,155 @@ function CreateOffer() {
       activity: offerData.associatedActivity || "Actividad General",
       icon: "local_offer",
       meta: offerData.promoCode ? `Código: ${offerData.promoCode}` : "Sin código",
-      status: "pending"
+      status: "pending",
     });
-    setStatusMessage(
-      "Oferta enviada a revisión. Redirigiendo...",
-    );
-    setTimeout(() => {
-      navigate('/negocio/ofertas');
-    }, 1500);
+    setStatusMessage("Oferta enviada a revisión. Redirigiendo...");
+    setTimeout(() => navigate("/negocio/ofertas"), 1500);
   };
 
   const handleSaveDraft = () => {
-    setStatusMessage(
-      "Borrador guardado. Puedes volver a editarlo cuando quieras.",
-    );
-  };
-
-  const handleBack = () => {
-    navigate("/negocio/dashboard");
+    setStatusMessage("Borrador guardado. Puedes volver a editarlo cuando quieras.");
   };
 
   return (
-    <main className="create-offer-main">
-      <div className="offer-header-simple">
-        <button
-          className="btn-icon-round"
-          aria-label="Volver"
-          type="button"
-          onClick={handleBack}
-        >
-          <span className="material-symbols-outlined">arrow_back</span>
-        </button>
-        <h1 className="header-title truncate">Crear Oferta</h1>
-        <div className="header-status hidden md:flex">
-          <span className="badge-draft">Borrador</span>
+    <main className="biz-dashboard-main">
+
+      <div className="biz-dashboard-header">
+        <h1 className="biz-dashboard-title">Gestionar oferta</h1>
+        <div className="btn-back-wrapper">
+          <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
+            Volver atrás
+          </button>
         </div>
       </div>
 
-      <form className="offer-form" onSubmit={(e) => e.preventDefault()}>
-        {/* Left Column: Primary Content & Media */}
-        <div className="left-column">
-          {/* Media Upload Bento Card */}
-          <section className="media-upload-section group">
-            <div className="upload-container">
-              <span className="material-symbols-outlined icon-upload group-hover:text-primary fill">
-                add_photo_alternate
-              </span>
-              <div className="upload-text">
-                <p className="primary-text">Subir Imagen de Portada</p>
-                <p className="secondary-text">
-                  PNG, JPG, o WEBP (Recomendado: 16:9, max 5MB)
-                </p>
+      <form className="create-offer-form" onSubmit={(e) => e.preventDefault()}>
+
+        {/* Columna izquierda */}
+        <div className="create-offer-left">
+
+          {/* Imagen de portada */}
+          <section className="biz-activity-form create-offer-media" onClick={() => fileInputRef.current.click()}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) setCoverImage(URL.createObjectURL(file));
+              }}
+            />
+            {coverImage ? (
+              <img src={coverImage} alt="Portada" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '0.8rem' }} />
+            ) : (
+              <div className="create-offer-upload">
+                <span className="material-symbols-outlined">add_photo_alternate</span>
+                <p className="create-offer-upload__primary">Subir imagen de portada</p>
+                <p className="create-offer-upload__secondary">PNG, JPG o WEBP · Recomendado 16:9 · Máx. 5MB</p>
               </div>
-              <div className="gradient-blob"></div>
-            </div>
+            )}
           </section>
 
-          <section className="core-info-section">
-            <div className="form-group">
-              <label htmlFor="title" className="form-label">
-                Título de la oferta
-              </label>
-              <input
-                type="text"
-                id="title"
-                className="form-input"
-                placeholder="Ej: 20% Dto en Taller de Cerámica Familiar"
-                value={offerData.title}
-                onChange={handleChange}
-              />
+          {/* Información principal */}
+          <section className="biz-activity-form">
+            <h2 className="biz-panel__title">Información principal</h2>
+
+            <div className="create-family-form__group">
+              <label className="section-label biz-label" htmlFor="title">Título de la oferta</label>
+              <input type="text" id="title" className="biz-input" placeholder="Ej: 20% Dto en Taller de Cerámica Familiar" value={offerData.title} onChange={handleChange} />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="description" className="form-label">
-                Descripción
-              </label>
-              <textarea
-                id="description"
-                rows="4"
-                className="form-textarea"
+            <div className="create-family-form__group">
+              <label className="section-label biz-label" htmlFor="description">Descripción</label>
+              <textarea id="description" className="biz-input create-offer-textarea" rows="4"
                 placeholder="Explica en qué consiste la oferta, qué incluye y por qué es genial para las familias..."
-                value={offerData.description}
-                onChange={handleChange}
+                value={offerData.description} onChange={handleChange}
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="conditions" className="form-label">
-                Condiciones del servicio
-              </label>
-              <textarea
-                id="conditions"
-                rows="3"
-                className="form-textarea text-sm"
+            <div className="create-family-form__group">
+              <label className="section-label biz-label" htmlFor="conditions">Condiciones del servicio</label>
+              <textarea id="conditions" className="biz-input create-offer-textarea" rows="3"
                 placeholder="Restricciones de edad, necesidad de reserva previa, días excluidos..."
-                value={offerData.conditions}
-                onChange={handleChange}
+                value={offerData.conditions} onChange={handleChange}
               />
             </div>
           </section>
         </div>
 
-        <div className="right-column">
-          <div className="sticky-wrapper">
-            <section className="config-section">
-              <h2 className="section-title">Configuración</h2>
+        {/* Columna derecha */}
+        <div className="create-offer-right">
+          <div className="create-offer-sticky">
 
-              <div className="form-group">
-                <label htmlFor="associatedActivity" className="form-label">
-                  Actividad asociada
-                </label>
-                <div className="input-with-icon">
-                  <select
-                    id="associatedActivity"
-                    className="form-select"
-                    value={offerData.associatedActivity}
-                    onChange={handleChange}
-                  >
-                    <option value="" disabled>
-                      Selecciona una actividad activa
-                    </option>
-                    <option value="Taller de Cerámica Familiar (Sábados)">
-                      Taller de Cerámica Familiar (Sábados)
-                    </option>
-                    <option value="Ruta Guiada por el Bosque Mágico">
-                      Ruta Guiada por el Bosque Mágico
-                    </option>
-                    <option value="Clase de Surf para Principiantes">
-                      Clase de Surf para Principiantes
-                    </option>
-                  </select>
-                  <span className="material-symbols-outlined icon">
-                    expand_more
-                  </span>
-                </div>
+            <section className="biz-activity-form">
+              <h2 className="biz-panel__title">Configuración</h2>
+
+              <div className="create-family-form__group">
+                <label className="section-label biz-label" htmlFor="associatedActivity">Actividad asociada</label>
+                <select id="associatedActivity" className="biz-input" value={offerData.associatedActivity} onChange={handleChange}>
+                  <option value="" disabled>Selecciona una actividad activa</option>
+                  <option value="Taller de Cerámica Familiar (Sábados)">Taller de Cerámica Familiar (Sábados)</option>
+                  <option value="Ruta Guiada por el Bosque Mágico">Ruta Guiada por el Bosque Mágico</option>
+                  <option value="Clase de Surf para Principiantes">Clase de Surf para Principiantes</option>
+                </select>
               </div>
 
-              <div className="form-group">
-                <label htmlFor="offerType" className="form-label">
-                  Tipo de oferta
-                </label>
-                <div className="input-with-icon">
-                  <select
-                    id="offerType"
-                    className="form-select"
-                    value={offerData.offerType}
-                    onChange={handleChange}
-                  >
-                    <option value="discount">Descuento (%)</option>
-                    <option value="fixed_amount">Importe Fijo (€)</option>
-                    <option value="bogo">2x1</option>
-                    <option value="gift">Regalo con reserva</option>
-                  </select>
-                  <span className="material-symbols-outlined icon">
-                    expand_more
-                  </span>
-                </div>
+              <div className="create-family-form__group">
+                <label className="section-label biz-label" htmlFor="offerType">Tipo de oferta</label>
+                <select id="offerType" className="biz-input" value={offerData.offerType} onChange={handleChange}>
+                  <option value="discount">Descuento (%)</option>
+                  <option value="fixed_amount">Importe fijo (€)</option>
+                  <option value="bogo">2x1</option>
+                  <option value="gift">Regalo con reserva</option>
+                </select>
               </div>
 
-              <div className="form-group">
-                <div className="label-row">
-                  <label htmlFor="promoCode" className="form-label mb-0">
-                    Código promocional
-                  </label>
-                  <span className="label-optional">Opcional</span>
+              <div className="create-family-form__group">
+                <label className="section-label biz-label" htmlFor="promoCode">
+                  Código promocional
+                  <span className="create-offer-optional">Opcional</span>
+                </label>
+                <input type="text" id="promoCode" className="biz-input" placeholder="TXIKI20" value={offerData.promoCode} onChange={handleChange} />
+              </div>
+            </section>
+
+            <section className="biz-activity-form">
+              <h2 className="biz-panel__title">Vigencia</h2>
+
+              <div className="create-offer-dates">
+                <div className="create-family-form__group">
+                  <label className="section-label biz-label" htmlFor="startDate">Fecha inicio</label>
+                  <input type="date" id="startDate" className="biz-input" value={offerData.startDate} onChange={handleChange} />
                 </div>
-                <div className="input-with-icon left-icon">
-                  <span className="material-symbols-outlined icon-left">
-                    sell
-                  </span>
-                  <input
-                    type="text"
-                    id="promoCode"
-                    className="form-input pl-10 uppercase-placeholder"
-                    placeholder="TXIKI20"
-                    value={offerData.promoCode}
-                    onChange={handleChange}
-                  />
+                <div className="create-family-form__group">
+                  <label className="section-label biz-label" htmlFor="endDate">Fecha fin</label>
+                  <input type="date" id="endDate" className="biz-input" value={offerData.endDate} onChange={handleChange} />
                 </div>
               </div>
             </section>
 
-            <section className="validity-section">
-              <h2 className="section-title">Vigencia</h2>
-              <div className="grid-2-cols">
-                <div className="form-group">
-                  <label htmlFor="startDate" className="form-label">
-                    Fecha inicio
-                  </label>
-                  <input
-                    type="date"
-                    id="startDate"
-                    className="form-input"
-                    value={offerData.startDate}
-                    onChange={handleChange}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="endDate" className="form-label">
-                    Fecha fin
-                  </label>
-                  <input
-                    type="date"
-                    id="endDate"
-                    className="form-input"
-                    value={offerData.endDate}
-                    onChange={handleChange}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <div className="admin-notice">
-              <span className="material-symbols-outlined fill text-secondary mt-0.5">
-                info
-              </span>
-              <p className="notice-text">
-                Las ofertas deben ser revisadas por admin antes de publicarse
-                para garantizar la calidad del servicio en TxikiPlan.
-              </p>
+            <div className="biz-activity-form create-offer-notice">
+              <span className="material-symbols-outlined fill" style={{ color: 'var(--accent-color)', fontSize: '1.5rem' }}>info</span>
+              <p>Las ofertas deben ser revisadas por el equipo de Plangune antes de publicarse.</p>
             </div>
 
-            <div className="desktop-actions hidden lg:flex">
-              <button
-                type="button"
-                className="btn-primary-icon"
-                onClick={handleSendReview}
-              >
-                <span className="material-symbols-outlined text-lg">send</span>
+            <div className="create-offer-actions">
+              <button type="button" className="btn-primary" onClick={handleSendReview}>
+                <span className="material-symbols-outlined">send</span>
                 Enviar a revisión
               </button>
-              <button
-                type="button"
-                className="btn-outline-icon"
-                onClick={handleSaveDraft}
-              >
-                <span className="material-symbols-outlined text-lg">save</span>
+              <button type="button" className="btn-text-danger" onClick={handleSaveDraft}>
+                <span className="material-symbols-outlined">save</span>
                 Guardar borrador
               </button>
             </div>
+
+            {statusMessage && <p className="status-message">{statusMessage}</p>}
           </div>
         </div>
+
       </form>
-
-      {statusMessage && (
-        <div className="status-message-container">
-          <p className="status-message">{statusMessage}</p>
-        </div>
-      )}
-
-      <div className="mobile-fixed-actions lg:hidden">
-        <button
-          type="button"
-          className="btn-outline flex-1 truncate"
-          onClick={handleSaveDraft}
-        >
-          Guardar borrador
-        </button>
-        <button
-          type="button"
-          className="btn-primary flex-1 truncate"
-          onClick={handleSendReview}
-        >
-          Enviar a revisión
-        </button>
-      </div>
     </main>
   );
 }

@@ -22,15 +22,15 @@ function AdminLayout() {
         </div>
         <div className="header-right">
           <button className="icon-btn" onClick={handleLogout} style={{ color: 'var(--error)' }}>
-            <span className="material-symbols-outlined">logout</span>
+            Cerrar sesión
           </button>
         </div>
       </header>
-      
+
       <div className="layout-content-wrapper">
         <Outlet />
       </div>
-      
+
       <Navigation />
     </>
   );
