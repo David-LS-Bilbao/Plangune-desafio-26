@@ -25,9 +25,11 @@ function ManageOffers() {
             <span className="material-symbols-outlined">add</span>
             Nueva oferta
           </button>
-          <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-            Volver atrás
-          </button>
+          <div className="btn-back-wrapper">
+            <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
+              Volver atrás
+            </button>
+          </div>
         </div>
       </div>
 

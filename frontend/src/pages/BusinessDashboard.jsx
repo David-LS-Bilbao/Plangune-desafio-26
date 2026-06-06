@@ -45,9 +45,11 @@ function BusinessDashboard() {
 
       <div className="biz-dashboard-header">
         <h1 className="biz-dashboard-title">Gestionar actividad</h1>
-        <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-          Volver atrás
-        </button>
+        <div className="btn-back-wrapper">
+          <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
+            Volver atrás
+          </button>
+        </div>
       </div>
 
       <div className="biz-dashboard-grid">

@@ -27,6 +27,7 @@ function NavbarResponsive() {
   const businessLinks = [
     { to: '/negocio/dashboard', icon: 'dashboard', label: 'Dashboard', exact: true },
     { to: '/negocio/rendimiento', icon: 'bar_chart', label: 'Rendimiento', exact: false },
+    { to: '/negocio/resenas', icon: 'reviews', label: 'Reseñas', exact: false },
     { to: '/negocio/estrategia', icon: 'rocket_launch', label: 'Estrategia', exact: false },
     { to: '/negocio/suscripciones', icon: 'workspace_premium', label: 'Suscripción', exact: false },
   ];
@@ -83,8 +84,9 @@ function NavbarResponsive() {
       { label: 'Dashboard', path: '/negocio/dashboard', icon: 'dashboard' },
       { label: 'Mis ofertas', path: '/negocio/ofertas', icon: 'local_offer' },
       { label: 'Rendimiento', path: '/negocio/rendimiento', icon: 'bar_chart' },
+      { label: 'Reseñas', path: '/negocio/resenas', icon: 'reviews' },
       { label: 'Estrategia', path: '/negocio/estrategia', icon: 'rocket_launch' },
-      { label: 'Suscripción', path: '/negocio/suscripcion', icon: 'workspace_premium' },
+      { label: 'Suscripción', path: '/negocio/suscripciones', icon: 'workspace_premium' },
     ];
     if (user.role === 'admin') return [
       { label: 'Panel admin', path: '/admin', icon: 'admin_panel_settings' },

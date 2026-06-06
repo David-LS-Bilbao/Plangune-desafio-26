@@ -46,9 +46,11 @@ function CreateOffer() {
 
       <div className="biz-dashboard-header">
         <h1 className="biz-dashboard-title">Gestionar oferta</h1>
-        <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-          Volver atrás
-        </button>
+        <div className="btn-back-wrapper">
+          <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
+            Volver atrás
+          </button>
+        </div>
       </div>
 
       <form className="create-offer-form" onSubmit={(e) => e.preventDefault()}>
