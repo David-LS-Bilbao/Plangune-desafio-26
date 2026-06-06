@@ -5,27 +5,31 @@ import { MemoryRouter } from "react-router-dom";
 import App from "../App.jsx";
 
 describe("App", () => {
-  it("renderiza el título técnico DESAFIO-26", () => {
+  it("renderiza la landing con su titular principal", () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>,
     );
 
     expect(
-      screen.getByRole("heading", { name: "DESAFIO-26" }),
+      screen.getByRole("heading", {
+        level: 1,
+        name: /haz planes y disfruta con tus peques/i,
+      }),
     ).toBeInTheDocument();
   });
 
-  it("muestra el texto provisional del proyecto", () => {
+  it("muestra la navegación principal de la landing", () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>,
     );
 
+    expect(screen.getByRole("navigation")).toBeInTheDocument();
     expect(
-      screen.getByText("App provisional para planes familiares en Euskadi"),
+      screen.getByRole("link", { name: "PLANES" }),
     ).toBeInTheDocument();
   });
 });
