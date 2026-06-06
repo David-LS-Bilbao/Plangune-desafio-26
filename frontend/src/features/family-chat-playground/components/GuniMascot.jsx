@@ -1,20 +1,53 @@
-import React from "react";
+import React, { useId } from "react";
 
 /**
- * Mascota GUNI.
+ * Mascota GUNI — v3.
  *
- * Personaje protagonista del playground. Se dibuja con SVG inline
- * (sin librerías de animación) y soporta dos estados:
- *  - "idle"     -> respiración/flotación suave (animación CSS).
- *  - "thinking" -> rebote pequeño + estrellitas sutiles.
+ * Basada en GuniAvatar (design system Harmonious Kinship): cuerpo orgánico tipo
+ * peluche/fantasmita, 4 orejitas superiores, ojo izquierdo grande con aro verde,
+ * ojo derecho pequeño, boca naranja expresiva.
  *
- * @param {Object} props
- * @param {"idle"|"thinking"} [props.state="idle"] - Estado de la mascota.
- * @param {"sm"|"md"|"lg"} [props.size="lg"] - Tamaño visual.
- * @param {string} [props.title="GUNI"] - Texto accesible.
+ * Los `id` de `<filter>` y `<clipPath>` se generan únicos por instancia con
+ * `useId()` para evitar colisiones cuando hay varios avatares en pantalla.
+ *
+ * @param {"idle"|"thinking"} [state="idle"]
+ * @param {"sm"|"md"|"lg"}   [size="lg"]
+ * @param {string}            [title="GUNI"]
  */
 function GuniMascot({ state = "idle", size = "lg", title = "GUNI" }) {
   const isThinking = state === "thinking";
+  const uid      = useId().replace(/:/g, "");
+  const shadowId = `guni-shadow-${uid}`;
+  const mouthId  = `guni-mouth-${uid}`;
+
+  const navy   = "var(--avatar-navy,   #163A4A)";
+  const cream  = "var(--avatar-cream,  #FFF7E6)";
+  const green  = "var(--avatar-green,  #77D7C8)";
+  const yellow = "var(--avatar-yellow, #EFE54F)";
+  const orange = "var(--avatar-orange, #D35230)";
+  const coral  = "var(--avatar-coral,  #FF7551)";
+
+  // Cuerpo orgánico (sin líneas rectas): curvas bezier a ambos lados con
+  // 3 patitas redondeadas en la base. Basado en GuniAvatar reference.
+  const bodyPath =
+    "M256 103" +
+    "C197 103 153 130 134 174" +
+    "C118 211 126 246 111 279" +
+    "C101 302 91 319 91 345" +
+    "C91 374 113 386 136 368" +
+    "C147 400 181 421 207 393" +
+    "C217 382 219 365 234 363" +
+    "C248 361 264 363 278 363" +
+    "C293 365 295 382 305 393" +
+    "C331 421 365 400 376 368" +
+    "C399 386 421 374 421 345" +
+    "C421 319 411 302 401 279" +
+    "C386 246 394 211 378 174" +
+    "C359 130 315 103 256 103Z";
+
+  // Boca: sonrisa ancha y profunda con clip de lengua coral.
+  const mouthPath =
+    "M203 278C217 321 282 330 306 282C315 263 305 250 286 255C266 260 242 260 222 255C204 251 197 262 203 278Z";
 
   return (
     <div
@@ -32,66 +65,90 @@ function GuniMascot({ state = "idle", size = "lg", title = "GUNI" }) {
 
       <svg
         className="fcp-guni__svg"
-        viewBox="0 0 120 130"
+        viewBox="0 0 512 512"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
         focusable="false"
       >
-        {/* Sombra de apoyo */}
-        <ellipse
-          className="fcp-guni__shadow"
-          cx="60"
-          cy="122"
-          rx="30"
-          ry="6"
-        />
+        <defs>
+          <filter id={shadowId} x="-20%" y="-20%" width="140%" height="150%">
+            <feDropShadow
+              dx="0" dy="14" stdDeviation="13"
+              floodColor="#163A4A" floodOpacity="0.16"
+            />
+          </filter>
+          <clipPath id={mouthId}>
+            <path d={mouthPath} />
+          </clipPath>
+        </defs>
 
-        {/* Cuerpo en forma de gota/burbuja */}
-        <path
-          className="fcp-guni__body"
-          d="M60 12
-             C30 12 16 34 16 60
-             C16 90 36 112 60 112
-             C84 112 104 90 104 60
-             C104 34 90 12 60 12 Z"
-        />
+        <g filter={`url(#${shadowId})`}>
 
-        {/* Antena con bolita */}
-        <line
-          className="fcp-guni__antenna"
-          x1="60"
-          y1="14"
-          x2="60"
-          y2="2"
-        />
-        <circle className="fcp-guni__antenna-tip" cx="60" cy="3" r="4" />
+          {/* ── Orejitas ── dibujadas antes del cuerpo para quedar semisolapadas */}
 
-        {/* Pantalla/cara */}
-        <rect
-          className="fcp-guni__face"
-          x="34"
-          y="40"
-          width="52"
-          height="40"
-          rx="16"
-        />
+          {/* Exterior izquierda: amarilla */}
+          <ellipse cx="130" cy="134" rx="42" ry="34"
+            transform="rotate(-28 130 134)"
+            fill={yellow} stroke={navy} strokeWidth="28"
+            strokeLinecap="round" strokeLinejoin="round"
+          />
+          {/* Interior izquierda: verde */}
+          <ellipse cx="176" cy="100" rx="34" ry="39"
+            transform="rotate(-25 176 100)"
+            fill={green} stroke={navy} strokeWidth="28"
+            strokeLinecap="round" strokeLinejoin="round"
+          />
+          {/* Interior derecha: amarilla */}
+          <ellipse cx="336" cy="100" rx="34" ry="39"
+            transform="rotate(25 336 100)"
+            fill={yellow} stroke={navy} strokeWidth="28"
+            strokeLinecap="round" strokeLinejoin="round"
+          />
+          {/* Exterior derecha: verde */}
+          <ellipse cx="382" cy="134" rx="42" ry="34"
+            transform="rotate(28 382 134)"
+            fill={green} stroke={navy} strokeWidth="28"
+            strokeLinecap="round" strokeLinejoin="round"
+          />
 
-        {/* Ojos */}
-        <circle className="fcp-guni__eye" cx="50" cy="58" r="5" />
-        <circle className="fcp-guni__eye" cx="70" cy="58" r="5" />
-        <circle className="fcp-guni__eye-shine" cx="48.5" cy="56.5" r="1.6" />
-        <circle className="fcp-guni__eye-shine" cx="68.5" cy="56.5" r="1.6" />
+          {/* ── Cuerpo principal orgánico (sin líneas rectas) ── */}
+          <path
+            d={bodyPath}
+            fill={cream}
+            stroke={navy}
+            strokeWidth="30"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
 
-        {/* Sonrisa */}
-        <path
-          className="fcp-guni__smile"
-          d="M48 70 Q60 78 72 70"
-          fill="none"
-        />
+          {/* Luz 3D suave centrada (efecto peluche) */}
+          <ellipse cx="256" cy="232" rx="112" ry="124"
+            fill="#FFFFFF" opacity="0.22"
+          />
 
-        {/* Mejillas */}
-        <circle className="fcp-guni__cheek" cx="40" cy="68" r="4" />
-        <circle className="fcp-guni__cheek" cx="80" cy="68" r="4" />
+          {/* ── Ojo izquierdo grande ── */}
+          <g className="fcp-guni__eye fcp-guni__eye--left">
+            <circle cx="198" cy="232" r="53"
+              fill={cream} stroke={navy} strokeWidth="18" />
+            <circle cx="198" cy="232" r="36"
+              fill="none" stroke={green} strokeWidth="8" />
+            <circle cx="198" cy="232" r="23" fill={navy} />
+            <circle cx="214" cy="216" r="8"  fill="#FFFFFF" />
+          </g>
+
+          {/* ── Ojo derecho pequeño ── */}
+          <g className="fcp-guni__eye fcp-guni__eye--right">
+            <circle cx="316" cy="232" r="31" fill={navy} />
+            <circle cx="328" cy="219" r="8"  fill="#FFFFFF" />
+          </g>
+
+          {/* ── Boca naranja + lengua coral recortada ── */}
+          <path d={mouthPath} fill={orange} />
+          <g clipPath={`url(#${mouthId})`}>
+            <ellipse cx="257" cy="311" rx="47" ry="25" fill={coral} />
+          </g>
+
+        </g>
       </svg>
     </div>
   );
