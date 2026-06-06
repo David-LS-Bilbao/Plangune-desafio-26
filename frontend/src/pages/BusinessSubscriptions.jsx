@@ -30,19 +30,16 @@ function BusinessSubscriptions() {
         </div>
       )}
 
-      <section className="subscriptions-header">
-        <p className="page-tag">Suscripciones</p>
+      <div className="biz-dashboard-header">
         <h1 className="page-title">Planes de pago</h1>
-        <p className="page-subtitle">
-          Elige el plan que mejor impulse tus promociones y resultados.
-        </p>
-        {selectedPlan && (
-          <p className="section-note">
-            <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle' }}>stars</span>
-            {' '}Plan activo: <strong>{selectedPlan}</strong>
-          </p>
-        )}
-      </section>
+      </div>
+
+      {selectedPlan && (
+        <div className="subscription-active-banner">
+          <span className="material-symbols-outlined fill">workspace_premium</span>
+          Plan activo: <strong>{selectedPlan}</strong>
+        </div>
+      )}
 
       <section className="subscriptions-grid">
         {plans.map((plan) => {
