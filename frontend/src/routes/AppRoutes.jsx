@@ -29,6 +29,9 @@ import ManageOffers from "../pages/ManageOffers";
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminData from "../pages/AdminData";
 
+// Feature visual aislada (playground del chat familiar con GUNI)
+import FamilyChatPlayground from "../features/family-chat-playground";
+
 function AppRoutes() {
   return (
     <Routes>
@@ -43,6 +46,11 @@ function AppRoutes() {
         <Route path="/perfil" element={<FamilyProfile />} />
         <Route path="/ofertas" element={<OffersUser />} />
         <Route path="/buscar" element={<PlansSearch />} />
+        {/* Ruta temporal de desarrollo: playground del chat con GUNI.
+            Solo se registra en desarrollo; en build de producción se elimina. */}
+        {import.meta.env.DEV && (
+          <Route path="/dev/family-chat" element={<FamilyChatPlayground />} />
+        )}
       </Route>
 
       {/* Registration / Account Creation */}
