@@ -18,7 +18,7 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-wrapper">
         <Link to="/" aria-label="Ir al inicio">
-          <img src={logo} alt="TxikiPlan logo" />
+          <img src={logo} alt="Plangune logo" />
         </Link>
 
         <ul role="list">

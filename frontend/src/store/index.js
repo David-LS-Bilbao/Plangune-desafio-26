@@ -2,18 +2,27 @@ import { create } from "zustand";
 import { mockPlans, MOCK_USERS } from "../mocks/data";
 
 // --- AUTH STORE ---
+const storedUser = (() => {
+  try { return JSON.parse(localStorage.getItem("auth_user")); } catch { return null; }
+})();
+
 export const useAuthStore = create((set) => ({
-  user: null, // null when not logged in
+  user: storedUser,
   login: (payload) => {
-    if (typeof payload === "string") {
-      set({ user: MOCK_USERS[payload] });
-    } else {
-      set({ user: payload });
-    }
+    const user = typeof payload === "string" ? MOCK_USERS[payload] : payload;
+    localStorage.setItem("auth_user", JSON.stringify(user));
+    set({ user });
   },
   updateUser: (partial) =>
-    set((state) => ({ user: { ...state.user, ...partial } })),
-  logout: () => set({ user: null }),
+    set((state) => {
+      const user = { ...state.user, ...partial };
+      localStorage.setItem("auth_user", JSON.stringify(user));
+      return { user };
+    }),
+  logout: () => {
+    localStorage.removeItem("auth_user");
+    set({ user: null });
+  },
 }));
 
 // --- USER STORE (Family: Favorites, Profile, Reservations) ---

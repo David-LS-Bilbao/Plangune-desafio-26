@@ -60,7 +60,7 @@ function Header() {
         </button>
 
         <div className="title title-clickable" onClick={() => goTo("/")}>
-          TxikiPlan
+          Plangune
         </div>
 
         <div className="header-actions">
@@ -79,11 +79,10 @@ function Header() {
 
           {user && (
             <button
-              aria-label="Logout"
               className="icon-button icon-danger"
               onClick={handleLogout}
             >
-              <span className="material-symbols-outlined">logout</span>
+              Cerrar sesión
             </button>
           )}
         </div>
@@ -123,7 +122,6 @@ function Header() {
                 className="menu-item menu-item-danger"
                 onClick={handleLogout}
               >
-                <span className="material-symbols-outlined menu-item-icon">logout</span>
                 Cerrar sesión
               </button>
             )}

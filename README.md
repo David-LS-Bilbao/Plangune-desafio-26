@@ -1,11 +1,11 @@
-# TxikiPlan Euskadi
+# Plangune Euskadi
 
 > **Nombre provisional del proyecto.**
 > El naming definitivo será definido más adelante por el equipo de Marketing.
 
 ## Descripción
 
-TxikiPlan Euskadi es una web/app responsive, mobile-first y SPA orientada a familias jóvenes con bebés y niños pequeños que buscan planes, lugares, actividades y negocios familiares en Euskadi de forma sencilla, segura y sin complicaciones.
+Plangune Euskadi es una web/app responsive, mobile-first y SPA orientada a familias jóvenes con bebés y niños pequeños que buscan planes, lugares, actividades y negocios familiares en Euskadi de forma sencilla, segura y sin complicaciones.
 
 El objetivo principal es ayudar a las familias a responder preguntas prácticas antes de salir de casa:
 
@@ -306,7 +306,7 @@ Ejemplo de explicación al usuario:
 ## Arquitectura prevista
 
 ```txt
-txikiplan-euskadi/
+plangune-euskadi/
 ├── frontend/
 ├── backend/
 ├── docs/
@@ -658,7 +658,7 @@ Estructura esperada:
 
 ```bash
 git clone <url-del-repositorio>
-cd txikiplan-euskadi
+cd plangune-euskadi
 ```
 
 Instalar frontend:
@@ -866,7 +866,7 @@ Proyecto multidisciplinar con participación de:
 
 ## Notas importantes
 
-* El nombre **TxikiPlan Euskadi** es provisional.
+* El nombre **Plangune Euskadi** es provisional.
 * Los mocks UX/UI son referencia visual, no código final obligatorio.
 * Los archivos `code.html` de los mocks no deben condicionar la arquitectura final.
 * Prioridad absoluta: MVP funcional antes que funcionalidades avanzadas.

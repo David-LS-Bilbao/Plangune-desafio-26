@@ -20,6 +20,7 @@ import CreateBusiness from "../pages/CreateBusiness";
 import BusinessDashboard from "../pages/BusinessDashboard";
 import BusinessOverview from "../pages/BusinessOverview";
 import BusinessPerformance from "../pages/BusinessPerformance";
+import BusinessReviews from "../pages/BusinessReviews";
 import BusinessProfile from "../pages/BusinessProfile";
 import BusinessStrategy from "../pages/BusinessStrategy";
 import BusinessSubscriptions from "../pages/BusinessSubscriptions";
@@ -54,6 +55,7 @@ function AppRoutes() {
         <Route path="/negocio/dashboard" element={<BusinessOverview />} />
         <Route path="/negocio/perfil" element={<BusinessProfile />} />
         <Route path="/negocio/rendimiento" element={<BusinessPerformance />} />
+        <Route path="/negocio/resenas" element={<BusinessReviews />} />
         <Route
           path="/negocio/suscripciones"
           element={<BusinessSubscriptions />}

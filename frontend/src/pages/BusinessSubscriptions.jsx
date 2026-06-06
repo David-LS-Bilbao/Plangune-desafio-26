@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useBusinessStore } from "../store";
 
 function BusinessSubscriptions() {
+  const navigate = useNavigate();
   const { subscription, setSubscription } = useBusinessStore();
   const [selectedPlan, setSelectedPlan] = useState(subscription);
   const [toastMsg, setToastMsg] = useState("");
@@ -11,6 +13,13 @@ function BusinessSubscriptions() {
     setSelectedPlan(planName);
     setSubscription(planName);
     setToastMsg(`✓ Plan ${planName} activado correctamente`);
+    setTimeout(() => setToastMsg(""), 3500);
+  };
+
+  const handleCancelPlan = () => {
+    setSelectedPlan("Free");
+    setSubscription("Free");
+    setToastMsg("✓ Plan cancelado. Ahora estás en el plan Free");
     setTimeout(() => setToastMsg(""), 3500);
   };
 
@@ -30,19 +39,30 @@ function BusinessSubscriptions() {
         </div>
       )}
 
-      <section className="subscriptions-header">
-        <p className="page-tag">Suscripciones</p>
+      <div className="biz-dashboard-header">
         <h1 className="page-title">Planes de pago</h1>
-        <p className="page-subtitle">
-          Elige el plan que mejor impulse tus promociones y resultados.
-        </p>
-        {selectedPlan && (
-          <p className="section-note">
-            <span className="material-symbols-outlined" style={{ fontSize: '1rem', verticalAlign: 'middle' }}>stars</span>
-            {' '}Plan activo: <strong>{selectedPlan}</strong>
-          </p>
-        )}
-      </section>
+        <div className="btn-back-wrapper">
+          <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
+            Volver atrás
+          </button>
+        </div>
+      </div>
+
+      {selectedPlan && (
+        <div className="subscription-active-banner">
+          <span className="material-symbols-outlined fill">workspace_premium</span>
+          <span>Plan activo: <strong>{selectedPlan}</strong></span>
+          {selectedPlan !== "Free" && (
+            <button
+              type="button"
+              className="subscription-cancel-btn"
+              onClick={handleCancelPlan}
+            >
+              Cancelar plan
+            </button>
+          )}
+        </div>
+      )}
 
       <section className="subscriptions-grid">
         {plans.map((plan) => {
