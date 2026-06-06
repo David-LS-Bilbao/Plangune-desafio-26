@@ -54,13 +54,12 @@ export const useUserStore = create((set, get) => ({
         method: isFav ? "DELETE" : "POST",
       });
       if (!response.ok) {
-        // Rollback
-        set({ favorites });
+        console.warn("Backend API returned error for favorites. Keeping local state.");
+        // set({ favorites }); // Comentado para no revertir si no hay backend
       }
     } catch (error) {
-      console.error("Error toggling favorite:", error);
-      // Rollback
-      set({ favorites });
+      console.warn("Error toggling favorite (Backend might be down). Keeping local state:", error);
+      // set({ favorites }); // Comentado para que el modo mock local funcione
     }
   },
   isFavorite: (planId) => get().favorites.includes(planId),
