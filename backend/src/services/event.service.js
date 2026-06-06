@@ -33,6 +33,8 @@ function httpError(status, message) {
  * @param {boolean} [filters.es_interior]
  * @param {boolean} [filters.es_carrito]
  * @param {boolean} [filters.es_cambiador]
+ * @param {boolean} [filters.es_silla_ruedas]
+ * @param {boolean} [filters.es_mascotas]
  * @param {number}  [filters.edad]          apto si edad_minima <= edad
  * @param {string}  [filters.fecha_desde]   ISO; fecha_inicio >= fecha_desde
  * @param {string}  [filters.fecha_hasta]   ISO; fecha_inicio <= fecha_hasta

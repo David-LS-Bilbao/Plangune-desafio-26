@@ -23,6 +23,8 @@ function buildWhere(filters) {
   if (filters.es_interior   !== undefined) where.es_interior   = filters.es_interior;
   if (filters.es_carrito  !== undefined) where.es_carrito  = filters.es_carrito;
   if (filters.es_cambiador !== undefined) where.es_cambiador = filters.es_cambiador;
+  if (filters.es_silla_ruedas !== undefined) where.es_silla_ruedas = filters.es_silla_ruedas;
+  if (filters.es_mascotas !== undefined) where.es_mascotas = filters.es_mascotas;
 
   // edad_minima <= filtro.edad  → el evento es apto para esa edad
   if (filters.edad !== undefined) {
