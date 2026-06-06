@@ -47,7 +47,7 @@ function GuniMascot({ state = "idle", size = "lg", title = "GUNI" }) {
 
   // Boca: sonrisa ancha y profunda con clip de lengua coral.
   const mouthPath =
-    "M203 278C217 321 282 330 306 282C315 263 305 250 286 255C266 260 242 260 222 255C204 251 197 262 203 278Z";
+    "M208 303C221 340 279 349 300 307C309 288 300 275 283 280C265 285 243 285 225 280C208 276 203 287 208 303Z";
 
   return (
     <div
@@ -145,7 +145,7 @@ function GuniMascot({ state = "idle", size = "lg", title = "GUNI" }) {
           {/* ── Boca naranja + lengua coral recortada ── */}
           <path d={mouthPath} fill={orange} />
           <g clipPath={`url(#${mouthId})`}>
-            <ellipse cx="257" cy="311" rx="47" ry="25" fill={coral} />
+            <ellipse cx="257" cy="327" rx="44" ry="22" fill={coral} />
           </g>
 
         </g>
