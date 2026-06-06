@@ -49,22 +49,18 @@ function PlanDetail() {
     <main className="plan-detail-main">
 
       <div className="detail-header">
-        <h1 className="detail-title">{plan.title}</h1>
+        <div className="detail-header__top">
+          <h1 className="detail-title">{plan.title}</h1>
+          <button className="detail-map-btn" type="button">
+            <span className="material-symbols-outlined">map</span>
+            Ver Mapa
+          </button>
+        </div>
         <div className="detail-location">
           <span className="material-symbols-outlined">location_on</span>
           <span>{plan.location}</span>
         </div>
       </div>
-
-      <div className="detail-hero-image">
-        <img alt={`Imagen de ${plan.title}`} src={plan.image} />
-        <button className="detail-map-btn" type="button">
-          <span className="material-symbols-outlined">map</span>
-          Ver Mapa
-        </button>
-      </div>
-
-      <p className="detail-description">{plan.description}</p>
 
       <section className="detail-info-grid">
         {infoCards.map((card, i) => (
@@ -82,6 +78,10 @@ function PlanDetail() {
           </div>
         ))}
       </section>
+
+      <div className="detail-hero-image">
+        <img alt={`Imagen de ${plan.title}`} src={plan.image} />
+      </div>
 
       <section className="detail-actions">
         <button
@@ -115,6 +115,8 @@ function PlanDetail() {
         </button>
       </section>
 
+      <p className="detail-description">{plan.description}</p>
+
       <div className="detail-report">
         <button
           className="detail-report-btn"
@@ -139,13 +141,15 @@ function PlanDetail() {
               <span className="material-symbols-outlined">star_half</span>
             </div>
           </div>
-          <button
-            className="btn-text-danger"
-            type="button"
-            onClick={() => setShowReviewForm(!showReviewForm)}
-          >
-            {showReviewForm ? "Cancelar" : "Añadir reseña"}
-          </button>
+          <div className="btn-back-wrapper">
+            <button
+              className="btn-text-danger"
+              type="button"
+              onClick={() => setShowReviewForm(!showReviewForm)}
+            >
+              {showReviewForm ? "Cancelar" : "Añadir reseña"}
+            </button>
+          </div>
         </div>
 
         {showReviewForm && (

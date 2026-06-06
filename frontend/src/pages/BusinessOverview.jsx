@@ -130,60 +130,56 @@ function BusinessOverview() {
           </div>
         </div>
 
-        {/* Fila 1: estado del negocio */}
         <div className="kpis-grid">
           <div className="kpi-card">
+            <span className="kpi-value">{offers.length}</span>
             <div className="kpi-top">
               <span className="kpi-label">Actividades activas</span>
               <span className="material-symbols-outlined kpi-icon fill">event_available</span>
             </div>
-            <span className="kpi-value">{offers.length}</span>
           </div>
 
           <div className="kpi-card">
+            <span className="kpi-value">1</span>
             <div className="kpi-top">
               <span className="kpi-label">Ofertas activas</span>
               <span className="material-symbols-outlined kpi-icon fill">local_offer</span>
             </div>
-            <span className="kpi-value">1</span>
           </div>
 
           <div className="kpi-card">
+            <span className="kpi-value">1</span>
             <div className="kpi-top">
               <span className="kpi-label">Pendientes revisión</span>
               <span className="material-symbols-outlined kpi-icon">pending_actions</span>
             </div>
-            <span className="kpi-value">1</span>
           </div>
-        </div>
 
-        {/* Fila 2: engagement */}
-        <div className="kpis-grid">
           <div className="kpi-card kpi-card--accent">
+            <span className="kpi-value">12</span>
             <div className="kpi-top">
               <span className="kpi-label">Reseñas</span>
               <span className="material-symbols-outlined kpi-icon fill">star_rate</span>
+              <span className="kpi-trend">+2 esta semana</span>
             </div>
-            <span className="kpi-value">12</span>
-            <span className="kpi-trend">+2 esta semana</span>
           </div>
 
           <div className="kpi-card kpi-card--accent">
+            <span className="kpi-value">1.2k</span>
             <div className="kpi-top">
               <span className="kpi-label">Vistas</span>
               <span className="material-symbols-outlined kpi-icon">visibility</span>
+              <span className="kpi-trend">Últimos 30 días</span>
             </div>
-            <span className="kpi-value">1.2k</span>
-            <span className="kpi-trend">Últimos 30 días</span>
           </div>
 
           <div className="kpi-card kpi-card--accent">
+            <span className="kpi-value">85</span>
             <div className="kpi-top">
               <span className="kpi-label">Clics en ofertas</span>
               <span className="material-symbols-outlined kpi-icon">touch_app</span>
+              <span className="kpi-trend">Últimos 30 días</span>
             </div>
-            <span className="kpi-value">85</span>
-            <span className="kpi-trend">Últimos 30 días</span>
           </div>
         </div>
       </section>

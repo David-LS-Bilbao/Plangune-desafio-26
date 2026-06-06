@@ -116,7 +116,7 @@
   }
 }
 
-/* ── MOBILE HEADER (< 768px) ────────────────────────────────────────────── */
+/* ── MOBILE HEADER (< 840px) ────────────────────────────────────────────── */
 
 .nr-mobile-header {
   position: fixed;
@@ -136,7 +136,7 @@
 }
 
 .nr-mobile-logo img {
-  height: 2rem;
+  height: 2.75rem;
   width: auto;
   display: block;
 }
@@ -280,13 +280,13 @@
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 840px) {
   .nr-mobile-header {
     display: none;
   }
 }
 
-/* ── BOTTOM NAV (< 768px) ───────────────────────────────────────────────── */
+/* ── BOTTOM NAV (< 840px) ───────────────────────────────────────────────── */
 
 .nr-bottom-nav {
   position: fixed;
@@ -369,7 +369,7 @@
   flex-shrink: 0;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 840px) {
   .nr-top-navbar {
     display: block;
   }

@@ -8,7 +8,7 @@ function PlansList() {
 
   return (
     <main className="plans-user-main">
-      <h1 className="plans-user-title">Planes fáciles con peques en Euskadi</h1>
+      <h1 className="plans-user-title">Planes para disfrutar en familia</h1>
 
       <div className="plans-user-list">
         {filteredPlans.length > 0 ? (

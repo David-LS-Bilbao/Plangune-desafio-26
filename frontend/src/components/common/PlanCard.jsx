@@ -26,28 +26,14 @@ function PlanCard({ plan, index = 0 }) {
       <div className="plan-user-card__body">
         <div className="plan-user-card__header">
           <span className={`plan-user-badge plan-user-badge--${colorVariant}`}>{plan.category}</span>
-          <span className="plan-user-card__rating">
-            <span className="material-symbols-outlined fill">star</span>
-            {plan.rating}
-          </span>
         </div>
 
         <h3 className="plan-user-card__title">{plan.title}</h3>
 
-        <div className="plan-user-card__subtitle">
-          <p className={`plan-user-card__subtitle-text${expanded ? " expanded" : ""}`}>
-            {plan.description}
-          </p>
-          {plan.description && plan.description.length > 120 && (
-            <button
-              className="plan-user-card__read-more"
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
-            >
-              {expanded ? "Leer menos" : "Leer más"}
-            </button>
-          )}
-        </div>
+        <span className="plan-user-card__rating">
+          <span className="material-symbols-outlined fill">star</span>
+          {plan.rating}
+        </span>
 
         <div className="plan-user-card__meta">
           <span className="plan-user-card__location">
@@ -64,6 +50,21 @@ function PlanCard({ plan, index = 0 }) {
           {plan.tags?.slice(0, 3).map((tag) => (
             <span key={tag} className="plan-user-card__tag">{tag}</span>
           ))}
+        </div>
+
+        <div className="plan-user-card__subtitle">
+          <p className={`plan-user-card__subtitle-text${expanded ? " expanded" : ""}`}>
+            {plan.description}
+          </p>
+          {plan.description && plan.description.length > 120 && (
+            <button
+              className="plan-user-card__read-more"
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
+            >
+              {expanded ? "Leer menos" : "Leer más"}
+            </button>
+          )}
         </div>
 
         <button className="plan-user-card__btn" type="button">

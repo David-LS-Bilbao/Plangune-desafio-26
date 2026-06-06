@@ -97,7 +97,7 @@ function NavbarResponsive() {
 
   return (
     <>
-      {/* ── MOBILE: header superior (< 768px) ────────────────────────────── */}
+      {/* ── MOBILE: header superior (< 840px) ────────────────────────────── */}
       <header className="nr-mobile-header">
         <div className="nr-mobile-header-content">
           {/* Logo a la izquierda */}
@@ -149,7 +149,7 @@ function NavbarResponsive() {
         </div>
       </header>
 
-      {/* ── MOBILE: barra inferior con iconos (< 768px) ───────────────────── */}
+      {/* ── MOBILE: barra inferior con iconos (< 840px) ───────────────────── */}
       <nav className="nr-bottom-nav">
         {(() => {
           const fabIndex = links.length === 3 ? 1 : 2;
@@ -193,7 +193,7 @@ function NavbarResponsive() {
         })()}
       </nav>
 
-      {/* ── DESKTOP: navbar horizontal superior (>= 768px) ───────────────── */}
+      {/* ── DESKTOP: navbar horizontal superior (>= 840px) ───────────────── */}
       <nav className="nr-top-navbar">
         <div className="nr-top-wrapper">
           <Link to="/" aria-label="Ir al inicio">

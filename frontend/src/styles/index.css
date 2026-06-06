@@ -1387,6 +1387,34 @@ body {
     flex-direction: column;
     gap: 0.3rem;
 
+    .detail-header__top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+
+      .detail-map-btn {
+        position: static;
+        flex-shrink: 0;
+        background-color: transparent;
+        color: var(--secondary-color);
+        border: 0.15rem solid var(--secondary-color);
+        border-radius: 3rem;
+        padding: 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-family: var(--font-poppins);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+
+        .material-symbols-outlined { font-size: 1.1rem; }
+        &:hover { background-color: var(--secondary-color); color: var(--white-pure); }
+      }
+    }
+
     .detail-title {
       font-family: var(--font-fredoka);
       font-size: clamp(1.8rem, 5vw, 2.8rem);
@@ -1401,10 +1429,10 @@ body {
       gap: 0.3rem;
       color: var(--dark-grey);
       font-family: var(--font-poppins);
-      font-size: 0.875rem;
-      font-weight: 500;
+      font-size: 1.05rem;
+      font-weight: 400;
 
-      .material-symbols-outlined { font-size: 1.1rem; }
+      .material-symbols-outlined { font-size: 1.3rem; }
     }
   }
 
@@ -1454,7 +1482,7 @@ body {
 
   .detail-description {
     font-family: var(--font-poppins);
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     line-height: 1.7;
     color: var(--dark-grey);
     margin: 0;
@@ -1880,7 +1908,6 @@ body {
       border-radius: 2.5rem;
       box-shadow: 0 0.625rem 2.5rem rgba(38, 46, 82, 0.08);
       border: 0.0625rem solid rgba(187, 202, 198, 0.3);
-      backdrop-filter: blur(0.25rem);
       padding: var(--spacing-lg);
       display: flex;
       flex-direction: column;
@@ -2436,14 +2463,22 @@ body {
     }
 
     .status-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
       text-align: center;
       font-family: var(--font-poppins);
       font-size: 0.875rem;
+      font-weight: 600;
       color: var(--white-pure);
       background-color: var(--accent-color);
-      padding: 0.75rem 1rem;
-      border-radius: 0.75rem;
-      margin-top: var(--spacing-sm);
+      padding: 0.75rem 1.5rem;
+      border-radius: 9999px;
+      box-shadow: 0 0.5rem 2rem rgba(0, 0, 0, 0.2);
+      pointer-events: none;
+      white-space: nowrap;
     }
   }
 }
@@ -2987,8 +3022,9 @@ body {
         box-shadow: 0.3rem 0.3rem 0.3rem 0 rgba(0, 0, 0, 0.04);
         border: 0.2rem solid var(--accent-color);
         display: flex;
-        flex-direction: column;
-        gap: 0.15rem;
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
 
         &.kpi-card--accent {
           border-color: var(--secondary-color);
@@ -2997,18 +3033,18 @@ body {
           .kpi-value { color: var(--secondary-color); }
         }
 
-.kpi-top {
+        .kpi-top {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
+          flex-direction: column;
+          align-items: flex-start;
           gap: 0.25rem;
-          margin-bottom: 0.1rem;
+          flex: 1;
         }
 
         .kpi-label {
           font-family: var(--font-poppins);
-          font-size: 0.75rem;
-          font-weight: 500;
+          font-size: 0.95rem;
+          font-weight: 600;
           color: var(--on-surface-variant);
           line-height: 1.3;
         }
@@ -3022,12 +3058,13 @@ body {
 
         .kpi-value {
           font-family: var(--font-display);
-          font-size: 2.75rem;
+          font-size: 3.5rem;
           line-height: 1;
           font-weight: 700;
           letter-spacing: -0.03em;
           color: var(--accent-color);
           margin: 0;
+          flex-shrink: 0;
         }
 
         .kpi-trend {
@@ -6110,14 +6147,15 @@ body {
     transition: border-color 0.2s;
 
     .offer-user-badge--primary,
-    .offer-user-badge--secondary {
+    .offer-user-badge--secondary,
+    .offer-user-badge--accent {
       background-color: var(--tertiary-color);
       color: var(--secondary-color);
       transition: background-color 0.2s, color 0.2s;
     }
 
     .offer-user-card__title { color: var(--secondary-color); }
-    .offer-user-date { color: var(--dark-grey); transition: color 0.2s; }
+    .offer-user-date { color: var(--secondary-color); transition: color 0.2s; }
 
     .offer-user-card__btn {
       background-color: var(--tertiary-color);
@@ -6128,7 +6166,8 @@ body {
       border-color: var(--secondary-color);
 
       .offer-user-badge--primary,
-      .offer-user-badge--secondary {
+      .offer-user-badge--secondary,
+      .offer-user-badge--accent {
         background-color: var(--secondary-color);
         color: var(--white-pure);
       }
@@ -6148,14 +6187,15 @@ body {
     transition: border-color 0.2s;
 
     .offer-user-badge--primary,
-    .offer-user-badge--secondary {
+    .offer-user-badge--secondary,
+    .offer-user-badge--accent {
       background-color: var(--primary-color);
       color: var(--white-pure);
       transition: background-color 0.2s;
     }
 
     .offer-user-card__title { color: var(--primary-color); }
-    .offer-user-date { color: var(--dark-grey); transition: color 0.2s; }
+    .offer-user-date { color: var(--secondary-color); transition: color 0.2s; }
 
     .offer-user-card__btn {
       background-color: var(--primary-color);
@@ -6166,7 +6206,8 @@ body {
       border-color: var(--secondary-color);
 
       .offer-user-badge--primary,
-      .offer-user-badge--secondary {
+      .offer-user-badge--secondary,
+      .offer-user-badge--accent {
         background-color: var(--secondary-color);
       }
 
@@ -6192,7 +6233,7 @@ body {
     }
 
     .offer-user-card__title { color: var(--accent-color); }
-    .offer-user-date { color: var(--dark-grey); transition: color 0.2s; }
+    .offer-user-date { color: var(--secondary-color); transition: color 0.2s; }
 
     .offer-user-card__btn {
       background-color: var(--accent-color);
@@ -6227,10 +6268,11 @@ body {
     padding: 0.2rem 0.75rem;
     border-radius: 9999px;
     font-family: var(--font-poppins);
-    font-size: 0.7rem;
+    font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
+    align-self: flex-start;
   }
 
   .offer-user-date {
@@ -6238,12 +6280,11 @@ body {
     align-items: center;
     gap: 0.25rem;
     font-family: var(--font-poppins);
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: var(--dark-grey);
+    font-size: 0.85rem;
+    font-weight: 700;
 
     .material-symbols-outlined {
-      font-size: 1rem;
+      font-size: 1.1rem;
     }
   }
 
@@ -6287,7 +6328,7 @@ body {
     cursor: pointer;
     text-decoration: underline;
     margin-top: 0.2rem;
-    color: var(--dark-grey);
+    color: var(--secondary-color);
   }
 
   .offer-user-card__location {
@@ -6508,8 +6549,6 @@ body {
     display: flex;
     align-items: center;
     gap: 0.25rem;
-    background-color: var(--tertiary-color);
-    color: var(--secondary-color);
     padding: 0.2rem 0.6rem;
     transition: background-color 0.2s, color 0.2s;
     border-radius: 9999px;
@@ -6520,12 +6559,29 @@ body {
     .material-symbols-outlined { font-size: 0.9rem; }
   }
 
+  &.plan-user-card--tertiary .plan-user-card__ideal-badge {
+    background-color: var(--tertiary-color);
+    color: var(--secondary-color);
+  }
+
+  &.plan-user-card--primary .plan-user-card__ideal-badge {
+    background-color: var(--primary-color);
+    color: var(--white-pure);
+  }
+
+  &.plan-user-card--accent .plan-user-card__ideal-badge {
+    background-color: var(--accent-color);
+    color: var(--white-pure);
+  }
+
   .plan-user-card__body {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
+    gap: 0.5rem;
     padding: 1.25rem;
     flex-grow: 1;
+
+    .plan-user-card__subtitle { margin-top: 0.75rem; margin-bottom: 0.75rem; }
   }
 
   .plan-user-card__header {
@@ -6541,6 +6597,7 @@ body {
     font-size: 0.7rem;
     font-weight: 700;
     letter-spacing: 0.06em;
+    align-self: flex-start;
     text-transform: uppercase;
   }
 
@@ -6549,12 +6606,12 @@ body {
     align-items: center;
     gap: 0.2rem;
     font-family: var(--font-poppins);
-    font-size: 0.85rem;
+    font-size: 1.3rem;
     font-weight: 600;
     color: var(--secondary-color);
 
     .material-symbols-outlined {
-      font-size: 1rem;
+      font-size: 1.7rem;
       color: #f5a623;
     }
   }
@@ -6600,26 +6657,27 @@ body {
     cursor: pointer;
     text-decoration: underline;
     margin-top: 0.2rem;
-    color: var(--dark-grey);
+    color: var(--secondary-color);
   }
 
   .plan-user-card__meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.4rem;
+    align-items: center;
   }
 
   .plan-user-card__location,
   .plan-user-card__age {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.2rem;
     font-family: var(--font-poppins);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 500;
     color: var(--dark-grey);
 
-    .material-symbols-outlined { font-size: 1rem; }
+    .material-symbols-outlined { font-size: 0.9rem; }
   }
 
   .plan-user-card__tags {
@@ -6631,11 +6689,24 @@ body {
   .plan-user-card__tag {
     padding: 0.2rem 0.6rem;
     border-radius: 9999px;
-    background-color: rgba(14, 131, 118, 0.08);
-    color: var(--primary-color);
     font-family: var(--font-poppins);
     font-size: 0.75rem;
     font-weight: 500;
+  }
+
+  &.plan-user-card--tertiary .plan-user-card__tag {
+    background-color: color-mix(in srgb, var(--tertiary-color) 15%, transparent);
+    color: var(--secondary-color);
+  }
+
+  &.plan-user-card--primary .plan-user-card__tag {
+    background-color: color-mix(in srgb, var(--primary-color) 15%, transparent);
+    color: var(--primary-color);
+  }
+
+  &.plan-user-card--accent .plan-user-card__tag {
+    background-color: color-mix(in srgb, var(--accent-color) 15%, transparent);
+    color: var(--accent-color);
   }
 
   .plan-user-card__btn {
@@ -7078,7 +7149,7 @@ body {
     color: var(--white-pure);
     background-color: var(--accent-color);
     padding: 0.75rem 1rem;
-    border-radius: 0.75rem;
+    border-radius: 9999px;
     margin-top: var(--spacing-sm);
   }
 }

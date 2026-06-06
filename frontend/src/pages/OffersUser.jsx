@@ -10,14 +10,16 @@ function OfferCard({ colorVariant, badge, badgeType, date, dateIcon, title, subt
       className={`offer-user-card offer-user-card--${colorVariant}`}
       onClick={onNavigate}
     >
-      <div className="offer-user-card__header">
-        <span className={`offer-user-badge offer-user-badge--${badgeType}`}>{badge}</span>
-        <span className="offer-user-date">
-          <span className="material-symbols-outlined">{dateIcon}</span>
-          {date}
-        </span>
-      </div>
+      <span className={`offer-user-badge offer-user-badge--${badgeType}`}>{badge}</span>
       <h3 className="offer-user-card__title">{title}</h3>
+      <span className="offer-user-date">
+        <span className="material-symbols-outlined">{dateIcon}</span>
+        {date}
+      </span>
+      <div className="offer-user-card__location">
+        <span className="material-symbols-outlined">location_on</span>
+        {location}
+      </div>
       <div className="offer-user-card__subtitle">
         <p className={`offer-user-card__subtitle-text${expanded ? " expanded" : ""}`}>
           {subtitle}
@@ -31,10 +33,6 @@ function OfferCard({ colorVariant, badge, badgeType, date, dateIcon, title, subt
             {expanded ? "Leer menos" : "Leer más"}
           </button>
         )}
-      </div>
-      <div className="offer-user-card__location">
-        <span className="material-symbols-outlined">location_on</span>
-        {location}
       </div>
       <button className="offer-user-card__btn" type="button">
         Ver oferta
