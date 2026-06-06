@@ -27,9 +27,11 @@ describe("App", () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole("navigation")).toBeInTheDocument();
+    // La NavbarResponsive renderiza varias <nav> (barra inferior móvil y
+    // navbar superior de escritorio): basta con que exista al menos una.
+    expect(screen.getAllByRole("navigation").length).toBeGreaterThan(0);
     expect(
-      screen.getByRole("link", { name: "PLANES" }),
-    ).toBeInTheDocument();
+      screen.getAllByRole("link", { name: "PLANES" }).length,
+    ).toBeGreaterThan(0);
   });
 });
