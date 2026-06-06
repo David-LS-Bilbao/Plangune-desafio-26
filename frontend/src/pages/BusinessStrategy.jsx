@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useBusinessStore } from "../store";
 
 function BusinessStrategy() {
+  const navigate = useNavigate();
   const [strategyOptimized, setStrategyOptimized] = useState(false);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
   const [upgradeMessage, setUpgradeMessage] = useState("");
@@ -9,7 +11,7 @@ function BusinessStrategy() {
 
   const handleFeatureClick = (featureId) => {
     if (subscription === "Free") {
-      setUpgradeMessage("Mejora tu plan para activar estas funcionalidades.");
+      setUpgradeMessage("Mejora tu plan para activar estas funcionalidades. Haz click aquí.");
       return;
     }
     setUpgradeMessage("");
@@ -29,34 +31,33 @@ function BusinessStrategy() {
 
   return (
     <main className="business-strategy-main">
-      <section className="strategy-header">
-        <p className="page-tag">Mi estrategia</p>
-        <h1 className="page-title">Tu plan de visibilidad</h1>
-        <p className="page-subtitle">
-          Activa las funciones clave que amplían el alcance de tu negocio y
-          mejoran tu captación.
-        </p>
-      </section>
+      <div className="biz-dashboard-header">
+        <h1 className="page-title">Plan de visibilidad</h1>
+        <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
+          Volver atrás
+        </button>
+      </div>
 
-      <section className="strategy-intro">
-        <p>
-          Estas son las herramientas que puedes usar para destacar tu negocio
-          dentro de TxikiPlan:
-        </p>
-      </section>
+      
 
       {upgradeMessage && (
-        <div className="alert-error" style={{ marginBottom: "1rem", color: "var(--md-sys-color-error)", backgroundColor: "var(--md-sys-color-error-container)", padding: "1rem", borderRadius: "8px" }}>
-          <span className="material-symbols-outlined" style={{ verticalAlign: "middle", marginRight: "8px" }}>error</span>
-          {upgradeMessage}
-        </div>
+        <button
+          type="button"
+          onClick={() => navigate("/negocio/suscripciones")}
+          style={{ marginBottom: "1rem", padding: "1rem", borderRadius: "0.75rem", border: "0.2rem solid var(--accent-color)", color: "var(--accent-color)", background: "none", cursor: "pointer", textAlign: "left", width: "100%", fontSize: "1.1rem", fontFamily: "var(--font-poppins)", transition: "color 0.2s, border-color 0.2s, background-color 0.2s" }}
+          onMouseEnter={e => { e.currentTarget.style.color = "var(--white-pure)"; e.currentTarget.style.borderColor = "var(--accent-color)"; e.currentTarget.style.backgroundColor = "var(--accent-color)"; }}
+          onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-color)"; e.currentTarget.style.borderColor = "var(--accent-color)"; e.currentTarget.style.backgroundColor = "transparent"; }}
+        >
+          <span className="material-symbols-outlined" style={{ verticalAlign: "middle", marginRight: "8px", fontSize: "1.5rem" }}>error</span>
+          Mejora tu plan para activar estas funcionalidades. <span style={{ textDecoration: "underline" }}>Haz click aquí.</span>
+        </button>
       )}
 
       <section className="strategy-features-grid">
-        <button 
+        <button
           className={`feature-card ${selectedFeatures.includes("destacados") ? "selected" : ""}`}
           onClick={() => handleFeatureClick("destacados")}
-          style={{ textAlign: "left", width: "100%", border: selectedFeatures.includes("destacados") ? "2px solid var(--md-sys-color-primary)" : undefined }}
+          style={{ textAlign: "left", width: "100%" }}
         >
           <span className="material-symbols-outlined feature-icon">star</span>
           <h2 className="feature-title">Destacados</h2>
@@ -65,10 +66,10 @@ function BusinessStrategy() {
           </p>
         </button>
 
-        <button 
+        <button
           className={`feature-card ${selectedFeatures.includes("mailing") ? "selected" : ""}`}
           onClick={() => handleFeatureClick("mailing")}
-          style={{ textAlign: "left", width: "100%", border: selectedFeatures.includes("mailing") ? "2px solid var(--md-sys-color-primary)" : undefined }}
+          style={{ textAlign: "left", width: "100%" }}
         >
           <span className="material-symbols-outlined feature-icon">mail</span>
           <h2 className="feature-title">Mailing</h2>
@@ -78,10 +79,10 @@ function BusinessStrategy() {
           </p>
         </button>
 
-        <button 
+        <button
           className={`feature-card ${selectedFeatures.includes("mapa") ? "selected" : ""}`}
           onClick={() => handleFeatureClick("mapa")}
-          style={{ textAlign: "left", width: "100%", border: selectedFeatures.includes("mapa") ? "2px solid var(--md-sys-color-primary)" : undefined }}
+          style={{ textAlign: "left", width: "100%" }}
         >
           <span className="material-symbols-outlined feature-icon">map</span>
           <h2 className="feature-title">Destacados en el mapa</h2>
@@ -91,10 +92,10 @@ function BusinessStrategy() {
           </p>
         </button>
 
-        <button 
+        <button
           className={`feature-card ${selectedFeatures.includes("filtro") ? "selected" : ""}`}
           onClick={() => handleFeatureClick("filtro")}
-          style={{ textAlign: "left", width: "100%", border: selectedFeatures.includes("filtro") ? "2px solid var(--md-sys-color-primary)" : undefined }}
+          style={{ textAlign: "left", width: "100%" }}
         >
           <span className="material-symbols-outlined feature-icon">
             filter_alt

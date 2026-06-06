@@ -308,7 +308,7 @@ Campos por plan: `id`, `title`, `location`, `category`, `price`, `rating`, `revi
 |---|---|
 | `family` | `familia.agirre@example.com` |
 | `business` | `info@txikipark.com` |
-| `admin` | `admin@txikiplan.com` |
+| `admin` | `admin@plangune.com` |
 
 ---
 
@@ -390,4 +390,4 @@ Redirección:
 - ❌ Servicios de API (carpeta `services/` preparada)
 - ❌ Contextos React (carpeta `context/` preparada)
 - ❌ Hooks personalizados (carpeta `hooks/` preparada)
-- ❌ Nombre de marca definitivo (provisional: "TxikiPlan")
+- ❌ Nombre de marca definitivo (provisional: "Plangune")

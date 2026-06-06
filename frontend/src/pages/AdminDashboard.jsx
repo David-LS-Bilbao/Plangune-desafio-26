@@ -24,7 +24,7 @@ function AdminDashboard() {
     <main className="admin-dashboard-main">
       {/* Page Title */}
       <div className="admin-page-header">
-        <h2 className="admin-title">Admin TxikiPlan</h2>
+        <h2 className="admin-title">Admin Plangune</h2>
         <p className="admin-subtitle">Gestión y moderación del ecosistema.</p>
       </div>
 

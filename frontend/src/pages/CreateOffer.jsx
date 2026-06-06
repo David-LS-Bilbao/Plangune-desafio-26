@@ -159,7 +159,7 @@ function CreateOffer() {
 
             <div className="biz-activity-form create-offer-notice">
               <span className="material-symbols-outlined fill" style={{ color: 'var(--accent-color)', fontSize: '1.5rem' }}>info</span>
-              <p>Las ofertas deben ser revisadas por el equipo de TxikiPlan antes de publicarse.</p>
+              <p>Las ofertas deben ser revisadas por el equipo de Plangune antes de publicarse.</p>
             </div>
 
             <div className="create-offer-actions">

@@ -94,7 +94,7 @@ function CreateBusiness() {
               <label className="section-label" htmlFor="email">Correo electrónico</label>
               <div className="input-with-icon">
                 <span className="material-symbols-outlined icon">mail</span>
-                <input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="negocio@txikiplan.com" required />
+                <input id="email" name="email" type="email" value={form.email} onChange={handleChange} placeholder="negocio@plangune.com" required />
               </div>
             </div>
 

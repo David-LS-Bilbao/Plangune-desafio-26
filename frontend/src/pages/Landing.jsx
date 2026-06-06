@@ -39,7 +39,7 @@ function Landing() {
               <p>Más tiempo para compartir. Más tiempo para disfrutar.</p>
             </div>
             <div className="problem-visual">
-              <img src={logoTemp} alt="TxikiPlan logo" />
+              <img src={logoTemp} alt="Plangune logo" />
             </div>
           </div>
         </section>

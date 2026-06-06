@@ -60,7 +60,7 @@ function Header() {
         </button>
 
         <div className="title title-clickable" onClick={() => goTo("/")}>
-          TxikiPlan
+          Plangune
         </div>
 
         <div className="header-actions">

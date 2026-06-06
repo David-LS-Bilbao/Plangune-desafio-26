@@ -44,9 +44,13 @@ function NavbarResponsive() {
     { to: user ? '/perfil' : '/login', label: 'Perfil', exact: false },
   ];
 
+  const businessDesktopLinks = [
+    { to: '/negocio/dashboard', label: 'Dashboard', exact: true },
+  ];
+
   const desktopLinks =
     user?.role === 'admin' ? adminLinks :
-    user?.role === 'business' ? [] :
+    user?.role === 'business' ? businessDesktopLinks :
     defaultDesktopLinks;
 
   const isActive = (to, exact) =>
@@ -96,7 +100,7 @@ function NavbarResponsive() {
         <div className="nr-mobile-header-content">
           {/* Logo a la izquierda */}
           <Link to="/" aria-label="Ir al inicio" className="nr-mobile-logo">
-            <img src={logo} alt="TxikiPlan logo" />
+            <img src={logo} alt="Plangune logo" />
           </Link>
 
           {/* Botón hamburguesa / X a la derecha */}
@@ -191,7 +195,7 @@ function NavbarResponsive() {
       <nav className="nr-top-navbar">
         <div className="nr-top-wrapper">
           <Link to="/" aria-label="Ir al inicio">
-            <img src={logo} alt="TxikiPlan logo" />
+            <img src={logo} alt="Plangune logo" />
           </Link>
           <ul role="list">
             {desktopLinks.map(({ to, label, exact }) => (
