@@ -77,13 +77,15 @@ function FamilyProfile() {
           podremos recomendarte los mejores planes para tu familia.
         </p>
 
-        <button
-          type="button"
-          className="btn-text-danger"
-          onClick={() => { logout(); navigate('/login'); }}
-        >
-          Cerrar sesión
-        </button>
+        <div className="btn-back-wrapper" style={{ alignSelf: "flex-end", paddingRight: "1.2rem", marginTop: "1rem" }}>
+          <button
+            type="button"
+            className="btn-text-danger"
+            onClick={() => { logout(); navigate('/login'); }}
+          >
+            Cerrar sesión
+          </button>
+        </div>
       </section>
 
       <div className="profile-form-card">

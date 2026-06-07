@@ -20,16 +20,16 @@ function NavbarResponsive() {
   ];
 
   const adminLinks = [
-    { to: '/admin', icon: 'dashboard', label: 'Panel', exact: true },
+    { to: '/admin', icon: 'dashboard', label: 'Dashboard', exact: true },
     { to: '/admin/data', icon: 'analytics', label: 'Datos', exact: true },
   ];
 
   const businessLinks = [
+    { to: '/negocio/ofertas', icon: 'local_offer', label: 'Ofertas', exact: true },
+    { to: '/negocio', icon: 'event', label: 'Actividades', exact: true },
     { to: '/negocio/dashboard', icon: 'dashboard', label: 'Dashboard', exact: true },
-    { to: '/negocio/rendimiento', icon: 'bar_chart', label: 'Rendimiento', exact: false },
     { to: '/negocio/resenas', icon: 'reviews', label: 'Reseñas', exact: false },
-    { to: '/negocio/estrategia', icon: 'rocket_launch', label: 'Estrategia', exact: false },
-    { to: '/negocio/suscripciones', icon: 'workspace_premium', label: 'Suscripción', exact: false },
+    { to: '/negocio/rendimiento', icon: 'bar_chart', label: 'Rendimiento', exact: false },
   ];
 
   const links =
@@ -82,15 +82,17 @@ function NavbarResponsive() {
     ];
     if (user.role === 'business') return [
       { label: 'Dashboard', path: '/negocio/dashboard', icon: 'dashboard' },
-      { label: 'Mis ofertas', path: '/negocio/ofertas', icon: 'local_offer' },
+      { label: 'Actividades', path: '/negocio', icon: 'event' },
+      { label: 'Ofertas', path: '/negocio/ofertas', icon: 'local_offer' },
       { label: 'Rendimiento', path: '/negocio/rendimiento', icon: 'bar_chart' },
       { label: 'Reseñas', path: '/negocio/resenas', icon: 'reviews' },
-      { label: 'Estrategia', path: '/negocio/estrategia', icon: 'rocket_launch' },
+      { label: 'Visibilidad', path: '/negocio/estrategia', icon: 'rocket_launch' },
       { label: 'Suscripción', path: '/negocio/suscripciones', icon: 'workspace_premium' },
+      { label: 'Editar perfil', path: '/negocio/perfil', icon: 'person' },
     ];
     if (user.role === 'admin') return [
-      { label: 'Panel admin', path: '/admin', icon: 'admin_panel_settings' },
-      { label: 'Datos', path: '/admin/datos', icon: 'database' },
+      { label: 'Dashboard', path: '/admin', icon: 'admin_panel_settings' },
+      { label: 'Datos', path: '/admin/data', icon: 'database' },
     ];
     return [];
   })();
@@ -152,11 +154,6 @@ function NavbarResponsive() {
       {/* ── MOBILE: barra inferior con iconos (< 840px) ───────────────────── */}
       <nav className="nr-bottom-nav">
         {(() => {
-          const fabIndex = links.length === 3 ? 1 : 2;
-          const leftLinks = links.slice(0, fabIndex);
-          const rightLinks = links.slice(fabIndex + 1);
-          const fab = links[fabIndex];
-
           const renderLink = ({ to, icon, label, exact }) => (
             <NavLink
               key={to}
@@ -170,6 +167,15 @@ function NavbarResponsive() {
               <span className="nr-bottom-label">{label}</span>
             </NavLink>
           );
+
+          if (links.length < 3) {
+            return <>{links.map(renderLink)}</>;
+          }
+
+          const fabIndex = links.length === 3 ? 1 : 2;
+          const leftLinks = links.slice(0, fabIndex);
+          const rightLinks = links.slice(fabIndex + 1);
+          const fab = links[fabIndex];
 
           return (
             <>

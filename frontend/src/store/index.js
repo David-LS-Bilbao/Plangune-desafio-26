@@ -58,7 +58,7 @@ export const useBusinessStore = create((set, get) => ({
     clicks: 350,
     reservations: 42,
   },
-  addOffer: (offer) => set({ offers: [...get().offers, { ...offer, id: Date.now(), status: 'active' }] }),
+  addOffer: (offer) => set({ offers: [...get().offers, { status: 'pending', ...offer, id: Date.now() }] }),
   updateOffer: (id, partial) => set({
     offers: get().offers.map((o) => (o.id === id ? { ...o, ...partial } : o)),
   }),

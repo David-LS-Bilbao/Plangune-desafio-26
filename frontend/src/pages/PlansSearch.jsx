@@ -80,18 +80,18 @@ function PlansSearch() {
 
       <h2 className="search-form__results-title">
         {filteredPlans.length > 0
-          ? `${filteredPlans.length} plan${filteredPlans.length !== 1 ? "es" : ""} encontrado${filteredPlans.length !== 1 ? "s" : ""}`
-          : "Sin resultados"}
+          ? filteredPlans.length === 1
+            ? `¡Encontramos el plan perfecto para tu familia!`
+            : `¡Encontramos ${filteredPlans.length} planes perfectos para tu familia!`
+          : "No encontramos nada... ¡pero hay muchos planes esperándote! Cambia los filtros."}
       </h2>
 
-      {filteredPlans.length > 0 ? (
+      {filteredPlans.length > 0 && (
         <div className="plans-user-list">
           {filteredPlans.map((plan, i) => (
             <PlanCard key={plan.id} plan={plan} index={i} />
           ))}
         </div>
-      ) : (
-        <p className="plans-user-empty">No se encontraron planes con esa búsqueda.</p>
       )}
 
     </main>

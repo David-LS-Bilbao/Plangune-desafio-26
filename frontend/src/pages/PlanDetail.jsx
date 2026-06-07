@@ -51,9 +51,13 @@ function PlanDetail() {
       <div className="detail-header">
         <div className="detail-header__top">
           <h1 className="detail-title">{plan.title}</h1>
-          <button className="detail-map-btn" type="button">
-            <span className="material-symbols-outlined">map</span>
-            Ver Mapa
+          <button
+            className={`detail-btn detail-btn--outline${isFavorite ? " detail-btn--active" : ""}`}
+            type="button"
+            onClick={() => user ? toggleFavorite(parseInt(id)) : navigate("/login")}
+          >
+            <span className={`material-symbols-outlined${isFavorite ? " fill" : ""}`}>favorite</span>
+            {isFavorite ? "Guardado" : "Favorito"}
           </button>
         </div>
         <div className="detail-location">
@@ -85,6 +89,15 @@ function PlanDetail() {
 
       <section className="detail-actions">
         <button
+          className="detail-btn detail-btn--secondary"
+          type="button"
+          onClick={() => window.open(`https://www.google.com/maps/search/${encodeURIComponent(plan.location)}`, "_blank")}
+        >
+          <span className="material-symbols-outlined">directions</span>
+          Cómo llegar
+        </button>
+
+        <button
           className={`detail-btn detail-btn--primary${reserved ? " detail-btn--reserved" : ""}`}
           type="button"
           disabled={reserved}
@@ -96,23 +109,6 @@ function PlanDetail() {
           {reserved ? "¡Reservado!" : "Reservar"}
         </button>
 
-        <button
-          className="detail-btn detail-btn--secondary"
-          type="button"
-          onClick={() => window.open(`https://www.google.com/maps/search/${encodeURIComponent(plan.location)}`, "_blank")}
-        >
-          <span className="material-symbols-outlined">directions</span>
-          Cómo llegar
-        </button>
-
-        <button
-          className={`detail-btn detail-btn--outline${isFavorite ? " detail-btn--active" : ""}`}
-          type="button"
-          onClick={() => user ? toggleFavorite(parseInt(id)) : navigate("/login")}
-        >
-          <span className={`material-symbols-outlined${isFavorite ? " fill" : ""}`}>favorite</span>
-          {isFavorite ? "Guardado" : "Favorito"}
-        </button>
       </section>
 
       <p className="detail-description">{plan.description}</p>

@@ -19,7 +19,7 @@ function Landing() {
 
           <div className="hero-card">
             <h1>Haz planes y disfruta con tus peques</h1>
-            <p>Las actividades más divertidas, seguras y cómodas de Euskadi al alcance de tu mano.</p>
+            <p>Las mejores actividades y ofertas para salir con tus hijos y crear momentos inolvidables.</p>
             <div className="hero-btn-wrapper">
               <Link to="/planes" className="btn-search-plans">
                 <span className="material-symbols-outlined">search</span>
