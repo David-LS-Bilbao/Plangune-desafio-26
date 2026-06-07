@@ -1,45 +1,47 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuthStore, useUserStore, usePlansStore } from "../store";
 import PlanCard from "../components/common/PlanCard";
+import { useFavorites } from "../context/FavoritesContext";
 
 function Favorites() {
-  const navigate = useNavigate();
-  const user = useAuthStore((state) => state.user);
-  const favoritesIds = useUserStore((state) => state.favorites);
-  const allPlans = usePlansStore((state) => state.allPlans);
-  const favoritePlans = allPlans.filter((plan) => favoritesIds.includes(plan.id));
-
-  if (!user) {
-    return (
-      <main className="plans-user-main">
-        <div className="favorites-empty">
-          <span className="material-symbols-outlined favorites-empty__icon">lock</span>
-          <p>Inicia sesión para guardar tus planes favoritos.</p>
-          <button className="btn-primary" type="button" onClick={() => navigate("/login")}>
-            Iniciar sesión
-          </button>
-        </div>
-      </main>
-    );
-  }
+  const { favoritePlans, loading, error, refresh } = useFavorites();
 
   return (
     <main className="plans-user-main">
       <h1 className="plans-user-title">Tus planes favoritos</h1>
 
-      {favoritePlans.length > 0 ? (
-        <div className="plans-user-list">
-          {favoritePlans.map((plan, i) => (
-            <PlanCard key={plan.id} plan={plan} index={i} />
-          ))}
+      {loading && (
+        <div className="planner-state">
+          <div className="planner-spinner" role="status" aria-label="Cargando favoritos" />
+          <p className="planner-state__text">Cargando tus favoritos...</p>
         </div>
-      ) : (
-        <div className="favorites-empty">
-          <span className="material-symbols-outlined favorites-empty__icon">bookmark</span>
-          <p>No has guardado ningún plan aún.</p>
-          <p>Visita la pantalla de explorar para encontrar actividades familiares que te encanten.</p>
+      )}
+
+      {!loading && error && (
+        <div className="planner-state">
+          <span className="material-symbols-outlined planner-state__icon">cloud_off</span>
+          <p className="planner-state__text">
+            No hemos podido cargar tus favoritos. Inténtalo de nuevo.
+          </p>
+          <button type="button" className="planner-retry" onClick={refresh}>
+            Reintentar
+          </button>
         </div>
+      )}
+
+      {!loading && !error && (
+        favoritePlans.length > 0 ? (
+          <div className="plans-user-list">
+            {favoritePlans.map((plan, i) => (
+              <PlanCard key={plan.id} plan={plan} index={i} />
+            ))}
+          </div>
+        ) : (
+          <div className="favorites-empty">
+            <span className="material-symbols-outlined favorites-empty__icon">bookmark</span>
+            <p>No has guardado ningún plan aún.</p>
+            <p>Explora los planes y pulsa el corazón para guardarlos aquí.</p>
+          </div>
+        )
       )}
     </main>
   );
