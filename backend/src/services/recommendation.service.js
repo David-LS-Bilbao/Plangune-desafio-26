@@ -1,6 +1,7 @@
 import { findEvents } from '../repositories/event.repository.js';
 import { serializeEvent, toNumberOrNull } from '../utils/serializeEvent.js';
 import { isDataRecommenderEnabled, fetchDataPlanes } from '../clients/dataRecommender.client.js';
+import { normalizeDataPlaneToEvent } from '../utils/normalizeDataEvent.js';
 
 /**
  * Recomendador local: Family Score atómico y simple.
@@ -93,9 +94,12 @@ function getDataPlanesArray(response) {
 }
 
 function mapDataPlaneToRecommendation(plan) {
+  // Normaliza el plan crudo de Data al shape público de `events` (contrato F↔B).
+  // `event` y `activity` (alias legacy) apuntan al MISMO objeto normalizado.
+  const event = normalizeDataPlaneToEvent(plan);
   return {
-    event: plan,
-    activity: plan,
+    event,
+    activity: event,
     score: typeof plan.score === 'number' ? plan.score : 3,
     reasons: Array.isArray(plan.reasons) && plan.reasons.length > 0
       ? plan.reasons

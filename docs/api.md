@@ -192,6 +192,13 @@ Respuesta (array de recomendaciones con explicación):
 > - `activity` es un **alias temporal legacy** del mismo objeto, mantenido para no romper el
 >   frontend hasta que migre. **No retirar** hasta confirmación del equipo frontend.
 
+> **Normalización de Data:** cuando `source: "data-api"`, Express **normaliza** el plan crudo de Data
+> al shape de `events` (`nombre→title`, `descripcion→description`, `direccion→address`, `precio→price`,
+> `es_lluvia→es_interior`, booleanos string `"True"/"False"`→boolean, `edad_minima`→número). En ese
+> caso **`event.id` puede ser `null`** si el plan de Data aún no existe como evento interno; el
+> frontend debe tolerarlo (sin detalle ni favorito para esos ítems). Ver
+> [features/backend-recommendations-data-normalization.md](features/backend-recommendations-data-normalization.md).
+
 ## Asistente
 
 ### `POST /api/assistant/family-plan`

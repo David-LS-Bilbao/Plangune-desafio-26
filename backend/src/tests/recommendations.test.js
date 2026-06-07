@@ -145,6 +145,51 @@ describe('GET /api/recommendations · Data API principal', () => {
     expect(findEvents).not.toHaveBeenCalled();
   });
 
+  it('normaliza el shape crudo de Data al shape de events (title, booleanos, edad, id null)', async () => {
+    isDataRecommenderEnabled.mockReturnValue(true);
+    fetchDataPlanes.mockResolvedValue([
+      {
+        nombre: 'Aizian',
+        descripcion: 'Restaurante acogedor',
+        direccion: 'Lehendakari Leizaola, 29',
+        precio: null,
+        municipio: 'Bilbao',
+        territorio: 'bizkaia',
+        es_carrito: true,
+        es_lluvia: true,
+        es_mascotas: 'False',
+        es_silla_ruedas: 'True',
+        edad_minima: '0',
+        lat: 43.2675,
+        lng: -2.9418,
+        score: 1,
+        reasons: ['Recomendado por el servicio Data'],
+      },
+    ]);
+
+    const res = await request(app).get('/api/recommendations?municipality=Bilbao');
+
+    expect(res.status).toBe(200);
+    const item = res.body[0];
+    // event con shape de events (no el crudo de Data)
+    expect(item.event.title).toBe('Aizian');
+    expect(item.event.nombre).toBeUndefined();
+    expect(item.event.description).toBe('Restaurante acogedor');
+    expect(item.event.address).toBe('Lehendakari Leizaola, 29');
+    expect(item.event.es_interior).toBe(true); // desde es_lluvia
+    expect(item.event.es_silla_ruedas).toBe(true); // "True" → true
+    expect(item.event.es_mascotas).toBe(false); // "False" → false (no truthy)
+    expect(typeof item.event.es_mascotas).toBe('boolean');
+    expect(item.event.edad_minima).toBe(0);
+    expect(typeof item.event.edad_minima).toBe('number');
+    expect(item.event.id).toBeNull(); // Data sin id interno
+    // alias legacy + metadatos preservados
+    expect(item.activity).toEqual(item.event);
+    expect(item.source).toBe('data-api');
+    expect(typeof item.score).toBe('number');
+    expect(Array.isArray(item.reasons)).toBe(true);
+  });
+
   it('Data OK (shape { total, filtros, resultados }) → source "data-api"', async () => {
     isDataRecommenderEnabled.mockReturnValue(true);
     fetchDataPlanes.mockResolvedValue({
