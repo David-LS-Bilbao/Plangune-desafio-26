@@ -188,6 +188,12 @@ deshabilitada, se usa el **recomendador local** (Family Score sobre `events`) co
 | `reasons` | Array de strings explicativos (mostrables al usuario). |
 | `source` | `"data-api"` (recomendación de Data) o `"local-fallback"` (recomendador local). |
 
+> **`event.id` puede ser `null`** cuando `source: "data-api"` y el plan recomendado por Data aún no
+> existe como evento interno de la DB. Express normaliza el resto de campos de Data al shape de
+> `events` (`title`, `description`, `address`, `price`, `es_interior`, booleanos reales,
+> `edad_minima` numérico). El frontend debe tolerar `id: null` (no enlazar a detalle ni permitir
+> favorito para esos ítems, que requieren un id de evento real).
+
 ---
 
 ## Favoritos
