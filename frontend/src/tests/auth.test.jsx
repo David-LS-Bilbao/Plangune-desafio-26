@@ -109,8 +109,80 @@ describe("Guards de rutas", () => {
     expect(await screen.findByPlaceholderText("tu@email.com")).toBeInTheDocument();
   });
 
-  it("sin sesión, /negocio/ofertas sigue siendo accesible (ruta pública)", async () => {
+  it("sin sesión, /negocio/ofertas redirige a /login", async () => {
     apiFetchMe.mockRejectedValue(new Error("no session"));
+
+    render(
+      <MemoryRouter initialEntries={["/negocio/ofertas"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByPlaceholderText("tu@email.com")).toBeInTheDocument();
+  });
+
+  it("sin sesión, /negocio/suscripciones redirige a /login", async () => {
+    apiFetchMe.mockRejectedValue(new Error("no session"));
+
+    render(
+      <MemoryRouter initialEntries={["/negocio/suscripciones"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByPlaceholderText("tu@email.com")).toBeInTheDocument();
+  });
+
+  it("sin sesión, /ofertas es accesible (escaparate público)", async () => {
+    apiFetchMe.mockRejectedValue(new Error("no session"));
+
+    render(
+      <MemoryRouter initialEntries={["/ofertas"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /ofertas para tu familia/i })).toBeInTheDocument();
+  });
+
+  it("familia logueada NO accede a /negocio (pantalla de no autorizado)", async () => {
+    apiFetchMe.mockResolvedValue(familyUser);
+
+    render(
+      <MemoryRouter initialEntries={["/negocio"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /no tienes acceso/i })).toBeInTheDocument();
+  });
+
+  it("familia logueada NO accede a /negocio/ofertas (pantalla de no autorizado)", async () => {
+    apiFetchMe.mockResolvedValue(familyUser);
+
+    render(
+      <MemoryRouter initialEntries={["/negocio/ofertas"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /no tienes acceso/i })).toBeInTheDocument();
+  });
+
+  it("negocio logueado NO accede a /admin (pantalla de no autorizado)", async () => {
+    apiFetchMe.mockResolvedValue(businessUser);
+
+    render(
+      <MemoryRouter initialEntries={["/admin"]}>
+        <App />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("heading", { name: /no tienes acceso/i })).toBeInTheDocument();
+  });
+
+  it("negocio logueado accede a /negocio/ofertas", async () => {
+    apiFetchMe.mockResolvedValue(businessUser);
 
     render(
       <MemoryRouter initialEntries={["/negocio/ofertas"]}>

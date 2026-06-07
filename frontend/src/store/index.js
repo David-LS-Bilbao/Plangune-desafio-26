@@ -116,7 +116,7 @@ export const useUserStore = create((set, get) => ({
 // --- BUSINESS STORE (Offers, Subscription, Stats) ---
 export const useBusinessStore = create((set, get) => ({
   offers: mockPlans.slice(0, 2).map((p) => ({ ...p, status: 'active' })), // mock some initial offers
-  subscription: "Free", // Free, Pro, Premium
+  subscription: "Free", // Free, Base, Pro, Premium
   stats: {
     views: 1240,
     clicks: 350,

@@ -41,11 +41,10 @@ import FamilyChatPlayground from "../features/family-chat-playground";
  * Mapa de rutas con guards por rol.
  *
  * PÚBLICAS (sin login): /, /login, /register, /no-autorizado, /crear-familia, /crear-negocio,
- *   /ofertas (ofertas para el consumidor) y /negocio/ofertas (excepción de producto: el panel
- *   de ofertas de negocio es visible sin login en esta fase; es demo, sin datos reales).
+ *   /ofertas (ofertas para el consumidor).
  *
  * FAMILIA (login + rol family): /planes, /planes/:id, /favoritos, /perfil, /buscar (+ GUNI dev).
- * NEGOCIO (login + rol business o admin): /negocio y subrutas, EXCEPTO /negocio/ofertas (pública).
+ * NEGOCIO (login + rol business o admin): /negocio y subrutas (incluida /negocio/ofertas).
  * ADMIN (login + rol admin): /admin, /admin/data.
  *
  * El admin puede entrar también en el área de negocio (allow incluye 'admin'); no entra en el
@@ -67,11 +66,6 @@ function AppRoutes() {
       {/* Ofertas para el consumidor — pública */}
       <Route element={<PublicLayout />}>
         <Route path="/ofertas" element={<OffersUser />} />
-      </Route>
-
-      {/* /negocio/ofertas — PÚBLICA (excepción del brief); mantiene chrome de negocio */}
-      <Route element={<BusinessLayout />}>
-        <Route path="/negocio/ofertas" element={<ManageOffers />} />
       </Route>
 
       {/* ── FAMILIA (login + rol family) ──────────────────────────── */}
@@ -100,6 +94,7 @@ function AppRoutes() {
           <Route path="/negocio/resenas" element={<BusinessReviews />} />
           <Route path="/negocio/suscripciones" element={<BusinessSubscriptions />} />
           <Route path="/negocio/estrategia" element={<BusinessStrategy />} />
+          <Route path="/negocio/ofertas" element={<ManageOffers />} />
         </Route>
       </Route>
 
