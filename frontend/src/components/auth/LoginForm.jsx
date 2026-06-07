@@ -1,35 +1,37 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store";
-import { MOCK_USERS } from "../../mocks/data";
+
+/** Destino tras el login, según el rol devuelto por el backend. */
+const HOME_BY_ROLE = { family: "/buscar", business: "/negocio", admin: "/admin" };
 
 function LoginForm() {
   const navigate = useNavigate();
   const login = useAuthStore((state) => state.login);
-  const [email, setEmail] = useState("familia.agirre@example.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    
-    // Auto-detect role based on email or use MOCK_USERS
-    let detectedRole = "family";
-    const foundUser = Object.values(MOCK_USERS).find(u => u.email.toLowerCase() === email.toLowerCase());
-    
-    if (foundUser) {
-      detectedRole = foundUser.role;
-    } else if (email.toLowerCase().includes("admin")) {
-      detectedRole = "admin";
-    } else if (email.toLowerCase().includes("negocio") || email.toLowerCase().includes("business") || email.toLowerCase().includes("info")) {
-      detectedRole = "business";
+    if (loading) return;
+    setError("");
+    setLoading(true);
+    try {
+      const user = await login(email, password);
+      navigate(HOME_BY_ROLE[user.role] || "/", { replace: true });
+    } catch (err) {
+      const status = err?.response?.status;
+      setError(
+        status === 401
+          ? "Correo o contraseña incorrectos."
+          : "No se ha podido iniciar sesión. Inténtalo de nuevo.",
+      );
+    } finally {
+      setLoading(false);
     }
-
-    login(detectedRole);
-    
-    if (detectedRole === "family") navigate("/perfil");
-    else if (detectedRole === "business") navigate("/negocio/dashboard");
-    else if (detectedRole === "admin") navigate("/admin");
   };
 
   return (
@@ -91,11 +93,21 @@ function LoginForm() {
         </div>
       </div>
 
+      {/* Error */}
+      {error && (
+        <p
+          role="alert"
+          style={{ color: "var(--error-color, #d62828)", margin: "0.25rem 0 0", fontSize: "0.9rem" }}
+        >
+          {error}
+        </p>
+      )}
+
       {/* Submit */}
       <div className="submit-group">
-        <button type="submit" className="btn-primary-new">
-          <span className="material-symbols-outlined">login</span>
-          Iniciar Sesión
+        <button type="submit" className="btn-primary-new" disabled={loading}>
+          <span className="material-symbols-outlined">{loading ? "hourglass_top" : "login"}</span>
+          {loading ? "Entrando…" : "Iniciar Sesión"}
         </button>
       </div>
     </form>

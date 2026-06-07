@@ -9,6 +9,10 @@ import axios from "axios";
  * Express es la fachada única que normaliza datos y gestiona los fallbacks.
  *
  * `VITE_API_URL` ya incluye el sufijo `/api` (ver frontend/.env.example).
+ *
+ * `withCredentials: true`: el navegador envía/recibe la cookie httpOnly de sesión (`token`)
+ * en cada petición. El backend debe responder con CORS `credentials: true` y un origen
+ * concreto (CLIENT_URL), nunca `*`.
  */
 const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
@@ -16,6 +20,7 @@ export const apiClient = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },
   timeout: 10000,
+  withCredentials: true,
 });
 
 export default apiClient;

@@ -5,10 +5,13 @@
  * Solo para desarrollo/demo local. NO usar contra entornos compartidos o producción.
  *
  * Orden de ejecución:
- *   1. seedUsers()      — 5 usuarios demo 'business' (IDs 1–5) + 1 usuario 'family' (ID 100)
+ *   1. seedUsers()      — 5 usuarios demo 'business' (IDs 1–5, passwords placeholder)
  *   2. seedBusinesses() — 5 negocios demo vinculados a esos usuarios (IDs explícitos 1–5)
- *   3. seedEvents()     — eventos de mockEvents.js (IDs explícitos del mock)
- *   4. syncSequences()  — resincroniza las secuencias SERIAL para evitar choques
+ *   3. seedAuthUsers()  — usuarios demo de LOGIN real con hash bcrypt:
+ *                         familia@demo.com (family, id 100), negocio@demo.com (business, id 6),
+ *                         admin@demo.com (admin, id 7) + negocio demo (id 6) del business
+ *   4. seedEvents()     — eventos de mockEvents.js (IDs explícitos del mock)
+ *   5. syncSequences()  — resincroniza las secuencias SERIAL para evitar choques
  *                         en futuros inserts sin ID explícito
  *
  * Todos los upserts son idempotentes: puede ejecutarse varias veces sin duplicar.
@@ -18,8 +21,14 @@
  *   # o bien: node prisma/seed.js   (desde backend/)
  */
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 import { mockEvents } from '../src/seed/mockEvents.js';
+
+if (process.env.NODE_ENV === 'production') {
+  console.error('Seed de desarrollo bloqueado: NODE_ENV=production.');
+  process.exit(1);
+}
 
 const prisma = new PrismaClient();
 
@@ -27,7 +36,10 @@ const prisma = new PrismaClient();
 // Datos demo (inline — no se duplican en otros archivos)
 // ---------------------------------------------------------------------------
 
-/** 5 usuarios demo de tipo 'business'. Passwords son placeholders, no hashes reales. */
+/**
+ * 5 usuarios demo de tipo 'business' que respaldan los business_id de mockEvents (1–5).
+ * Passwords placeholder (NO hashes): no sirven para login real (ver demoAuthUsers).
+ */
 const demoUsers = [
   { id: 1, email: 'negocio1@demo.eus', password: 'seed-demo-no-real-1', role: 'business' },
   { id: 2, email: 'negocio2@demo.eus', password: 'seed-demo-no-real-2', role: 'business' },
@@ -37,17 +49,22 @@ const demoUsers = [
 ];
 
 /**
- * Usuario family demo (ID 100) para favoritos mientras no exista auth.
- * Lo usa favorite.service.js como MOCK_FAMILY_USER_ID. No es un negocio (1–5).
+ * Contraseña demo para los 3 usuarios de LOGIN real (solo desarrollo/demo).
+ * Documentada en docs/features/auth-roles-minimum.md. NO usar en producción.
  */
-const demoFamilyUser = {
-  id: 100,
-  email: 'familia@demo.eus',
-  password: 'seed-demo-no-real-family',
-  role: 'family',
-};
+const DEMO_PASSWORD = 'Demo1234!';
 
-/** 5 negocios demo. IDs 1–5 coinciden con los business_id referenciados por mockEvents. */
+/**
+ * Usuarios demo con LOGIN real (password hasheada con bcrypt). Uno por rol.
+ * El family (id 100) es además el usuario de favoritos histórico.
+ */
+const demoAuthUsers = [
+  { id: 100, email: 'familia@demo.com', role: 'family' },
+  { id: 6, email: 'negocio@demo.com', role: 'business' },
+  { id: 7, email: 'admin@demo.com', role: 'admin' },
+];
+
+/** 5 negocios demo (IDs 1–5, referenciados por mockEvents) + el del usuario business demo (id 6). */
 const demoBusinesses = [
   { id: 1, user_id: 1, name: 'Negocio Demo 1 (museo Bilbao)', nif: 'B00000001' },
   { id: 2, user_id: 2, name: 'Negocio Demo 2 (taller Bilbao)', nif: 'B00000002' },
@@ -79,7 +96,7 @@ function prepareEventForPrisma({ fecha_inicio, fecha_fin, ...rest }) {
 
 async function seedUsers() {
   let count = 0;
-  for (const user of [...demoUsers, demoFamilyUser]) {
+  for (const user of demoUsers) {
     const { id, ...data } = user;
     await prisma.user.upsert({
       where:  { id },
@@ -89,6 +106,32 @@ async function seedUsers() {
     count++;
   }
   return count;
+}
+
+/**
+ * Usuarios demo con login real (bcrypt). A diferencia de seedUsers, el upsert SÍ actualiza
+ * email/password/role para garantizar credenciales demo conocidas incluso en DBs ya creadas.
+ * Crea además el negocio (id 6) del usuario business demo (relación 1:1 obligatoria).
+ */
+async function seedAuthUsers() {
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
+
+  for (const { id, email, role } of demoAuthUsers) {
+    await prisma.user.upsert({
+      where:  { id },
+      update: { email, password: passwordHash, role },
+      create: { id, email, password: passwordHash, role },
+    });
+  }
+
+  // Negocio del usuario business demo (negocio@demo.com → user_id 6).
+  await prisma.business.upsert({
+    where:  { id: 6 },
+    update: {},
+    create: { id: 6, user_id: 6, name: 'Negocio Demo (login)', nif: 'B00000006' },
+  });
+
+  return demoAuthUsers.length;
 }
 
 async function seedBusinesses() {
@@ -147,10 +190,13 @@ async function syncSequences() {
 
 async function main() {
   const users     = await seedUsers();
-  console.log(`  ✔ users      : ${users} registros (upsert) — 5 business + 1 family (id 100)`);
+  console.log(`  ✔ users      : ${users} registros (upsert) — 5 business (placeholder)`);
 
   const businesses = await seedBusinesses();
   console.log(`  ✔ businesses : ${businesses} registros (upsert)`);
+
+  const authUsers = await seedAuthUsers();
+  console.log(`  ✔ auth users : ${authUsers} con login real (bcrypt) — familia@/negocio@/admin@demo.com`);
 
   const events    = await seedEvents();
   console.log(`  ✔ events     : ${events} registros (upsert)`);
@@ -158,7 +204,7 @@ async function main() {
   await syncSequences();
   console.log(`  ✔ secuencias SERIAL resincronizadas (users, businesses, events)`);
 
-  console.log('\n✅ Seed completado. DB lista para /api/events.');
+  console.log('\n✅ Seed completado. DB lista para /api/events y /api/auth.');
 }
 
 main()

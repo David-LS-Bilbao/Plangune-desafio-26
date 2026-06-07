@@ -5,7 +5,7 @@ import NavbarResponsive from "../components/common/NavbarResponsive";
 
 function CreateBusiness() {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const registerAccount = useAuthStore((state) => state.register);
   const [form, setForm] = useState({
     businessName: "",
     category: "",
@@ -15,24 +15,36 @@ function CreateBusiness() {
     email: "",
     password: "",
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  // Registro real (rol business). Los datos del negocio (nombre, NIF, dirección) aún no se
+  // persisten en backend en esta fase: solo se crea la cuenta de usuario.
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login({
-      role: "business",
-      id: `biz_${Date.now()}`,
-      name: form.businessName || "Negocio Txiki",
-      email: form.email,
-      nif: form.nif,
-      address: form.address,
-      avatar: "TP",
-    });
-    navigate("/negocio/dashboard");
+    if (loading) return;
+    setError("");
+    setLoading(true);
+    try {
+      await registerAccount({ email: form.email, password: form.password, role: "business" });
+      navigate("/negocio", { replace: true });
+    } catch (err) {
+      const status = err?.response?.status;
+      setError(
+        status === 409
+          ? "Ya existe una cuenta con ese correo. Prueba a iniciar sesión."
+          : status === 422
+            ? "Revisa el correo y que la contraseña tenga al menos 8 caracteres."
+            : "No se ha podido crear el negocio. Inténtalo de nuevo.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -102,14 +114,20 @@ function CreateBusiness() {
               <label className="section-label" htmlFor="password">Contraseña</label>
               <div className="input-with-icon">
                 <span className="material-symbols-outlined icon">lock</span>
-                <input id="password" name="password" type="password" value={form.password} onChange={handleChange} placeholder="••••••••" required />
+                <input id="password" name="password" type="password" value={form.password} onChange={handleChange} placeholder="Mínimo 8 caracteres" minLength={8} required />
               </div>
             </div>
 
+            {error && (
+              <p role="alert" style={{ color: "var(--error-color, #d62828)", margin: "0.25rem 0 0", fontSize: "0.9rem" }}>
+                {error}
+              </p>
+            )}
+
             <div className="create-family-form__actions">
-              <button type="submit" className="btn-primary">
-                <span className="material-symbols-outlined">add_business</span>
-                Crear negocio
+              <button type="submit" className="btn-primary" disabled={loading}>
+                <span className="material-symbols-outlined">{loading ? "hourglass_top" : "add_business"}</span>
+                {loading ? "Creando…" : "Crear negocio"}
               </button>
               <button type="button" className="btn-text-danger" onClick={() => navigate("/login")}>
                 Volver al inicio

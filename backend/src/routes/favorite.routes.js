@@ -1,5 +1,6 @@
 import { Router } from 'express';
 
+import { requireAuth, requireRole } from '../middlewares/auth.middleware.js';
 import {
   listFavoritesHandler,
   addFavoriteHandler,
@@ -8,7 +9,10 @@ import {
 
 const router = Router();
 
-// Montado bajo /api/favorites desde routes/index.js
+// Montado bajo /api/favorites desde routes/index.js.
+// Datos familiares por usuario → requieren sesión family; `requireAuth` rellena `req.user.id`.
+router.use(requireAuth, requireRole('family'));
+
 router.get('/', listFavoritesHandler);
 router.post('/:activityId', addFavoriteHandler);
 router.delete('/:activityId', removeFavoriteHandler);

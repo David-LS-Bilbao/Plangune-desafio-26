@@ -40,6 +40,11 @@ Express; no llama directamente a servicios internos como la API Flask de Data.
 Estado actual:
 
 * `/api/events`, `/api/recommendations` y `/api/favorites` usan datos reales vía PostgreSQL/Prisma.
+* Login real mínimo con roles (`family`, `business`, `admin`) en `/api/auth`.
+* La sesión usa cookie `httpOnly`; el frontend no guarda JWT en `localStorage`.
+* `/api/favorites` requiere usuario autenticado con rol `family`.
+* Auth endurecida para despliegue: CORS cerrado por `CLIENT_URL`, rate limit en login/registro,
+  `JWT_SECRET` fuerte, JWT `HS256` explícito y seed bloqueado en producción.
 * `/api/recommendations` usa **Data Flask** como recomendador principal cuando
   `DATA_RECOMMENDER_ENABLED=true`.
 * Si Data está deshabilitada, falla o agota timeout, Express usa el recomendador local
@@ -51,7 +56,7 @@ Estado actual:
   sin IA.
 * El campo actual para planes interiores/a cubierto es `events.es_interior`.
 * Existe una migración incremental segura para renombrar `es_lluvia` a `es_interior`.
-* Tests backend actuales: **11 suites · 94/94 verdes**.
+* Tests backend actuales: **16 suites · 158/158 verdes**.
 * PostgreSQL local usa `localhost:5434` desde el host para evitar conflictos con otros
   proyectos en `5432`; dentro de Docker el backend sigue usando `postgres:5432`.
 * Existe un importador CSV seguro (`backend/prisma/import-events-from-csv.js`) para ampliar
@@ -60,11 +65,16 @@ Estado actual:
 Endpoints actuales:
 
 * `GET /api/health`
+* `POST /api/auth/register` · `POST /api/auth/login` · `GET /api/auth/me` · `POST /api/auth/logout`
 * `GET /api/activities` · `GET /api/activities/:id` (solo `approved`)
 * `GET /api/recommendations` (hasta 3 planes con Family Score reglado y explicable)
 * `POST /api/assistant/family-plan` (LLM local opcional con fallback sin IA)
 * `POST /api/reviews` · `POST /api/incidents`
-* `GET/POST/DELETE /api/favorites`
+* `GET/POST/DELETE /api/favorites` (requiere rol `family`)
+
+Detalle de la feature auth/roles:
+[docs/features/auth-roles-minimum.md](docs/features/auth-roles-minimum.md) · memoria de cierre:
+[docs/memoria/auth-roles-minimum-cierre.md](docs/memoria/auth-roles-minimum-cierre.md).
 
 Variables Data (`backend/.env.example`):
 
@@ -113,9 +123,9 @@ Contrato detallado en [docs/api.md](docs/api.md) · base de datos y seed en [doc
 El frontend incluye **GUNI**, el asistente familiar conversacional, como **playground visual aislado**
 en la ruta de desarrollo **`/dev/family-chat`**.
 
-* Es la **única parte del frontend que consume el backend real**
-  (`POST /api/assistant/family-plan` vía `VITE_API_URL`). El resto de pantallas (planes, login,
-  favoritos, negocio, admin) funciona de momento con datos mock.
+* Consume el backend real en `POST /api/assistant/family-plan` vía `VITE_API_URL`.
+  El frontend ya usa backend real para auth/favoritos; varias pantallas de negocio/admin siguen
+  usando stores mock hasta sus features específicas.
 * La ruta **solo se registra en desarrollo** (`import.meta.env.DEV`); en el build de producción se
   elimina y no es accesible.
 * Cumple el [contrato Frontend ↔ Backend](docs/contracts/frontend-backend-api-contract.md):

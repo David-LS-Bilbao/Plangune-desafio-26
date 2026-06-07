@@ -9,16 +9,13 @@ import {
 /**
  * Lógica de negocio de favoritos sobre eventos reales (tabla `user_favorite_events`).
  *
- * Sin auth todavía: se usa un usuario family mock fijo (`MOCK_FAMILY_USER_ID`). Cuando
- * exista auth, ese id pasará a venir del usuario autenticado.
+ * Con auth: el `userId` proviene SIEMPRE del usuario autenticado (req.user.id), inyectado
+ * por el controlador tras `requireAuth`. Cada familia ve y gestiona solo sus favoritos.
  *
  * Contrato de compatibilidad: las rutas usan `:activityId`, pero internamente se trata
  * como `eventId`. La respuesta incluye AMBOS (`eventId` nuevo + `activityId` alias legacy)
  * para no romper el frontend hasta que migre.
  */
-
-/** Usuario family demo (creado por el seed). Reemplazar por el usuario autenticado al añadir auth. */
-export const MOCK_FAMILY_USER_ID = 100;
 
 /** Crea un error HTTP con `.status` para el errorHandler central. */
 function httpError(status, message) {
@@ -42,11 +39,13 @@ function parseEventId(rawId) {
 // Serialización de eventos: helper común en utils/serializeEvent.js.
 
 /**
- * Añade un evento a favoritos del usuario mock. Idempotente.
+ * Añade un evento a favoritos del usuario autenticado. Idempotente.
  * Lanza 404 si el evento no existe.
+ * @param {number} userId id del usuario autenticado
+ * @param {number|string} rawId id de evento
  * @returns {Promise<{eventId:number, activityId:number, favorited:true}>}
  */
-export async function addFavorite(rawId) {
+export async function addFavorite(userId, rawId) {
   const eventId = parseEventId(rawId);
 
   const event = await findEventById(eventId);
@@ -54,27 +53,30 @@ export async function addFavorite(rawId) {
     throw httpError(404, 'Evento no encontrado');
   }
 
-  await addFavoriteEvent(MOCK_FAMILY_USER_ID, eventId);
+  await addFavoriteEvent(userId, eventId);
   // `activityId` es alias legacy temporal de `eventId`.
   return { eventId, activityId: eventId, favorited: true };
 }
 
 /**
- * Quita un evento de favoritos del usuario mock. Idempotente (no falla si no estaba).
+ * Quita un evento de favoritos del usuario autenticado. Idempotente (no falla si no estaba).
  * No comprueba la existencia del evento: borrar un favorito ausente devuelve removed:false.
+ * @param {number} userId id del usuario autenticado
+ * @param {number|string} rawId id de evento
  * @returns {Promise<{eventId:number, activityId:number, favorited:false, removed:boolean}>}
  */
-export async function removeFavorite(rawId) {
+export async function removeFavorite(userId, rawId) {
   const eventId = parseEventId(rawId);
-  const removed = await removeFavoriteEvent(MOCK_FAMILY_USER_ID, eventId);
+  const removed = await removeFavoriteEvent(userId, eventId);
   return { eventId, activityId: eventId, favorited: false, removed };
 }
 
 /**
- * Lista los eventos favoritos del usuario mock (array de eventos reales serializados).
+ * Lista los eventos favoritos del usuario autenticado (array de eventos reales serializados).
+ * @param {number} userId id del usuario autenticado
  * @returns {Promise<Array>}
  */
-export async function listFavorites() {
-  const events = await listFavoriteEventsByUser(MOCK_FAMILY_USER_ID);
+export async function listFavorites(userId) {
+  const events = await listFavoriteEventsByUser(userId);
   return events.map(serializeEvent);
 }

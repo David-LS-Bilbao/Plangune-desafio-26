@@ -5,9 +5,14 @@ import {
   listFavorites,
 } from '../services/favorite.service.js';
 
-/** GET /api/favorites — lista los eventos favoritos del usuario mock. */
+/**
+ * Controladores de favoritos. Requieren `requireAuth` (rellena `req.user.id`),
+ * por lo que cada usuario opera SOLO sobre sus propios favoritos.
+ */
+
+/** GET /api/favorites — lista los eventos favoritos del usuario autenticado. */
 export const listFavoritesHandler = asyncHandler(async (req, res) => {
-  res.status(200).json(await listFavorites());
+  res.status(200).json(await listFavorites(req.user.id));
 });
 
 /**
@@ -15,7 +20,7 @@ export const listFavoritesHandler = asyncHandler(async (req, res) => {
  * `activityId` es alias legacy de `eventId` (se mantiene la ruta por compatibilidad frontend).
  */
 export const addFavoriteHandler = asyncHandler(async (req, res) => {
-  res.status(201).json(await addFavorite(req.params.activityId));
+  res.status(201).json(await addFavorite(req.user.id, req.params.activityId));
 });
 
 /**
@@ -23,5 +28,5 @@ export const addFavoriteHandler = asyncHandler(async (req, res) => {
  * `activityId` es alias legacy de `eventId`.
  */
 export const removeFavoriteHandler = asyncHandler(async (req, res) => {
-  res.status(200).json(await removeFavorite(req.params.activityId));
+  res.status(200).json(await removeFavorite(req.user.id, req.params.activityId));
 });
