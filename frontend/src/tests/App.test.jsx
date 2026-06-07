@@ -2,8 +2,8 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
-// La app valida la sesión al arrancar. Lo mockeamos para mantener este test
-// centrado en el render público de la landing, sin depender de red.
+// La app valida la sesión al arrancar (GET /auth/me). Lo mockeamos para que el test sea
+// hermético (sin red): sin sesión → la landing pública se renderiza igualmente.
 vi.mock("../services/authApi", () => ({
   login: vi.fn(),
   register: vi.fn(),
@@ -42,7 +42,11 @@ describe("App", () => {
       </MemoryRouter>,
     );
 
+    // La NavbarResponsive renderiza varias <nav> (barra inferior móvil y
+    // navbar superior de escritorio): basta con que exista al menos una.
     expect(screen.getAllByRole("navigation").length).toBeGreaterThan(0);
-    expect(screen.getAllByRole("link", { name: "PLANES" }).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole("link", { name: "PLANES" }).length,
+    ).toBeGreaterThan(0);
   });
 });

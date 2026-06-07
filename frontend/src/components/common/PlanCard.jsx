@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import getPlanImage from '../../utils/getPlanImage';
+import { useFavorites } from '../../context/FavoritesContext';
 
 const chessPattern = ["tertiary", "primary", "accent"];
 
 function PlanCard({ plan, index = 0 }) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
   const colorVariant = chessPattern[index % chessPattern.length];
+  const favorite = isFavorite(plan.id);
 
   return (
     <div
@@ -26,6 +29,17 @@ function PlanCard({ plan, index = 0 }) {
             Ideal
           </span>
         )}
+        <button
+          type="button"
+          className="plan-fav-btn"
+          aria-label={favorite ? "Quitar de favoritos" : "Añadir a favoritos"}
+          aria-pressed={favorite}
+          onClick={(e) => { e.stopPropagation(); toggleFavorite(plan.id); }}
+        >
+          <span className={`material-symbols-outlined${favorite ? " fill" : ""}`}>
+            favorite
+          </span>
+        </button>
       </div>
 
       <div className="plan-user-card__body">
@@ -35,10 +49,12 @@ function PlanCard({ plan, index = 0 }) {
 
         <h3 className="plan-user-card__title">{plan.title}</h3>
 
-        <span className="plan-user-card__rating">
-          <span className="material-symbols-outlined fill">star</span>
-          {plan.rating}
-        </span>
+        {plan.rating != null && (
+          <span className="plan-user-card__rating">
+            <span className="material-symbols-outlined fill">star</span>
+            {plan.rating}
+          </span>
+        )}
 
         <div className="plan-user-card__meta">
           <span className="plan-user-card__location">

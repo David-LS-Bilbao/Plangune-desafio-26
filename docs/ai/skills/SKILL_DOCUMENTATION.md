@@ -8,6 +8,7 @@ Cómo documentar en DESAFIO-26 para que el equipo y los agentes trabajen sin fri
 - **AGENTS.md / CLAUDE.md**: reglas operativas para agentes de IA.
 - **docs/**: documentación técnica y de IA.
 - **docs/ai/skills/**: procedimientos paso a paso (como este).
+- **docs/ai/prompts/**: prompts base reutilizables. Se versionan y revisan **como código** ("Prompt ≈ Código"): un cambio de prompt que altere el comportamiento entra por PR documental (`docs/*` → `dev`).
 
 ## Principios
 
@@ -18,7 +19,7 @@ Cómo documentar en DESAFIO-26 para que el equipo y los agentes trabajen sin fri
 
 ## Nombre del proyecto
 
-- El nombre de la app es **provisional** (lo define Marketing).
+- El nombre de la app es **provisional** (lo define Marketing). Nombre funcional provisional: **"TxikiPlan Euskadi"** — no fijarlo como nombre técnico.
 - En documentación técnica y nombres críticos usar `DESAFIO-26` / `desafio-26`.
 
 ## Plantilla para una decisión técnica (futuro `docs/decisions.md`)

@@ -1,0 +1,114 @@
+/* Panel "Pregunta a GUNI" en el flujo de familia (mobile-first). CSS propio. */
+
+.guni-panel {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin: 1.25rem 0 1.75rem;
+  background: linear-gradient(180deg, rgba(119, 215, 200, 0.12), #fff 60%);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+}
+
+.guni-panel__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Tamaño controlado de la mascota reutilizada (override del sizing del playground). */
+.guni-panel__mascot {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  display: inline-flex;
+}
+.guni-panel__mascot .fcp-guni,
+.guni-panel__mascot .fcp-guni__svg {
+  width: 100%;
+  height: 100%;
+}
+
+.guni-panel__title {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.guni-panel__subtitle {
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
+  color: var(--on-surface-variant, #6b7280);
+}
+
+.guni-panel__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.9rem 0;
+}
+
+.guni-chip {
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  background: rgba(37, 99, 235, 0.06);
+  color: #1d4ed8;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.guni-chip:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.guni-panel__form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.guni-panel__input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.7rem;
+  font-size: 1rem; /* >=16px evita zoom en iOS */
+}
+
+.guni-panel__send {
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.7rem 1.1rem;
+  background: var(--primary-color, #2563eb);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.guni-panel__send:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.guni-panel__response {
+  margin-top: 1rem;
+}
+
+.guni-panel__hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f766e;
+}
+
+.guni-panel__reply-text {
+  margin: 0;
+  white-space: pre-wrap; /* preserva saltos de línea del texto del asistente */
+  line-height: 1.5;
+  color: #1f2937;
+}
+
+.guni-panel__recs {
+  margin-top: 1rem;
+}

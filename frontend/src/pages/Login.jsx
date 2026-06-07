@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "../store";
 import LoginForm from "../components/auth/LoginForm";
 import NavbarResponsive from "../components/common/NavbarResponsive";
 import '../styles/login.css';
 
 function Login() {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
   const [registerRole, setRegisterRole] = useState("");
 
   const handleRegister = () => {
@@ -34,30 +32,6 @@ function Login() {
           <div className="login-body">
 
             <LoginForm />
-
-            <div className="social-divider">
-              <div className="divider-line"></div>
-              <span className="divider-text">o continuar con</span>
-              <div className="divider-line"></div>
-            </div>
-
-            <div className="social-buttons">
-              <button
-                className="btn-social"
-                type="button"
-                onClick={() => {
-                  login("family");
-                  navigate("/perfil");
-                }}
-              >
-                <img
-                  src="https://www.svgrepo.com/show/475656/google-color.svg"
-                  alt="Google"
-                  className="social-icon"
-                />
-                <span>Google</span>
-              </button>
-            </div>
 
             <div className="registration-section">
               <p className="registration-text">

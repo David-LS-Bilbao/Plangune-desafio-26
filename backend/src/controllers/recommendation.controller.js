@@ -9,7 +9,18 @@ function parseBool(value) {
 
 /** Construye el contexto del recomendador a partir de la query string. */
 function parseContext(query) {
-  const { childrenAges, strollerFriendly, rainSuitable, budget, municipality } = query;
+  const {
+    childrenAges,
+    strollerFriendly,
+    rainSuitable,
+    budget,
+    municipality,
+    limit,
+    changingTable,
+    wheelchairAccessible,
+    petsAllowed,
+    includeKulturklik,
+  } = query;
 
   return {
     childrenAges: childrenAges
@@ -22,12 +33,21 @@ function parseContext(query) {
     rainSuitable: parseBool(rainSuitable),
     budget: budget !== undefined ? Number(budget) : undefined,
     municipality: municipality || undefined,
+    // Adicionales (Data): se mapean en el service. Opcionales; undefined si no vienen.
+    changingTable: parseBool(changingTable),
+    wheelchairAccessible: parseBool(wheelchairAccessible),
+    petsAllowed: parseBool(petsAllowed),
+    includeKulturklik: parseBool(includeKulturklik),
+    limit: limit !== undefined ? Number(limit) : undefined,
   };
 }
 
-/** GET /api/recommendations — hasta 3 planes con Family Score. */
+/** GET /api/recommendations — recomendaciones de Data o fallback local. */
 export const getRecommendationsHandler = asyncHandler(async (req, res) => {
-  // La query string llega como texto; el parser deja tipos simples para el service.
   const context = parseContext(req.query);
-  res.status(200).json(getRecommendations(context));
+  const recommendations = await getRecommendations(context);
+  res.status(200).json(recommendations);
 });
+
+export default { getRecommendationsHandler };
+
