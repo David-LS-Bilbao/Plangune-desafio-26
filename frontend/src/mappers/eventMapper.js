@@ -108,8 +108,9 @@ export function eventToPlan(event) {
     telefono: event.telefono ?? null,
     website: event.website ?? null,
 
-    // Imagen
-    image: event.imagen_url || PLACEHOLDER_IMAGE,
+    // Imagen: null cuando el backend no provee imagen_url, para que getPlanImage
+    // caiga a getCategoryImage y use los assets de /images/categories/.
+    image: event.imagen_url || null,
     imagen_url: event.imagen_url ?? null,
 
     // Campos sin equivalente en el backend (la UI los oculta si faltan)

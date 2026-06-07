@@ -74,8 +74,8 @@ describe("eventToPlan", () => {
     expect(plan.es_mascotas).toBe(false);
   });
 
-  it("usa imagen placeholder cuando imagen_url es null", () => {
-    expect(eventToPlan(baseEvent).image).toBe(PLACEHOLDER_IMAGE);
+  it("image es null cuando imagen_url es null (el placeholder lo gestiona getPlanImage)", () => {
+    expect(eventToPlan(baseEvent).image).toBeNull();
   });
 
   it("respeta imagen_url cuando existe", () => {
