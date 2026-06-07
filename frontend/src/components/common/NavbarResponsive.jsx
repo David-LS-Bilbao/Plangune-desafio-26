@@ -20,7 +20,7 @@ function NavbarResponsive() {
   ];
 
   const adminLinks = [
-    { to: '/admin', icon: 'dashboard', label: 'Panel', exact: true },
+    { to: '/admin', icon: 'dashboard', label: 'Dashboard', exact: true },
     { to: '/admin/data', icon: 'analytics', label: 'Datos', exact: true },
   ];
 
@@ -91,8 +91,8 @@ function NavbarResponsive() {
       { label: 'Editar perfil', path: '/negocio/perfil', icon: 'person' },
     ];
     if (user.role === 'admin') return [
-      { label: 'Panel admin', path: '/admin', icon: 'admin_panel_settings' },
-      { label: 'Datos', path: '/admin/datos', icon: 'database' },
+      { label: 'Dashboard', path: '/admin', icon: 'admin_panel_settings' },
+      { label: 'Datos', path: '/admin/data', icon: 'database' },
     ];
     return [];
   })();

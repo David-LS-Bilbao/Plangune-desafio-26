@@ -1,37 +1,14 @@
 import React from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
-import Navigation from './Navigation';
-import { useAuthStore } from '../../store';
+import { Outlet } from 'react-router-dom';
+import NavbarResponsive from '../common/NavbarResponsive';
 
 function AdminLayout() {
-  const navigate = useNavigate();
-  const user = useAuthStore(state => state.user);
-  const logout = useAuthStore(state => state.logout);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   return (
     <>
-      <header className="admin-header">
-        <div className="header-left">
-          <span className="material-symbols-outlined menu-icon">menu</span>
-          <h1 className="header-title">Admin Console</h1>
-        </div>
-        <div className="header-right">
-          <button className="icon-btn" onClick={handleLogout} style={{ color: 'var(--error)' }}>
-            Cerrar sesión
-          </button>
-        </div>
-      </header>
-
+      <NavbarResponsive />
       <div className="layout-content-wrapper">
         <Outlet />
       </div>
-
-      <Navigation />
     </>
   );
 }
