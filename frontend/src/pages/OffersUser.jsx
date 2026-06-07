@@ -100,7 +100,7 @@ function OffersUser() {
 
   return (
     <main className="offers-user-main">
-      <h1 className="offers-user-title">Ofertas familiares cerca de ti</h1>
+      <h1 className="offers-user-title">Ofertas para tu familia</h1>
 
       <div className="offers-user-list">
         {allOffers.map((offer, i) => (

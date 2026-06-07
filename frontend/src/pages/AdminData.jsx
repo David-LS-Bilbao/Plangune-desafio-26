@@ -1,15 +1,17 @@
 import React from 'react';
 
 const KPI_DATA = [
-  { label: 'Familias Registradas', value: '842', trend: '+12% este mes', icon: 'group', color: 'secondary' },
-  { label: 'Negocios Registrados', value: '156', trend: '+4 este mes', icon: 'storefront', color: 'primary' },
-  { label: 'Planes Activos', value: '1,204', trend: '+45 esta semana', icon: 'explore', color: 'tertiary' },
-  { label: 'Reseñas Totales', value: '3,450', trend: '4.8 media global', icon: 'star', color: 'yellow' },
-  { label: 'Incidencias', value: '12', trend: '3 críticas (Urgent)', icon: 'report_problem', color: 'error', trendError: true },
-  { label: 'Actividades Pendientes', value: '28', trend: 'Por moderar', icon: 'pending_actions', color: 'secondary' },
-  { label: 'Recomendaciones Gen.', value: '15.2k', trend: '82% CTR', icon: 'psychology', color: 'primary' },
-  { label: 'Estrés Fam. Medio', value: 'Medio', trend: 'Moda poblacional', icon: 'stress_management', color: 'dark' },
+  { label: 'Familias registradas', value: '842', trend: '+12% este mes', icon: 'group' },
+  { label: 'Negocios registrados', value: '156', trend: '+4 este mes', icon: 'storefront' },
+  { label: 'Planes activos', value: '1,204', trend: '+45 esta semana', icon: 'explore' },
+  { label: 'Reseñas totales', value: '3,450', trend: '4.8 media global', icon: 'star' },
+  { label: 'Incidencias', value: '12', trend: '3 críticas (Urgent)', icon: 'report_problem', trendError: true },
+  { label: 'Actividades pendientes', value: '28', trend: 'Por moderar', icon: 'pending_actions' },
+  { label: 'Recomendaciones gen.', value: '15.2k', trend: '82% CTR', icon: 'psychology' },
+  { label: 'Estrés fam. medio', value: 'Medio', trend: 'Moda poblacional', icon: 'stress_management' },
 ];
+
+const BAR_COLORS = ['bar-primary', 'bar-secondary', 'bar-tertiary', 'bar-accent'];
 
 const CATEGORIES = [
   { name: 'Parque al aire libre', pct: 32 },
@@ -31,7 +33,7 @@ function AdminData() {
       {/* Page Header */}
       <div className="admin-data-header">
         <div>
-          <h2 className="data-title">Vista General</h2>
+          <h2 className="data-title">Vista general</h2>
           <p className="data-subtitle">Métricas globales, moderación activa y rendimiento del modelo de recomendación.</p>
         </div>
         <div className="header-actions">
@@ -50,7 +52,7 @@ function AdminData() {
       <div className="kpi-grid-8">
         {KPI_DATA.map((kpi, i) => (
           <div key={i} className="kpi-card-admin">
-            <div className={`kpi-icon-row kpi-color-${kpi.color}`}>
+            <div className="kpi-icon-row">
               <span className="material-symbols-outlined">{kpi.icon}</span>
               <h3 className="kpi-label-sm">{kpi.label}</h3>
             </div>
@@ -67,54 +69,56 @@ function AdminData() {
       <div className="analytics-grid">
         {/* Left (2 cols): Analytics */}
         <div className="analytics-left">
-          <h3 className="section-title">Analítica de Búsqueda</h3>
-          <div className="charts-pair">
-            {/* Categories Bar Chart */}
-            <div className="chart-card">
-              <h4 className="chart-card-title">Categorías más buscadas</h4>
-              <div className="bar-list">
-                {CATEGORIES.map((c, i) => (
-                  <div key={i} className="bar-item">
-                    <div className="bar-item-header">
-                      <span className="bar-name">{c.name}</span>
-                      <span className="bar-pct-label text-secondary">{c.pct}%</span>
+          <div className="analytics-search-card">
+            <h3 className="section-title">Analítica de búsqueda</h3>
+            <div className="charts-pair">
+              {/* Categories Bar Chart */}
+              <div className="chart-card">
+                <h4 className="chart-card-title">Categorías más buscadas</h4>
+                <div className="bar-list">
+                  {CATEGORIES.map((c, i) => (
+                    <div key={i} className="bar-item">
+                      <div className="bar-item-header">
+                        <span className="bar-name">{c.name}</span>
+                        <span className="bar-pct-label text-secondary">{c.pct}%</span>
+                      </div>
+                      <div className="bar-track">
+                        <div className={`bar-fill ${BAR_COLORS[i % BAR_COLORS.length]}`} style={{ width: `${c.pct}%` }}></div>
+                      </div>
                     </div>
-                    <div className="bar-track">
-                      <div className="bar-fill bar-primary" style={{ width: `${c.pct}%` }}></div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-            {/* Filters Bar Chart */}
-            <div className="chart-card">
-              <h4 className="chart-card-title">Filtros Familiares TOP</h4>
-              <div className="bar-list">
-                {FILTERS.map((f, i) => (
-                  <div key={i} className="bar-item">
-                    <div className="bar-item-header">
-                      <span className="bar-name">{f.name}</span>
-                      <span className="bar-pct-label text-secondary">{f.pct}%</span>
+              {/* Filters Bar Chart */}
+              <div className="chart-card">
+                <h4 className="chart-card-title">Filtros familiares top</h4>
+                <div className="bar-list">
+                  {FILTERS.map((f, i) => (
+                    <div key={i} className="bar-item">
+                      <div className="bar-item-header">
+                        <span className="bar-name">{f.name}</span>
+                        <span className="bar-pct-label text-secondary">{f.pct}%</span>
+                      </div>
+                      <div className="bar-track">
+                        <div className={`bar-fill ${BAR_COLORS[i % BAR_COLORS.length]}`} style={{ width: `${f.pct}%` }}></div>
+                      </div>
                     </div>
-                    <div className="bar-track">
-                      <div className="bar-fill bar-secondary" style={{ width: `${f.pct}%` }}></div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
 
           {/* Recommender Performance */}
           <div className="chart-card mt-lg">
-            <h3 className="section-title mb-4">Rendimiento del Recomendador</h3>
+            <h3 className="section-title mb-4">Rendimiento del recomendador</h3>
             <div className="recommender-grid">
               <div className="recommender-stat">
                 <p className="recommender-number">8.5k</p>
                 <p className="recommender-label">Tags "Ideal para tu familia"</p>
               </div>
               <div className="recommender-chart">
-                <p className="recommender-chart-label">Pesos de Factores del Modelo (Impacto relativo)</p>
+                <p className="recommender-chart-label">Pesos de factores del modelo (Impacto relativo)</p>
                 <div className="stacked-bar">
                   <div className="stack-segment bg-primary-container" style={{ width: '35%' }} title="Edad (35%)">EDAD 35%</div>
                   <div className="stack-segment bg-secondary" style={{ width: '25%' }} title="Distancia (25%)">DIST 25%</div>
@@ -130,7 +134,7 @@ function AdminData() {
         {/* Right (1 col): Density Map */}
         <div className="analytics-right">
           <div className="density-card">
-            <h3 className="section-title">Densidad de Actividad</h3>
+            <h3 className="section-title">Densidad de actividad</h3>
             <div className="map-placeholder">
               <span className="material-symbols-outlined map-icon">map</span>
               <p className="map-label">Mapa de calor Euskadi</p>
@@ -146,7 +150,7 @@ function AdminData() {
               <h4 className="age-chart-label">Edad de los peques</h4>
               <div className="age-bars">
                 <div className="age-bar-col">
-                  <div className="age-bar bg-surface-container h-20" title="0-1"></div>
+                  <div className="age-bar bg-accent h-20" title="0-1"></div>
                   <span className="age-label">0-1</span>
                 </div>
                 <div className="age-bar-col">
@@ -158,7 +162,7 @@ function AdminData() {
                   <span className="age-label">4-6</span>
                 </div>
                 <div className="age-bar-col">
-                  <div className="age-bar bg-surface-container h-40" title="7-9"></div>
+                  <div className="age-bar bg-tertiary-container h-40" title="7-9"></div>
                   <span className="age-label">7-9</span>
                 </div>
                 <div className="age-bar-col">
@@ -173,78 +177,80 @@ function AdminData() {
 
       {/* 3. Moderation Centre */}
       <div className="moderation-section">
-        <div className="section-title-row">
-          <h3 className="section-title">Centro de Moderación</h3>
-          <button className="btn-link-sm">Ver todo</button>
-        </div>
-        <div className="moderation-grid">
-          {/* Pending Activities */}
-          <div className="mod-card">
-            <div className="mod-card-header">
-              <h4 className="mod-card-title">
-                <span className="material-symbols-outlined">pending_actions</span> Actividades Pendientes
-              </h4>
-              <span className="badge-neutral-sm">28</span>
-            </div>
-            <ul className="mod-list">
-              {['Taller de Barro Creativo', 'Cuentacuentos en euskera', 'Ruta Txiki Mendia'].map((item, i) => (
-                <li key={i} className="mod-list-item">
-                  <span className="item-name">{item}</span>
-                  <button className="btn-icon-primary"><span className="material-symbols-outlined">visibility</span></button>
-                </li>
-              ))}
-            </ul>
+        <div className="moderation-card">
+          <div className="section-title-row">
+            <h3 className="section-title">Centro de moderación</h3>
+            <button className="btn-link-sm">Ver todo</button>
           </div>
-
-          {/* Businesses to Validate */}
-          <div className="mod-card">
-            <div className="mod-card-header">
-              <h4 className="mod-card-title">
-                <span className="material-symbols-outlined">storefront</span> Negocios por Validar
-              </h4>
-              <span className="badge-error-sm">5</span>
+          <div className="moderation-grid">
+            {/* Pending Activities */}
+            <div className="mod-card">
+              <div className="mod-card-header">
+                <h4 className="mod-card-title">
+                  <span className="material-symbols-outlined">pending_actions</span> Actividades pendientes
+                </h4>
+                <span className="badge-neutral-sm">28</span>
+              </div>
+              <ul className="mod-list">
+                {['Taller de Barro Creativo', 'Cuentacuentos en euskera', 'Ruta Txiki Mendia'].map((item, i) => (
+                  <li key={i} className="mod-list-item">
+                    <span className="item-name">{item}</span>
+                    <button className="btn-icon-primary"><span className="material-symbols-outlined">visibility</span></button>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <ul className="mod-list">
-              {['Ludoteca Txikitxu', 'Café Monstruos', 'Granja Escuela Bizkaia'].map((item, i) => (
-                <li key={i} className="mod-list-item">
-                  <span className="item-name">{item}</span>
-                  <button className="btn-icon-primary"><span className="material-symbols-outlined">verified</span></button>
+
+            {/* Businesses to Validate */}
+            <div className="mod-card">
+              <div className="mod-card-header">
+                <h4 className="mod-card-title">
+                  <span className="material-symbols-outlined">storefront</span> Negocios por validar
+                </h4>
+                <span className="badge-error-sm">5</span>
+              </div>
+              <ul className="mod-list">
+                {['Ludoteca Txikitxu', 'Café Monstruos', 'Granja Escuela Bizkaia'].map((item, i) => (
+                  <li key={i} className="mod-list-item">
+                    <span className="item-name">{item}</span>
+                    <button className="btn-icon-primary"><span className="material-symbols-outlined">verified</span></button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Open Incidents */}
+            <div className="mod-card">
+              <div className="mod-card-header">
+                <h4 className="mod-card-title error">
+                  <span className="material-symbols-outlined">report</span> Incidencias abiertas
+                </h4>
+                <span className="badge-error-filled">3</span>
+              </div>
+              <ul className="mod-list">
+                <li className="mod-list-item">
+                  <div className="incident-info">
+                    <span className="item-name error">Info desactualizada</span>
+                    <span className="incident-desc">"Museo cerrado por obras"</span>
+                  </div>
+                  <button className="btn-icon-muted"><span className="material-symbols-outlined">open_in_new</span></button>
                 </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Open Incidents */}
-          <div className="mod-card">
-            <div className="mod-card-header">
-              <h4 className="mod-card-title error">
-                <span className="material-symbols-outlined">report</span> Incidencias Abiertas
-              </h4>
-              <span className="badge-error-filled">3</span>
+                <li className="mod-list-item">
+                  <div className="incident-info">
+                    <span className="item-name">Falta accesibilidad real</span>
+                    <span className="incident-desc">"No se puede entrar con carrito gemelar"</span>
+                  </div>
+                  <button className="btn-icon-muted"><span className="material-symbols-outlined">open_in_new</span></button>
+                </li>
+              </ul>
             </div>
-            <ul className="mod-list">
-              <li className="mod-list-item">
-                <div className="incident-info">
-                  <span className="item-name error">Info desactualizada</span>
-                  <span className="incident-desc">"Museo cerrado por obras"</span>
-                </div>
-                <button className="btn-icon-muted"><span className="material-symbols-outlined">open_in_new</span></button>
-              </li>
-              <li className="mod-list-item">
-                <div className="incident-info">
-                  <span className="item-name">Falta accesibilidad real</span>
-                  <span className="incident-desc">"No se puede entrar con carrito gemelar"</span>
-                </div>
-                <button className="btn-icon-muted"><span className="material-symbols-outlined">open_in_new</span></button>
-              </li>
-            </ul>
           </div>
         </div>
       </div>
 
       {/* 4. Top Performance Table */}
       <div className="top-performance-section">
-        <h3 className="section-title">Top Rendimiento</h3>
+        <h3 className="section-title">Top rendimiento</h3>
         <div className="data-table-wrapper">
           <div className="table-scroll">
             <table className="data-table">

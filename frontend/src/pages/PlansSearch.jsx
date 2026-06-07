@@ -234,18 +234,18 @@ function PlansSearch() {
         <>
           <h2 className="search-form__results-title">
             {plans.length > 0
-              ? `${plans.length} plan${plans.length !== 1 ? "es" : ""} encontrado${plans.length !== 1 ? "s" : ""}`
-              : "Sin resultados"}
+              ? plans.length === 1
+                ? "¡Encontramos el plan perfecto para tu familia!"
+                : `¡Encontramos ${plans.length} planes perfectos para tu familia!`
+              : "No encontramos nada... ¡pero hay muchos planes esperándote! Cambia los filtros."}
           </h2>
 
-          {plans.length > 0 ? (
+          {plans.length > 0 && (
             <div className="plans-user-list">
               {plans.map((plan, i) => (
                 <PlanCard key={plan.id} plan={plan} index={i} />
               ))}
             </div>
-          ) : (
-            <p className="plans-user-empty">No se encontraron planes con esos filtros.</p>
           )}
         </>
       )}
