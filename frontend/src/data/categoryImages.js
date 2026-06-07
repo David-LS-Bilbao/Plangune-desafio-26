@@ -1,0 +1,100 @@
+export const DEFAULT_CATEGORY = "default";
+
+export const categoryImages = {
+  "actividad-exterior": [
+    "/images/categories/actividad-exterior/01.webp",
+    "/images/categories/actividad-exterior/02.jpg",
+    "/images/categories/actividad-exterior/03.jpg",
+    "/images/categories/actividad-exterior/04.jpg",
+    "/images/categories/actividad-exterior/05.jpg",
+  ],
+  "actividad-interior": [
+    "/images/categories/actividad-interior/01.jpg",
+    "/images/categories/actividad-interior/02.jpg",
+    "/images/categories/actividad-interior/03.jpg",
+  ],
+  ciudades: [
+    "/images/categories/ciudades/01.jpg",
+    "/images/categories/ciudades/02.jpg",
+    "/images/categories/ciudades/03.webp",
+    "/images/categories/ciudades/04.jpg",
+    "/images/categories/ciudades/05.jpg",
+    "/images/categories/ciudades/06.jpg",
+    "/images/categories/ciudades/07.jpg",
+    "/images/categories/ciudades/08.jpg",
+    "/images/categories/ciudades/09.jpg",
+    "/images/categories/ciudades/10.jpg",
+    "/images/categories/ciudades/11.jpg",
+    "/images/categories/ciudades/12.jpg",
+    "/images/categories/ciudades/13.jpg",
+    "/images/categories/ciudades/14.jpg",
+  ],
+  "cultura-vasca": [
+    "/images/categories/cultura-vasca/01.jpg",
+    "/images/categories/cultura-vasca/02.jpg",
+    "/images/categories/cultura-vasca/03.webp",
+    "/images/categories/cultura-vasca/04.jpg",
+    "/images/categories/cultura-vasca/05.jpeg",
+  ],
+  default: [
+    "/images/categories/default/01.jpg",
+    "/images/categories/default/02.jpg",
+    "/images/categories/default/03.jpg",
+    "/images/categories/default/04.jpg",
+    "/images/categories/default/05.jpg",
+  ],
+  "gastronomia-familiar": [
+    "/images/categories/gastronomia-familiar/01.jpg",
+    "/images/categories/gastronomia-familiar/02.jpg",
+    "/images/categories/gastronomia-familiar/03.jpg",
+    "/images/categories/gastronomia-familiar/04.jpg",
+    "/images/categories/gastronomia-familiar/05.webp",
+    "/images/categories/gastronomia-familiar/06.jpg",
+  ],
+  "mercado-feria": [
+    "/images/categories/mercado-feria/01.jpg",
+    "/images/categories/mercado-feria/02.jpg",
+    "/images/categories/mercado-feria/03.jpg",
+  ],
+  "montana-ruta-facil": [
+    "/images/categories/montana-ruta-facil/01.jpg",
+    "/images/categories/montana-ruta-facil/02.jpg",
+  ],
+  museo: [
+    "/images/categories/museo/01.jpg",
+    "/images/categories/museo/02.jpg",
+    "/images/categories/museo/03.jpg",
+    "/images/categories/museo/04.jpg",
+    "/images/categories/museo/05.jpg",
+    "/images/categories/museo/06.jpg",
+    "/images/categories/museo/07.jpg",
+    "/images/categories/museo/08.jpg",
+    "/images/categories/museo/09.jpg",
+  ],
+  "parque-infantil": [
+    "/images/categories/parque-infantil/01.jpg",
+    "/images/categories/parque-infantil/02.jpg",
+  ],
+  "parque-naturaleza": [
+    "/images/categories/parque-naturaleza/01.jpg",
+    "/images/categories/parque-naturaleza/02.jpg",
+    "/images/categories/parque-naturaleza/03.avif",
+    "/images/categories/parque-naturaleza/04.jpg",
+  ],
+  playa: [
+    "/images/categories/playa/01.jpg",
+    "/images/categories/playa/02.jpg",
+    "/images/categories/playa/03.avif",
+    "/images/categories/playa/04.webp",
+    "/images/categories/playa/05.jpg",
+    "/images/categories/playa/06.webp",
+  ],
+  "teatro-cine": [
+    "/images/categories/teatro-cine/01.jpg",
+    "/images/categories/teatro-cine/02.jpg",
+    "/images/categories/teatro-cine/03.jpg",
+    "/images/categories/teatro-cine/04.webp",
+  ],
+};
+
+export default categoryImages;

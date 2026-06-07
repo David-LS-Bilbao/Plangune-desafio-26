@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { fetchEventById } from "../services/eventsApi";
 import { eventToPlan } from "../mappers/eventMapper";
 import { useFavorites } from "../context/FavoritesContext";
+import getPlanImage from "../utils/getPlanImage";
 
 /** Formatea una fecha ISO a texto legible en español (o null si no hay). */
 function formatDate(iso) {
@@ -153,7 +154,10 @@ function PlanDetail() {
       </section>
 
       <div className="detail-hero-image">
-        <img alt={`Imagen de ${plan.title}`} src={plan.image} />
+        <img
+          alt={`Imagen de ${plan.title || "plan familiar"}`}
+          src={getPlanImage(plan)}
+        />
       </div>
 
       {/* Servicios familiares (datos reales del backend) */}
