@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 import { fetchRecommendations } from "../../services/recommendationsApi";
 import { recommendationsToCards } from "../../mappers/recommendationMapper";
-import { useFavorites } from "../../context/FavoritesContext";
+import RecommendationCard from "./RecommendationCard";
 import "./RecommendedPlans.css";
 
 /**
@@ -13,12 +12,13 @@ import "./RecommendedPlans.css";
  * usuario en camelCase). Es autónomo: su loading/error/empty NO afecta al resto de
  * la pantalla. Si /api/recommendations falla, muestra un aviso discreto y nada más,
  * de modo que /buscar (o /planes) sigue funcionando.
+ *
+ * Cada tarjeta se delega en RecommendationCard (reutilizada también por el panel de GUNI).
  */
 function RecommendedPlans({ context = {}, title = "Recomendado para tu familia" }) {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const { isFavorite, toggleFavorite } = useFavorites();
 
   // Clave estable: re-pide solo cuando cambian los valores del contexto.
   const contextKey = JSON.stringify(context);
@@ -77,56 +77,9 @@ function RecommendedPlans({ context = {}, title = "Recomendado para tu familia" 
         </div>
       ) : (
         <div className="rec-list">
-          {cards.map((card, index) => {
-            const favorite = card.hasDetail && isFavorite(card.id);
-            return (
-              <article key={card.id ?? `rec-${index}`} className="rec-card">
-                <div className="rec-card__head">
-                  <span className="rec-chip">
-                    <span className="material-symbols-outlined fill">auto_awesome</span>
-                    {card.scoreLabel}
-                  </span>
-                  {card.hasDetail && (
-                    <button
-                      type="button"
-                      className="rec-fav"
-                      aria-label={favorite ? "Quitar de favoritos" : "Añadir a favoritos"}
-                      aria-pressed={favorite}
-                      onClick={() => toggleFavorite(card.id)}
-                    >
-                      <span className={`material-symbols-outlined${favorite ? " fill" : ""}`}>
-                        favorite
-                      </span>
-                    </button>
-                  )}
-                </div>
-
-                <h3 className="rec-card__title">{card.title}</h3>
-
-                <p className="rec-card__location">
-                  <span className="material-symbols-outlined">location_on</span>
-                  {card.location}
-                </p>
-
-                {card.reasons.length > 0 && (
-                  <ul className="rec-reasons">
-                    {card.reasons.slice(0, 4).map((reason, i) => (
-                      <li key={i} className="rec-reason">
-                        <span className="material-symbols-outlined">check_circle</span>
-                        {reason}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {card.hasDetail && (
-                  <Link className="rec-card__cta" to={`/planes/${card.id}`}>
-                    Ver plan
-                  </Link>
-                )}
-              </article>
-            );
-          })}
+          {cards.map((card, index) => (
+            <RecommendationCard key={card.id ?? `rec-${index}`} card={card} />
+          ))}
         </div>
       )}
     </section>

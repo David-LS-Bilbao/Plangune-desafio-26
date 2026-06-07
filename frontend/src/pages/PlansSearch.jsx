@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import PlanCard from "../components/common/PlanCard";
 import RecommendedPlans from "../components/recommendations/RecommendedPlans";
+import GuniPanel from "../components/assistant/GuniPanel";
 import { fetchEvents } from "../services/eventsApi";
 import { eventsToPlans } from "../mappers/eventMapper";
 
@@ -95,6 +96,18 @@ function PlansSearch() {
       if (label === "Gratis") ctx.budget = 0;
     });
     return ctx;
+  }, [query, ageFilters, activeFeatures]);
+
+  // Perfil familiar para GUNI (subset del contrato del asistente) desde los mismos filtros.
+  const assistantFamilyProfile = useMemo(() => {
+    const profile = {};
+    if (query.trim()) profile.municipality = query.trim();
+    const ages = ageFilters.map((a) => AGE_TO_NUMBER[a]).filter((n) => n != null);
+    if (ages.length > 0) profile.childrenAges = ages;
+    if (activeFeatures.includes("Carrito")) profile.strollerFriendly = true;
+    if (activeFeatures.includes("Interior")) profile.rainSuitable = true;
+    if (activeFeatures.includes("Gratis")) profile.budget = 0;
+    return profile;
   }, [query, ageFilters, activeFeatures]);
 
   // Búsqueda contra la API con debounce al cambiar cualquier filtro.
@@ -198,6 +211,8 @@ function PlansSearch() {
           </div>
         )}
       </div>
+
+      <GuniPanel familyProfile={assistantFamilyProfile} />
 
       <RecommendedPlans context={recommendationContext} />
 
