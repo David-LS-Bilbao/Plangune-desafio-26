@@ -5,6 +5,11 @@ import {
   fetchLlmFamilyPlan,
   fetchLlmQuestion,
 } from '../clients/llmAssistant.client.js';
+import {
+  isCloudAssistantEnabled,
+  getCloudAssistantProvider,
+  fetchCloudFamilyPlan,
+} from '../clients/cloudAssistant.client.js';
 
 /**
  * Asistente de plan familiar (POST /api/assistant/family-plan).
@@ -62,37 +67,71 @@ export async function getFamilyPlanFallback(context = {}) {
 }
 
 /**
- * Orquesta el asistente: LLM local primero (si habilitado), fallback local si falla.
+ * Plan vía LLM local/Data/Ollama. Lanza si el proveedor falla (lo captura `getFamilyPlan`
+ * para pasar al siguiente nivel de la cascada).
+ */
+async function getLocalLlmPlan({ message, context }) {
+  if (getLlmAssistantContract() === 'get-question') {
+    const question = buildQuestion({ message, context });
+    const assistantMessageMarkdown = await fetchLlmQuestion(question);
+    return { mode: 'ai', source: 'data-chatbot', assistantMessageMarkdown, recommendations: [] };
+  }
+
+  // Contrato por defecto "post-family-plan": ai-service Flask.
+  const llm = await fetchLlmFamilyPlan({ message, familyProfile: context });
+  return {
+    mode: 'ai',
+    source: 'llm-local',
+    assistantMessageMarkdown: llm.assistantMessageMarkdown,
+    recommendations: Array.isArray(llm.recommendations) ? llm.recommendations : [],
+  };
+}
+
+/**
+ * Plan vía proveedor cloud (Gemini por defecto). Lanza si falla (429/500/timeout/sin key/
+ * inválido) para que `getFamilyPlan` caiga al fallback local. `source: "cloud-<provider>"`.
+ */
+async function getCloudPlan({ message, context }) {
+  const cloud = await fetchCloudFamilyPlan({ message, familyProfile: context });
+  return {
+    mode: 'ai',
+    source: `cloud-${getCloudAssistantProvider()}`,
+    assistantMessageMarkdown: cloud.assistantMessageMarkdown,
+    recommendations: Array.isArray(cloud.recommendations) ? cloud.recommendations : [],
+  };
+}
+
+/**
+ * Orquesta el asistente con degradación en cascada:
+ *   1) LLM local/Data/Ollama   (si LLM_ASSISTANT_ENABLED).
+ *   2) Cloud (Gemini)          (si CLOUD_ASSISTANT_ENABLED).
+ *   3) Fallback local reglado  (siempre disponible).
+ *
+ * Los errores de cada proveedor se capturan y NUNCA se propagan al cliente (sin filtrar
+ * detalles internos ni API keys). El contrato público de la respuesta no cambia.
  *
  * @param {{ message?: string, context?: object }} [params]
  * @returns {Promise<object>} plan del asistente
  */
 export async function getFamilyPlan({ message, context = {} } = {}) {
+  // 1) LLM local/Data/Ollama
   if (isLlmAssistantEnabled()) {
     try {
-      if (getLlmAssistantContract() === 'get-question') {
-        const question = buildQuestion({ message, context });
-        const assistantMessageMarkdown = await fetchLlmQuestion(question);
-        return {
-          mode: 'ai',
-          source: 'data-chatbot',
-          assistantMessageMarkdown,
-          recommendations: [],
-        };
-      }
-
-      // Contrato por defecto "post-family-plan": ai-service Flask.
-      const llm = await fetchLlmFamilyPlan({ message, familyProfile: context });
-      return {
-        mode: 'ai',
-        source: 'llm-local',
-        assistantMessageMarkdown: llm.assistantMessageMarkdown,
-        recommendations: Array.isArray(llm.recommendations) ? llm.recommendations : [],
-      };
+      return await getLocalLlmPlan({ message, context });
     } catch {
-      // Error de red, timeout, 5xx, body vacío, "ERROR:" o respuesta inválida → fallback local.
+      // local deshabilitado de facto/timeout/5xx/inválido → probar cloud o fallback
     }
   }
 
+  // 2) Cloud opcional (solo si está habilitado)
+  if (isCloudAssistantEnabled()) {
+    try {
+      return await getCloudPlan({ message, context });
+    } catch {
+      // cloud sin key/429/500/timeout/inválido → fallback local reglado
+    }
+  }
+
+  // 3) Fallback local reglado (sin IA)
   return getFamilyPlanFallback(context);
 }
