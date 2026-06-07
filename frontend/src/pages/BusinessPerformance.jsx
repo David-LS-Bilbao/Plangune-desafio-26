@@ -1,16 +1,19 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function BusinessPerformance() {
+  const navigate = useNavigate();
   const [showFullReport, setShowFullReport] = useState(false);
 
   return (
     <main className="business-performance-main">
       <div className="performance-header">
-        <h2 className="performance-title">Resumen de Rendimiento</h2>
-        <p className="performance-subtitle">
-          Consulta el impacto de tus actividades y ofertas en los últimos 30
-          días.
-        </p>
+        <h2 className="performance-title">Informe de rendimiento</h2>
+        <div className="btn-back-wrapper">
+          <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
+            Volver atrás
+          </button>
+        </div>
       </div>
 
       {/* BENTO GRID: METRICS */}
@@ -73,7 +76,7 @@ function BusinessPerformance() {
         </div>
 
         {/* KPI 4: Valoración */}
-        <div className="metric-card gradient">
+        <div className="metric-card">
           <div className="metric-header">
             <span className="material-symbols-outlined icon-star fill">
               star
@@ -101,7 +104,7 @@ function BusinessPerformance() {
               type="button"
               onClick={() => setShowFullReport(true)}
             >
-              Ver reporte completo
+              Reporte completo
             </button>
           </div>
           {showFullReport && (
@@ -172,6 +175,7 @@ function BusinessPerformance() {
                 <div className="author-details">
                   <p className="author-name">Marta L.</p>
                   <div className="review-stars">
+                    <span className="review-rating-number">5.0</span>
                     <span className="material-symbols-outlined fill">star</span>
                     <span className="material-symbols-outlined fill">star</span>
                     <span className="material-symbols-outlined fill">star</span>
@@ -193,6 +197,7 @@ function BusinessPerformance() {
                 <div className="author-details">
                   <p className="author-name">Javier G.</p>
                   <div className="review-stars">
+                    <span className="review-rating-number">4.5</span>
                     <span className="material-symbols-outlined fill">star</span>
                     <span className="material-symbols-outlined fill">star</span>
                     <span className="material-symbols-outlined fill">star</span>
@@ -214,6 +219,7 @@ function BusinessPerformance() {
                 <div className="author-details">
                   <p className="author-name">Ane E.</p>
                   <div className="review-stars">
+                    <span className="review-rating-number">5.0</span>
                     <span className="material-symbols-outlined fill">star</span>
                     <span className="material-symbols-outlined fill">star</span>
                     <span className="material-symbols-outlined fill">star</span>
@@ -228,6 +234,14 @@ function BusinessPerformance() {
               </p>
             </div>
           </div>
+
+          <button
+            type="button"
+            className="reviews-see-more"
+            onClick={() => navigate("/negocio/resenas")}
+          >
+            Ver más reseñas
+          </button>
         </div>
       </div>
     </main>

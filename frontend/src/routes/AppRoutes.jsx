@@ -24,7 +24,6 @@ import BusinessReviews from "../pages/BusinessReviews";
 import BusinessProfile from "../pages/BusinessProfile";
 import BusinessStrategy from "../pages/BusinessStrategy";
 import BusinessSubscriptions from "../pages/BusinessSubscriptions";
-import CreateOffer from "../pages/CreateOffer";
 import ManageOffers from "../pages/ManageOffers";
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminData from "../pages/AdminData";
@@ -61,7 +60,6 @@ function AppRoutes() {
           element={<BusinessSubscriptions />}
         />
         <Route path="/negocio/estrategia" element={<BusinessStrategy />} />
-        <Route path="/negocio/crear-oferta" element={<CreateOffer />} />
         <Route path="/negocio/ofertas" element={<ManageOffers />} />
       </Route>
 
