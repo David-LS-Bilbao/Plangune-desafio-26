@@ -1,31 +1,48 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
+// La app valida la sesión al arrancar. Lo mockeamos para mantener este test
+// centrado en el render público de la landing, sin depender de red.
+vi.mock("../services/authApi", () => ({
+  login: vi.fn(),
+  register: vi.fn(),
+  fetchMe: vi.fn().mockRejectedValue(new Error("no session")),
+  logout: vi.fn(),
+}));
+
 import App from "../App.jsx";
+import { useAuthStore } from "../store";
+
+beforeEach(() => {
+  localStorage.clear();
+  useAuthStore.setState({ user: null, status: "loading" });
+});
 
 describe("App", () => {
-  it("renderiza el título técnico DESAFIO-26", () => {
+  it("renderiza la landing con su titular principal", () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>,
     );
 
     expect(
-      screen.getByRole("heading", { name: "DESAFIO-26" }),
+      screen.getByRole("heading", {
+        level: 1,
+        name: /haz planes y disfruta con tus peques/i,
+      }),
     ).toBeInTheDocument();
   });
 
-  it("muestra el texto provisional del proyecto", () => {
+  it("muestra la navegación principal de la landing", () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>,
     );
 
-    expect(
-      screen.getByText("App provisional para planes familiares en Euskadi"),
-    ).toBeInTheDocument();
+    expect(screen.getAllByRole("navigation").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "PLANES" }).length).toBeGreaterThan(0);
   });
 });
