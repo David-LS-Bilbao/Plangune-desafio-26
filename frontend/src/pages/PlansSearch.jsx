@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import PlanCard from "../components/common/PlanCard";
+import RecommendedPlans from "../components/recommendations/RecommendedPlans";
 import { fetchEvents } from "../services/eventsApi";
 import { eventsToPlans } from "../mappers/eventMapper";
 
@@ -30,6 +31,15 @@ const FEATURE_OPTIONS = [
 ];
 
 const FEATURE_BY_LABEL = Object.fromEntries(FEATURE_OPTIONS.map((f) => [f.label, f]));
+
+// Mapeo de filtro de evento (snake_case) -> query param de /api/recommendations (camelCase).
+const REC_PARAM = {
+  es_carrito: "strollerFriendly",
+  es_cambiador: "changingTable",
+  es_silla_ruedas: "wheelchairAccessible",
+  es_mascotas: "petsAllowed",
+  es_interior: "rainSuitable",
+};
 
 /** ¿El precio del plan indica gratuito? */
 function isFreePlan(plan) {
@@ -72,6 +82,20 @@ function PlansSearch() {
     // if (fechaHasta) filters.fecha_hasta = fechaHasta;
     return filters;
   };
+
+  // Contexto para /api/recommendations (camelCase), derivado de los mismos filtros.
+  const recommendationContext = useMemo(() => {
+    const ctx = { limit: 3 };
+    if (query.trim()) ctx.municipality = query.trim();
+    const ages = ageFilters.map((a) => AGE_TO_NUMBER[a]).filter((n) => n != null);
+    if (ages.length > 0) ctx.childrenAges = ages;
+    activeFeatures.forEach((label) => {
+      const feature = FEATURE_BY_LABEL[label];
+      if (feature?.param && REC_PARAM[feature.param]) ctx[REC_PARAM[feature.param]] = true;
+      if (label === "Gratis") ctx.budget = 0;
+    });
+    return ctx;
+  }, [query, ageFilters, activeFeatures]);
 
   // Búsqueda contra la API con debounce al cambiar cualquier filtro.
   useEffect(() => {
@@ -174,6 +198,8 @@ function PlansSearch() {
           </div>
         )}
       </div>
+
+      <RecommendedPlans context={recommendationContext} />
 
       {loading && (
         <div className="planner-state">

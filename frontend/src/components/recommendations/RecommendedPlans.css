@@ -1,0 +1,138 @@
+/* Bloque de recomendaciones familiares (mobile-first). CSS propio, sin Tailwind. */
+
+.rec-section {
+  margin: 1.25rem 0 1.75rem;
+}
+
+.rec-section__title {
+  font-size: 1.15rem;
+  margin: 0 0 0.75rem;
+}
+
+.rec-section__muted {
+  margin: 0;
+  color: var(--on-surface-variant, #6b7280);
+  font-size: 0.95rem;
+}
+
+.planner-state--inline {
+  padding: 1.25rem;
+}
+
+.rec-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.rec-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 0.9rem;
+  padding: 1rem;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.rec-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.rec-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.1);
+  color: #1d4ed8;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.rec-chip .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+.rec-fav {
+  border: none;
+  background: transparent;
+  color: #e11d48;
+  cursor: pointer;
+  padding: 0.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.rec-fav .material-symbols-outlined {
+  font-size: 1.4rem;
+}
+
+.rec-card__title {
+  margin: 0.6rem 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+.rec-card__location {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0 0 0.6rem;
+  color: var(--on-surface-variant, #6b7280);
+  font-size: 0.9rem;
+}
+
+.rec-card__location .material-symbols-outlined {
+  font-size: 1.05rem;
+}
+
+.rec-reasons {
+  list-style: none;
+  margin: 0 0 0.85rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.rec-reason {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.rec-reason .material-symbols-outlined {
+  font-size: 1.05rem;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.rec-card__cta {
+  display: inline-block;
+  text-decoration: none;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: var(--primary-color, #2563eb);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.rec-card__cta:hover {
+  filter: brightness(1.05);
+}
+
+/* Tablet+: tarjetas en cuadrícula. */
+@media (min-width: 600px) {
+  .rec-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .rec-card {
+    flex: 1 1 calc(50% - 0.45rem);
+  }
+}
