@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import getPlanImage from '../../utils/getPlanImage';
 
 const chessPattern = ["tertiary", "primary", "accent"];
 
@@ -14,7 +15,11 @@ function PlanCard({ plan, index = 0 }) {
       onClick={() => navigate(`/planes/${plan.id}`)}
     >
       <div className="plan-user-card__image">
-        <img src={plan.image} alt={plan.title} />
+        <img
+          src={getPlanImage(plan)}
+          alt={`Imagen de ${plan.title || "plan familiar"}`}
+          loading="lazy"
+        />
         {plan.isIdeal && (
           <span className="plan-user-card__ideal-badge">
             <span className="material-symbols-outlined fill">stars</span>

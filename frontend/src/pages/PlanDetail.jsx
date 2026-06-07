@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { usePlansStore, useUserStore, useAuthStore } from "../store";
+import getPlanImage from "../utils/getPlanImage";
 
 function PlanDetail() {
   const { id } = useParams();
@@ -84,7 +85,10 @@ function PlanDetail() {
       </section>
 
       <div className="detail-hero-image">
-        <img alt={`Imagen de ${plan.title}`} src={plan.image} />
+        <img
+          alt={`Imagen de ${plan.title || "plan familiar"}`}
+          src={getPlanImage(plan)}
+        />
       </div>
 
       <section className="detail-actions">
