@@ -38,7 +38,7 @@ function BusinessOverview() {
         <button
           className="action-card secondary"
           type="button"
-          onClick={() => navigate("/negocio/crear-oferta")}
+          onClick={() => navigate("/negocio/ofertas")}
         >
           <div className="action-icon">
             <span className="material-symbols-outlined">sell</span>
@@ -134,7 +134,7 @@ function BusinessOverview() {
           <div className="kpi-card">
             <span className="kpi-value">{offers.length}</span>
             <div className="kpi-top">
-              <span className="kpi-label">Actividades activas</span>
+              <span className="kpi-label">Actividades publicadas</span>
               <span className="material-symbols-outlined kpi-icon fill">event_available</span>
             </div>
           </div>
@@ -142,7 +142,7 @@ function BusinessOverview() {
           <div className="kpi-card">
             <span className="kpi-value">1</span>
             <div className="kpi-top">
-              <span className="kpi-label">Ofertas activas</span>
+              <span className="kpi-label">Ofertas en activo</span>
               <span className="material-symbols-outlined kpi-icon fill">local_offer</span>
             </div>
           </div>
