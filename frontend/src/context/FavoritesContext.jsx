@@ -20,7 +20,7 @@ import { eventsToPlans } from "../mappers/eventMapper";
  * el provider, de modo que un F5 NO borra los favoritos (persistencia real en backend).
  * `toggleFavorite` es optimista con rollback si la llamada falla.
  *
- * Sin auth: el backend usa un usuario family mock fijo. No hay gate de login en el cliente.
+ * Requiere sesión family: AppRoutes protege el área familiar y el backend valida cookie + rol.
  */
 const FavoritesContext = createContext(null);
 

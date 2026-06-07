@@ -6,8 +6,8 @@ import apiClient from "./apiClient";
  *   POST   /api/favorites/:eventId      (añadir, idempotente)
  *   DELETE /api/favorites/:eventId      (quitar, idempotente)
  *
- * Sin auth todavía: el backend usa un usuario family mock fijo. La persistencia es
- * real (PostgreSQL), por lo que los favoritos sobreviven a un F5.
+ * Requiere sesión family: la cookie httpOnly viaja mediante apiClient.withCredentials.
+ * La persistencia es real (PostgreSQL), por lo que los favoritos sobreviven a un F5.
  *
  * Nota de contrato: la ruta pública declara `:activityId` como alias legacy, pero el
  * valor es el id de evento (entero). Aquí lo llamamos `eventId` por claridad.

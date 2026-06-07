@@ -1,8 +1,23 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
+// La app valida la sesión al arrancar (GET /auth/me). Lo mockeamos para que el test sea
+// hermético (sin red): sin sesión → la landing pública se renderiza igualmente.
+vi.mock("../services/authApi", () => ({
+  login: vi.fn(),
+  register: vi.fn(),
+  fetchMe: vi.fn().mockRejectedValue(new Error("no session")),
+  logout: vi.fn(),
+}));
+
 import App from "../App.jsx";
+import { useAuthStore } from "../store";
+
+beforeEach(() => {
+  localStorage.clear();
+  useAuthStore.setState({ user: null, status: "loading" });
+});
 
 describe("App", () => {
   it("renderiza la landing con su titular principal", () => {

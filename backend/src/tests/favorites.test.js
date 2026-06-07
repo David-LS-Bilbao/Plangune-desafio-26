@@ -5,9 +5,15 @@
  * los tests NO requieran PostgreSQL. El mock de favoritos usa un Set en memoria que replica
  * la idempotencia de la tabla `user_favorite_events`.
  *
+ * Los endpoints requieren autenticación + rol family. Cada petición válida lleva un JWT de
+ * familia en la cabecera `Authorization: Bearer`. También se prueba 401 y 403.
+ *
  * Los vi.mock se declaran ANTES de importar createApp (Vitest hoista las llamadas vi.mock).
  */
 import { vi, describe, it, expect, beforeEach } from 'vitest';
+
+// JWT_SECRET de prueba: las utilidades JWT lo leen en cada llamada.
+process.env.JWT_SECRET = 'test-secret-favorites-strong-value-32';
 
 vi.mock('../repositories/favorite.repository.js', () => ({
   listFavoriteEventsByUser: vi.fn(),
@@ -23,6 +29,7 @@ vi.mock('../repositories/event.repository.js', () => ({
 import request from 'supertest';
 
 import { createApp } from '../app.js';
+import { signToken } from '../utils/jwt.js';
 import { mockEvents } from '../seed/mockEvents.js';
 import { findEventById } from '../repositories/event.repository.js';
 import {
@@ -33,7 +40,17 @@ import {
 
 const app = createApp();
 
-// Set en memoria que simula la tabla user_favorite_events para el usuario mock.
+// Token de un usuario family autenticado (el id es irrelevante para el mock del repositorio).
+const token = signToken({ sub: 100, role: 'family' });
+const authHeader = `Bearer ${token}`;
+const businessAuthHeader = `Bearer ${signToken({ sub: 6, role: 'business' })}`;
+
+// Helpers que adjuntan la sesión a cada request.
+const get = (url) => request(app).get(url).set('Authorization', authHeader);
+const post = (url) => request(app).post(url).set('Authorization', authHeader);
+const del = (url) => request(app).delete(url).set('Authorization', authHeader);
+
+// Set en memoria que simula la tabla user_favorite_events para el usuario autenticado.
 let favSet;
 
 beforeEach(() => {
@@ -58,71 +75,94 @@ beforeEach(() => {
 
 const EXISTING_ID = mockEvents[0].id; // id numérico real
 
+describe('Favoritos · autenticación', () => {
+  it('GET /api/favorites sin token responde 401', async () => {
+    const res = await request(app).get('/api/favorites');
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty('error');
+  });
+
+  it('POST /api/favorites/:id sin token responde 401 (no añade)', async () => {
+    const res = await request(app).post(`/api/favorites/${EXISTING_ID}`);
+    expect(res.status).toBe(401);
+    expect(addFavoriteEvent).not.toHaveBeenCalled();
+  });
+
+  it('POST /api/favorites/:id con rol business responde 403 (no añade)', async () => {
+    const res = await request(app)
+      .post(`/api/favorites/${EXISTING_ID}`)
+      .set('Authorization', businessAuthHeader);
+
+    expect(res.status).toBe(403);
+    expect(addFavoriteEvent).not.toHaveBeenCalled();
+  });
+});
+
 describe('Favoritos (events reales)', () => {
   it('POST /api/favorites/:id añade (201) con eventId + activityId y aparece en GET', async () => {
-    const add = await request(app).post(`/api/favorites/${EXISTING_ID}`);
+    const add = await post(`/api/favorites/${EXISTING_ID}`);
     expect(add.status).toBe(201);
     expect(add.body).toMatchObject({ eventId: EXISTING_ID, activityId: EXISTING_ID, favorited: true });
 
-    const list = await request(app).get('/api/favorites');
+    const list = await get('/api/favorites');
     expect(list.status).toBe(200);
     expect(Array.isArray(list.body)).toBe(true);
     expect(list.body.some((ev) => ev.id === EXISTING_ID)).toBe(true);
   });
 
   it('DELETE /api/favorites/:id quita (200) con removed:true y desaparece de GET', async () => {
-    await request(app).post(`/api/favorites/${EXISTING_ID}`); // asegura que está
+    await post(`/api/favorites/${EXISTING_ID}`); // asegura que está
 
-    const del = await request(app).delete(`/api/favorites/${EXISTING_ID}`);
-    expect(del.status).toBe(200);
-    expect(del.body).toMatchObject({
+    const delRes = await del(`/api/favorites/${EXISTING_ID}`);
+    expect(delRes.status).toBe(200);
+    expect(delRes.body).toMatchObject({
       eventId: EXISTING_ID,
       activityId: EXISTING_ID,
       favorited: false,
       removed: true,
     });
 
-    const list = await request(app).get('/api/favorites');
+    const list = await get('/api/favorites');
     expect(list.body.some((ev) => ev.id === EXISTING_ID)).toBe(false);
   });
 
   it('POST a un evento inexistente responde 404', async () => {
-    const res = await request(app).post('/api/favorites/999999');
+    const res = await post('/api/favorites/999999');
 
     expect(res.status).toBe(404);
     expect(res.body).toHaveProperty('error');
   });
 
   it('POST es idempotente: añadir dos veces no duplica ni falla', async () => {
-    const first = await request(app).post(`/api/favorites/${EXISTING_ID}`);
-    const second = await request(app).post(`/api/favorites/${EXISTING_ID}`);
+    const first = await post(`/api/favorites/${EXISTING_ID}`);
+    const second = await post(`/api/favorites/${EXISTING_ID}`);
 
     expect(first.status).toBe(201);
     expect(second.status).toBe(201);
 
-    const list = await request(app).get('/api/favorites');
+    const list = await get('/api/favorites');
     const matches = list.body.filter((ev) => ev.id === EXISTING_ID);
     expect(matches.length).toBe(1);
   });
 
   it('DELETE es idempotente: quitar algo no presente no falla (removed:false)', async () => {
-    const del = await request(app).delete(`/api/favorites/${EXISTING_ID}`);
+    const delRes = await del(`/api/favorites/${EXISTING_ID}`);
 
-    expect(del.status).toBe(200);
-    expect(del.body).toMatchObject({ eventId: EXISTING_ID, favorited: false, removed: false });
+    expect(delRes.status).toBe(200);
+    expect(delRes.body).toMatchObject({ eventId: EXISTING_ID, favorited: false, removed: false });
   });
 
   it('la respuesta contiene eventId y activityId (compatibilidad legacy)', async () => {
-    const add = await request(app).post(`/api/favorites/${EXISTING_ID}`);
+    const add = await post(`/api/favorites/${EXISTING_ID}`);
 
     expect(add.body).toHaveProperty('eventId', EXISTING_ID);
     expect(add.body).toHaveProperty('activityId', EXISTING_ID);
   });
 
   it('GET devuelve eventos reales con shape de event (no activities mock)', async () => {
-    await request(app).post(`/api/favorites/${EXISTING_ID}`);
+    await post(`/api/favorites/${EXISTING_ID}`);
 
-    const list = await request(app).get('/api/favorites');
+    const list = await get('/api/favorites');
     const fav = list.body.find((ev) => ev.id === EXISTING_ID);
 
     expect(fav).toBeDefined();

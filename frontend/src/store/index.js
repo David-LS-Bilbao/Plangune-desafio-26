@@ -1,27 +1,91 @@
 import { create } from "zustand";
-import { mockPlans, MOCK_USERS } from "../mocks/data";
+import { mockPlans } from "../mocks/data";
+import {
+  login as apiLogin,
+  register as apiRegister,
+  fetchMe as apiFetchMe,
+  logout as apiLogout,
+} from "../services/authApi";
 
-// --- AUTH STORE ---
-const storedUser = (() => {
-  try { return JSON.parse(localStorage.getItem("auth_user")); } catch { return null; }
-})();
+// --- AUTH STORE (login real con JWT en cookie httpOnly) ---
+//
+// El token vive en una cookie httpOnly (no accesible por JS). En el store solo guardamos el
+// `user`. `status` controla los guards: 'loading' mientras se valida la sesión (GET /auth/me),
+// luego 'authenticated' o 'guest'. La cookie es la fuente de verdad; cacheamos el user en
+// localStorage solo para evitar parpadeos de UI en recargas.
+
+const USER_CACHE_KEY = "auth_user";
+
+function readCachedUser() {
+  try { return JSON.parse(localStorage.getItem(USER_CACHE_KEY)); } catch { return null; }
+}
+
+function cacheUser(user) {
+  if (user) localStorage.setItem(USER_CACHE_KEY, JSON.stringify(user));
+  else localStorage.removeItem(USER_CACHE_KEY);
+}
+
+/**
+ * Enriquece el user del backend ({ id, email, role }) con `name`/`avatar` derivados del email,
+ * que la UI (navbar, perfil) ya espera. No añade datos sensibles ni los persiste en backend.
+ */
+function decorateUser(user) {
+  if (!user) return null;
+  const localPart = (user.email || "").split("@")[0] || "cuenta";
+  const name = user.name || localPart.charAt(0).toUpperCase() + localPart.slice(1);
+  const avatar = user.avatar || localPart.slice(0, 2).toUpperCase();
+  return { ...user, name, avatar };
+}
 
 export const useAuthStore = create((set) => ({
-  user: storedUser,
-  login: (payload) => {
-    const user = typeof payload === "string" ? MOCK_USERS[payload] : payload;
-    localStorage.setItem("auth_user", JSON.stringify(user));
-    set({ user });
+  // Hidratamos el user cacheado para pintar la navbar al instante; status sigue en 'loading'
+  // hasta que checkSession() valide la cookie contra el backend.
+  user: decorateUser(readCachedUser()),
+  status: "loading", // 'loading' | 'authenticated' | 'guest'
+
+  /** Valida la sesión actual contra el backend (GET /auth/me). Se llama una vez al arrancar. */
+  checkSession: async () => {
+    try {
+      const user = decorateUser(await apiFetchMe());
+      cacheUser(user);
+      set({ user, status: "authenticated" });
+      return user;
+    } catch {
+      cacheUser(null);
+      set({ user: null, status: "guest" });
+      return null;
+    }
   },
+
+  /** Login real (email + password). Lanza si las credenciales fallan. */
+  login: async (email, password) => {
+    const user = decorateUser(await apiLogin(email, password));
+    cacheUser(user);
+    set({ user, status: "authenticated" });
+    return user;
+  },
+
+  /** Registro real (family/business). Inicia sesión al crear la cuenta. */
+  register: async (payload) => {
+    const user = decorateUser(await apiRegister(payload));
+    cacheUser(user);
+    set({ user, status: "authenticated" });
+    return user;
+  },
+
+  /** Actualiza campos del usuario en cliente (avatar, preferencias). No persiste en backend. */
   updateUser: (partial) =>
     set((state) => {
       const user = { ...state.user, ...partial };
-      localStorage.setItem("auth_user", JSON.stringify(user));
+      cacheUser(user);
       return { user };
     }),
-  logout: () => {
-    localStorage.removeItem("auth_user");
-    set({ user: null });
+
+  /** Cierra sesión (borra la cookie en backend) y limpia el estado local. */
+  logout: async () => {
+    try { await apiLogout(); } catch { /* la limpieza local procede igualmente */ }
+    cacheUser(null);
+    set({ user: null, status: "guest" });
   },
 }));
 
