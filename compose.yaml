@@ -32,6 +32,12 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    # Carga en RUNTIME las flags del asistente y la CLOUD_ASSISTANT_API_KEY desde el .env del
+    # host (LLM_ASSISTANT_*, CLOUD_ASSISTANT_*, DATA_RECOMMENDER_*). NO se hornea en la imagen:
+    # .dockerignore ya excluye .env. Las claves de `environment` (abajo) tienen PRIORIDAD sobre
+    # env_file, así que el DATABASE_URL/CLIENT_URL de Docker prevalecen sobre los del .env (host).
+    env_file:
+      - ./backend/.env
     environment:
       NODE_ENV: development
       PORT: 3000

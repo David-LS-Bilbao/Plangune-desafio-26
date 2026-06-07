@@ -20,7 +20,7 @@
  */
 
 const DEFAULT_PROVIDER = 'gemini';
-const DEFAULT_MODEL = 'gemini-2.0-flash-lite';
+const DEFAULT_MODEL = 'gemini-2.5-flash';
 const DEFAULT_TIMEOUT_MS = 7000;
 
 // Proveedores implementados. "deepseek" queda reservado para el futuro (selector preparado).
