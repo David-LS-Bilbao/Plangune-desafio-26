@@ -47,7 +47,7 @@
 | GET | `/api/favorites` | Lista de eventos favoritos | — |
 | POST | `/api/favorites/:activityId` | Añadir favorito (idempotente) | — |
 | DELETE | `/api/favorites/:activityId` | Quitar favorito (idempotente) | — |
-| POST | `/api/assistant/family-plan` | Asistente familiar (LLM + fallback local) | IA: `data-chatbot` \| `llm-local` · fallback: sin `source` |
+| POST | `/api/assistant/family-plan` | Asistente familiar (LLM local → cloud → fallback) | IA: `data-chatbot` \| `llm-local` \| `cloud-gemini` · fallback: sin `source` |
 
 ---
 
@@ -254,7 +254,8 @@ deshabilitado, **fallback local** sin IA. El frontend **siempre** consume este E
 }
 ```
 
-- `source`: `"data-chatbot"` (chatbot Data dockerizado) o `"llm-local"` (ai-service Flask + Ollama).
+- `source`: `"data-chatbot"` (chatbot Data dockerizado), `"llm-local"` (ai-service Flask + Ollama)
+  o `"cloud-<provider>"` (fallback cloud opcional; hoy `"cloud-gemini"`). Todos son modo IA.
 - El texto del asistente llega en **`assistantMessageMarkdown`** (Markdown).
   **No existe un campo `assistantMessage` plano** — no asumirlo.
 - En modo IA, `recommendations` viene normalmente **`[]`** (el LLM responde en Markdown).
@@ -279,7 +280,7 @@ deshabilitado, **fallback local** sin IA. El frontend **siempre** consume este E
 
 ## `source` y `mode` son metadatos técnicos
 
-- `source` (`data-api` / `local-fallback` / `data-chatbot` / `llm-local`) y `mode` (`ai` / `fallback`)
+- `source` (`data-api` / `local-fallback` / `data-chatbot` / `llm-local` / `cloud-gemini`) y `mode` (`ai` / `fallback`)
   describen **de dónde** viene la respuesta.
 - **No deben mostrarse en crudo al usuario.** Úsalos solo para lógica interna (telemetría,
   decidir cómo renderizar, mensajes de degradación amables).

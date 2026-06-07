@@ -29,6 +29,12 @@ vi.mock('../repositories/event.repository.js', () => ({
   findEventById: vi.fn(),
 }));
 
+vi.mock('../clients/cloudAssistant.client.js', () => ({
+  isCloudAssistantEnabled: vi.fn(() => false),
+  getCloudAssistantProvider: vi.fn(() => 'gemini'),
+  fetchCloudFamilyPlan: vi.fn(),
+}));
+
 import request from 'supertest';
 
 import { createApp } from '../app.js';
@@ -40,6 +46,11 @@ import {
   fetchLlmFamilyPlan,
   fetchLlmQuestion,
 } from '../clients/llmAssistant.client.js';
+import {
+  isCloudAssistantEnabled,
+  getCloudAssistantProvider,
+  fetchCloudFamilyPlan,
+} from '../clients/cloudAssistant.client.js';
 
 const app = createApp();
 
@@ -50,6 +61,9 @@ beforeEach(() => {
   isLlmAssistantEnabled.mockReturnValue(false);
   // Default retrocompatible: contrato ai-service (POST). Los tests de get-question lo sobreescriben.
   getLlmAssistantContract.mockReturnValue('post-family-plan');
+  // Por defecto, cloud deshabilitado → no afecta a los tests históricos.
+  isCloudAssistantEnabled.mockReturnValue(false);
+  getCloudAssistantProvider.mockReturnValue('gemini');
 });
 
 // ---------------------------------------------------------------------------
@@ -265,5 +279,140 @@ describe('POST /api/assistant/family-plan · contrato get-question (chatbot Data
     expect(question).toContain('Plan en Getxo');
     expect(question).toContain('2, 5');
     expect(question).toContain('Getxo');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Cascada con cloud (Gemini): local → cloud → fallback local
+//
+// cloudAssistant.client.js va mockeado (sin Gemini real). Se controlan
+// isCloudAssistantEnabled y fetchCloudFamilyPlan.
+// ---------------------------------------------------------------------------
+
+describe('POST /api/assistant/family-plan · cascada con cloud (Gemini)', () => {
+  const cloudOk = {
+    assistantMessageMarkdown: '## Plan cloud\n\nUn museo cubierto en Bilbao.',
+    recommendations: [],
+  };
+
+  it('1) local OK → usa local y NO llama a cloud', async () => {
+    isLlmAssistantEnabled.mockReturnValue(true);
+    fetchLlmFamilyPlan.mockResolvedValue({
+      mode: 'ai',
+      source: 'llm-local',
+      assistantMessageMarkdown: '## Local',
+      recommendations: [],
+    });
+    isCloudAssistantEnabled.mockReturnValue(true); // habilitado, pero no debe usarse
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.body.source).toBe('llm-local');
+    expect(fetchCloudFamilyPlan).not.toHaveBeenCalled();
+  });
+
+  it('2) local falla + cloud OK → mode "ai", source "cloud-gemini"', async () => {
+    isLlmAssistantEnabled.mockReturnValue(true);
+    fetchLlmFamilyPlan.mockRejectedValue(new Error('local down'));
+    isCloudAssistantEnabled.mockReturnValue(true);
+    fetchCloudFamilyPlan.mockResolvedValue(cloudOk);
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.mode).toBe('ai');
+    expect(res.body.source).toBe('cloud-gemini');
+    expect(typeof res.body.assistantMessageMarkdown).toBe('string');
+    expect(res.body.recommendations).toEqual([]);
+    expect(findEvents).not.toHaveBeenCalled(); // no usó el fallback
+  });
+
+  it('3) local deshabilitado + cloud OK → cloud (sin llamar al LLM local)', async () => {
+    isLlmAssistantEnabled.mockReturnValue(false);
+    isCloudAssistantEnabled.mockReturnValue(true);
+    fetchCloudFamilyPlan.mockResolvedValue(cloudOk);
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.body.mode).toBe('ai');
+    expect(res.body.source).toBe('cloud-gemini');
+    expect(fetchLlmFamilyPlan).not.toHaveBeenCalled();
+  });
+
+  it('4) local falla + cloud falla → fallback local', async () => {
+    isLlmAssistantEnabled.mockReturnValue(true);
+    fetchLlmFamilyPlan.mockRejectedValue(new Error('local down'));
+    isCloudAssistantEnabled.mockReturnValue(true);
+    fetchCloudFamilyPlan.mockRejectedValue(new Error('cloud down'));
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.body.mode).toBe('fallback');
+    expect(Array.isArray(res.body.recommendations)).toBe(true);
+  });
+
+  it('5) cloud deshabilitado (y local deshabilitado) → fallback local', async () => {
+    isLlmAssistantEnabled.mockReturnValue(false);
+    isCloudAssistantEnabled.mockReturnValue(false);
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.body.mode).toBe('fallback');
+    expect(fetchCloudFamilyPlan).not.toHaveBeenCalled();
+  });
+
+  it('6) cloud 429 → fallback local', async () => {
+    isLlmAssistantEnabled.mockReturnValue(false);
+    isCloudAssistantEnabled.mockReturnValue(true);
+    const err = new Error('Cloud assistant (gemini) respondió 429');
+    err.status = 429;
+    fetchCloudFamilyPlan.mockRejectedValue(err);
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.body.mode).toBe('fallback');
+  });
+
+  it('7) cloud timeout → fallback local', async () => {
+    isLlmAssistantEnabled.mockReturnValue(false);
+    isCloudAssistantEnabled.mockReturnValue(true);
+    const abort = new Error('The operation was aborted');
+    abort.name = 'AbortError';
+    fetchCloudFamilyPlan.mockRejectedValue(abort);
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.body.mode).toBe('fallback');
+  });
+
+  it('8) falta API key con cloud enabled → fallback local, sin filtrar el error', async () => {
+    isLlmAssistantEnabled.mockReturnValue(false);
+    isCloudAssistantEnabled.mockReturnValue(true);
+    fetchCloudFamilyPlan.mockRejectedValue(
+      new Error('Falta CLOUD_ASSISTANT_API_KEY para el asistente cloud'),
+    );
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.body.mode).toBe('fallback');
+    const serialized = JSON.stringify(res.body);
+    expect(serialized).not.toMatch(/CLOUD_ASSISTANT_API_KEY/);
+    expect(serialized).not.toMatch(/api[_-]?key/i);
+  });
+
+  it('9) la respuesta final nunca contiene API key ni error interno', async () => {
+    isLlmAssistantEnabled.mockReturnValue(false);
+    isCloudAssistantEnabled.mockReturnValue(true);
+    const err = new Error('Cloud assistant respondió 500 secreto=AIzaSyXXXX');
+    err.status = 500;
+    fetchCloudFamilyPlan.mockRejectedValue(err);
+
+    const res = await request(app).post('/api/assistant/family-plan').send({ message: 'hola' });
+
+    expect(res.body.mode).toBe('fallback');
+    const serialized = JSON.stringify(res.body);
+    expect(serialized).not.toMatch(/AIza/);
+    expect(serialized).not.toMatch(/secreto/);
+    expect(res.body.message).toBeDefined(); // mensaje amable de fallback, sin detalles internos
   });
 });
