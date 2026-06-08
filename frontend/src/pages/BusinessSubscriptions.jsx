@@ -190,6 +190,29 @@ function BusinessSubscriptions() {
           );
         })}
       </section>
+
+      <section className="subscriptions-pitch">
+        <h2 className="subscriptions-pitch__title">Haz que tu negocio sea El Plan.</h2>
+        <p className="subscriptions-pitch__lead">
+          El lugar donde las familias de Euskadi eligen estar
+        </p>
+        <p>
+          Tienes un local increíble, instalaciones adaptadas y una gran oferta. Sin embargo,
+          llega el fin de semana y sientes que tu inversión en publicidad se pierde en el
+          ruido de las redes sociales. Las familias que buscan desesperadamente tiempo de
+          calidad cerca de ti no te ven en el momento decisivo: cuando están decidiendo
+          adónde ir.
+        </p>
+        <p>
+          PlanGune es el canal de conexión definitivo. No vendemos likes; te conectamos con
+          familias que están en tu zona, buscando exactamente lo que tú ofreces. Destacarás
+          en su pantalla justo cuando filtren buscando un local "A cubierto", con
+          "Cambiador" o "Gratis". Además, tus ofertas tendrán un escaparate brutal,
+          impactando en tiempo real incluso a los miles de usuarios que navegan por la app
+          sin estar registrados. Deja de disparar al aire. Tú pon la experiencia; nosotros
+          llevamos a las familias hasta tu puerta.
+        </p>
+      </section>
     </main>
   );
 }

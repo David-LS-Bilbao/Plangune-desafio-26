@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import NavbarResponsive from '../common/NavbarResponsive';
+import GuniFabLauncher from '../assistant/GuniFabLauncher';
 import { FavoritesProvider } from '../../context/FavoritesContext';
 
 function MainLayout() {
@@ -10,6 +11,7 @@ function MainLayout() {
       <div className="layout-content-wrapper">
         <Outlet />
       </div>
+      <GuniFabLauncher />
     </FavoritesProvider>
   );
 }

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import PlanCard from "../components/common/PlanCard";
 import RecommendedPlans from "../components/recommendations/RecommendedPlans";
-import GuniFabLauncher from "../components/assistant/GuniFabLauncher";
 import { fetchEvents } from "../services/eventsApi";
 import { eventsToPlans } from "../mappers/eventMapper";
 
@@ -51,6 +50,7 @@ function isFreePlan(plan) {
 function PlansSearch() {
   const [query, setQuery] = useState("");
   const [territorio, setTerritorio] = useState("");
+  const [territorioTodos, setTerritorioTodos] = useState(false);
   const [ageFilters, setAgeFilters] = useState([]);
   const [activeFeatures, setActiveFeatures] = useState([]);
 
@@ -124,7 +124,7 @@ function PlansSearch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, territorio, ageFilters, activeFeatures]);
 
-  const activeCount = ageFilters.length + activeFeatures.length + (territorio ? 1 : 0);
+  const activeCount = ageFilters.length + activeFeatures.length + (territorio || territorioTodos ? 1 : 0);
 
   return (
     <main className="plans-user-main">
@@ -145,18 +145,31 @@ function PlansSearch() {
         </div>
 
         <div className="search-form__group">
-          <label className="section-label" htmlFor="territorio">Territorio</label>
-          <select
-            id="territorio"
-            className="input-with-icon"
-            value={territorio}
-            onChange={(e) => setTerritorio(e.target.value)}
-          >
-            <option value="">Todos</option>
+          <span className="section-label">Territorio</span>
+          <div className="search-form__pills">
+            <span
+              className={`search-pill${territorioTodos ? " active" : ""}`}
+              onClick={() => { setTerritorio(""); setTerritorioTodos(true); }}
+            >
+              Todos
+            </span>
             {TERRITORIOS.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <span
+                key={t}
+                className={`search-pill${territorio === t ? " active" : ""}`}
+                onClick={() => {
+                  if (territorio === t) {
+                    setTerritorio("");
+                  } else {
+                    setTerritorio(t);
+                    setTerritorioTodos(false);
+                  }
+                }}
+              >
+                {t}
+              </span>
             ))}
-          </select>
+          </div>
         </div>
 
         <div className="search-form__group">
@@ -193,14 +206,13 @@ function PlansSearch() {
           <div className="search-form__active-filters">
             <span className="search-form__active-label">Filtros activos:</span>
             {territorio && <span className="search-form__active-tag">{territorio}</span>}
+            {territorioTodos && <span className="search-form__active-tag">Todos</span>}
             {[...ageFilters, ...activeFeatures].map((f) => (
               <span key={f} className="search-form__active-tag">{f}</span>
             ))}
           </div>
         )}
       </div>
-
-      <GuniFabLauncher />
 
       <RecommendedPlans context={recommendationContext} />
 

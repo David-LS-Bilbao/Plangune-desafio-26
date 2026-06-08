@@ -225,9 +225,6 @@ function NavbarResponsive() {
                 </NavLink>
               </li>
             ))}
-            <li>
-              <LanguageSwitcher />
-            </li>
             {user && (
               <li>
                 <button className="nr-top-link nr-top-link--logout" onClick={handleLogout}>
@@ -235,6 +232,9 @@ function NavbarResponsive() {
                 </button>
               </li>
             )}
+            <li className="nr-top-lang-item">
+              <LanguageSwitcher />
+            </li>
           </ul>
         </div>
       </nav>

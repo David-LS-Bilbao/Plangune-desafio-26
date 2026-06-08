@@ -15,12 +15,6 @@
   margin-left: 16px;
 }
 
-.language-switcher-btn:hover {
-  background-color: var(--background-hover);
-  color: var(--text-primary);
-  border-color: var(--primary-light);
-}
-
 .language-switcher-btn span {
   opacity: 0.6;
   transition: opacity 0.2s ease, color 0.2s ease;
@@ -28,7 +22,7 @@
 
 .language-switcher-btn span.active {
   opacity: 1;
-  color: var(--primary);
+  color: var(--secondary-color);
 }
 
 .language-switcher-btn .separator {

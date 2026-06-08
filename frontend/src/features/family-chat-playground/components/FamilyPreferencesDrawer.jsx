@@ -95,7 +95,6 @@ function FamilyPreferencesDrawer({ open, value, onApply, onClose }) {
         aria-label="Preferencias familiares"
       >
         <header className="fcp-drawer__head">
-          <h2 className="fcp-drawer__title">Preferencias familiares</h2>
           <button
             type="button"
             className="fcp-drawer__close"
@@ -104,6 +103,7 @@ function FamilyPreferencesDrawer({ open, value, onApply, onClose }) {
           >
             ✕
           </button>
+          <h2 className="fcp-drawer__title">Preferencias familiares</h2>
         </header>
 
         <div className="fcp-drawer__body">

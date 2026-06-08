@@ -170,6 +170,13 @@ function FamilyProfile() {
           </div>
         )}
 
+        {children.length === 0 && !showAddChildForm && (
+          <div className="children-empty">
+            <span className="material-symbols-outlined">child_care</span>
+            <p>Pulsa en "Añadir" para registrar a los peques de tu familia.</p>
+          </div>
+        )}
+
         <div className="children-list">
           {children.map((child) => (
             <div key={child.id} className="child-item">

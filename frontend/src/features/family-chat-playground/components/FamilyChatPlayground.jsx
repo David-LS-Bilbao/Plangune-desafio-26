@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
+import logo from "../../../assets/logo.svg";
 import ChatBubble from "./ChatBubble";
 import QuickPromptChips from "./QuickPromptChips";
 import FamilyPreferencesDrawer from "./FamilyPreferencesDrawer";
@@ -170,7 +171,7 @@ function FamilyChatPlayground({ onClose }) {
         >
           ☰
         </button>
-        <span className="fcp-header__brand">Plangune</span>
+        <img src={logo} alt="Plangune" className="fcp-header__brand" />
         {onClose ? (
           <button
             type="button"

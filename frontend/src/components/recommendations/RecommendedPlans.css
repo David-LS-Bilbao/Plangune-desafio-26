@@ -46,8 +46,9 @@
   gap: 0.3rem;
   padding: 0.3rem 0.65rem;
   border-radius: 999px;
-  background: rgba(37, 99, 235, 0.1);
-  color: #1d4ed8;
+  border: 0.0625rem solid var(--secondary-color);
+  background: var(--white-pure);
+  color: var(--secondary-color);
   font-size: 0.8rem;
   font-weight: 600;
 }
@@ -59,11 +60,20 @@
 .rec-fav {
   border: none;
   background: transparent;
-  color: #e11d48;
+  color: var(--accent-color);
   cursor: pointer;
-  padding: 0.2rem;
+  width: 2.1rem;
+  height: 2.1rem;
   display: flex;
   align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.rec-fav--active {
+  background: var(--accent-color);
+  color: var(--white);
 }
 
 .rec-fav .material-symbols-outlined {
@@ -120,10 +130,11 @@
   color: #fff;
   font-weight: 600;
   font-size: 0.9rem;
+  transition: background-color 0.2s ease;
 }
 
 .rec-card__cta:hover {
-  filter: brightness(1.05);
+  background: var(--accent-color);
 }
 
 /* Tablet+: tarjetas en cuadrícula. */

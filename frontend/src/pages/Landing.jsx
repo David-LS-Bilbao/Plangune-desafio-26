@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation, Trans } from 'react-i18next';
 import '../styles/landing.css';
 import Navbar from '../components/common/NavbarResponsive';
+import GuniFabLauncher from '../components/assistant/GuniFabLauncher';
 import heroImage from '../assets/hero-image.webp';
 import businessImage from '../assets/business-espectacle.webp';
 import logoTemp from '../assets/logo-temp.svg';
@@ -176,6 +177,8 @@ function Landing() {
           </div>
         </section>
       </main>
+
+      <GuniFabLauncher />
     </>
   );
 }

@@ -46,6 +46,19 @@ function PlanDetail() {
   const [notFound, setNotFound] = useState(false);
   const [error, setError] = useState(false);
   const [reportStatus, setReportStatus] = useState("");
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newReviewText, setNewReviewText] = useState("");
+  const [newReviewRating, setNewReviewRating] = useState(5);
+  const [reviews, setReviews] = useState([
+    {
+      id: 1,
+      author: "Familia Agirre",
+      avatar: "FA",
+      time: "Hace 2 semanas",
+      text: "Excelente plan para el fin de semana. Muy bien acondicionado para carritos.",
+      rating: 5,
+    },
+  ]);
 
   const load = () => {
     setLoading(true);
@@ -106,6 +119,7 @@ function PlanDetail() {
 
   const favorite = isFavorite(plan.id);
   const fecha = formatDate(plan.fecha);
+  const availableServices = SERVICES.filter((s) => plan[s.key]);
 
   const infoCards = [
     { icon: "child_care", label: "Edad", value: plan.ageRange, color: "tertiary" },
@@ -121,14 +135,6 @@ function PlanDetail() {
       <div className="detail-header">
         <div className="detail-header__top">
           <h1 className="detail-title">{plan.title}</h1>
-          <button
-            className="detail-map-btn"
-            type="button"
-            onClick={() => window.open(mapsUrl(plan), "_blank", "noopener")}
-          >
-            <span className="material-symbols-outlined">map</span>
-            Ver Mapa
-          </button>
         </div>
         <div className="detail-location">
           <span className="material-symbols-outlined">location_on</span>
@@ -160,39 +166,38 @@ function PlanDetail() {
         />
       </div>
 
-      {/* Servicios familiares (datos reales del backend) */}
-      <section className="detail-services">
-        <h3 className="detail-services__title">Servicios familiares</h3>
-        <div className="detail-services__list">
-          {SERVICES.map((s) => (
-            <span
-              key={s.key}
-              className={`detail-service-chip${plan[s.key] ? " detail-service-chip--on" : " detail-service-chip--off"}`}
-            >
-              <span className="material-symbols-outlined">{s.icon}</span>
-              {s.label}: {plan[s.key] ? "Sí" : "No"}
-            </span>
-          ))}
-        </div>
-      </section>
+      {/* Servicios familiares (datos reales del backend); solo se listan los disponibles */}
+      {availableServices.length > 0 && (
+        <section className="detail-services">
+          <h3 className="detail-services__title">Servicios familiares</h3>
+          <div className="detail-services__list">
+            {availableServices.map((s) => (
+              <span key={s.key} className="detail-service-chip">
+                <span className="material-symbols-outlined">{s.icon}</span>
+                {s.label}
+              </span>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="detail-actions">
         <button
-          className={`detail-btn detail-btn--primary${favorite ? " detail-btn--active" : ""}`}
-          type="button"
-          onClick={() => toggleFavorite(plan.id)}
-        >
-          <span className={`material-symbols-outlined${favorite ? " fill" : ""}`}>favorite</span>
-          {favorite ? "Guardado en favoritos" : "Guardar en favoritos"}
-        </button>
-
-        <button
-          className="detail-btn detail-btn--secondary"
+          className="detail-btn detail-btn--primary detail-btn--directions"
           type="button"
           onClick={() => window.open(mapsUrl(plan), "_blank", "noopener")}
         >
           <span className="material-symbols-outlined">directions</span>
           Cómo llegar
+        </button>
+
+        <button
+          className={`detail-btn detail-btn--outline${favorite ? " detail-btn--active" : ""}`}
+          type="button"
+          onClick={() => toggleFavorite(plan.id)}
+        >
+          <span className={`material-symbols-outlined${favorite ? " fill" : ""}`}>favorite</span>
+          {favorite ? "Guardado en favoritos" : "Guardar en favoritos"}
         </button>
       </section>
 
@@ -209,6 +214,99 @@ function PlanDetail() {
         </button>
         {reportStatus && <p className="detail-status">{reportStatus}</p>}
       </div>
+
+      <section className="detail-reviews">
+        <div className="detail-reviews__header">
+          <div>
+            <h3 className="detail-reviews__title">Reseñas familiares</h3>
+            {plan.rating != null && (
+              <div className="detail-reviews__rating">
+                <span className="detail-reviews__score">{plan.rating}</span>
+                <span className="material-symbols-outlined fill">star</span>
+                <span className="material-symbols-outlined fill">star</span>
+                <span className="material-symbols-outlined fill">star</span>
+                <span className="material-symbols-outlined fill">star</span>
+                <span className="material-symbols-outlined">star_half</span>
+              </div>
+            )}
+          </div>
+          <button
+            className="detail-reviews__add-btn"
+            type="button"
+            onClick={() => setShowReviewForm((v) => !v)}
+          >
+            {showReviewForm ? "Cancelar" : "Añadir reseña"}
+          </button>
+        </div>
+
+        {showReviewForm && (
+          <div className="detail-review-form">
+            <h4 className="detail-review-form__title">Tu valoración</h4>
+            <div className="detail-review-form__stars">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  className={`material-symbols-outlined${newReviewRating >= star ? " fill" : ""}`}
+                  onClick={() => setNewReviewRating(star)}
+                >
+                  star
+                </span>
+              ))}
+            </div>
+            <textarea
+              className="detail-review-form__textarea"
+              value={newReviewText}
+              onChange={(e) => setNewReviewText(e.target.value)}
+              placeholder="Cuéntanos tu experiencia..."
+            />
+            <button
+              className="detail-btn detail-btn--primary"
+              type="button"
+              onClick={() => {
+                if (!newReviewText.trim()) return;
+                setReviews((prev) => [
+                  {
+                    id: Date.now(),
+                    author: "Tú",
+                    avatar: "TU",
+                    time: "Justo ahora",
+                    text: newReviewText,
+                    rating: newReviewRating,
+                  },
+                  ...prev,
+                ]);
+                setNewReviewText("");
+                setNewReviewRating(5);
+                setShowReviewForm(false);
+              }}
+            >
+              Publicar reseña
+            </button>
+          </div>
+        )}
+
+        {reviews.map((review) => (
+          <div className="detail-review-card" key={review.id}>
+            <div className="detail-review-card__header">
+              <div className="detail-review-card__author">
+                <div className="detail-review-card__avatar">{review.avatar}</div>
+                <div>
+                  <span className="detail-review-card__name">{review.author}</span>
+                  <span className="detail-review-card__time">{review.time}</span>
+                </div>
+              </div>
+              <div className="detail-review-card__stars">
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} className={`material-symbols-outlined${i < review.rating ? " fill" : ""}`}>
+                    star
+                  </span>
+                ))}
+              </div>
+            </div>
+            <p className="detail-review-card__text">"{review.text}"</p>
+          </div>
+        ))}
+      </section>
     </main>
   );
 }

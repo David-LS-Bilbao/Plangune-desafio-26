@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../store";
 
 /** Destino tras el login, según el rol devuelto por el backend. */
-const HOME_BY_ROLE = { family: "/buscar", business: "/negocio", admin: "/admin" };
+const HOME_BY_ROLE = { family: "/", business: "/negocio", admin: "/admin" };
 
 function LoginForm() {
   const navigate = useNavigate();
