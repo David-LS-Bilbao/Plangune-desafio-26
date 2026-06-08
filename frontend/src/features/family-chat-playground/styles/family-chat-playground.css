@@ -808,6 +808,7 @@
 .fcp-drawer__foot {
   flex: 0 0 auto;
   padding: 1rem;
+  padding-top: 1.25rem;
   padding-bottom: calc(1rem + var(--fcp-safe-bottom));
   border-top: 1px solid var(--fcp-border);
 }
@@ -823,6 +824,10 @@
 
 .fcp-field--switches {
   gap: 0.85rem;
+}
+
+.fcp-field--ages .fcp-field__legend {
+  margin-bottom: 0.75rem;
 }
 
 .fcp-field__legend {

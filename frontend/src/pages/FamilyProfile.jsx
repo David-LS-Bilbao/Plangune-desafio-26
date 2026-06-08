@@ -39,8 +39,14 @@ function FamilyProfile() {
     setShowAddChildForm(true);
   };
 
+  const isChildAgeValid = (() => {
+    if (!newChildAge) return false;
+    const value = Number(newChildAge);
+    return Number.isInteger(value) && value >= 0 && value <= 99;
+  })();
+
   const submitChild = () => {
-    if (newChildAge) {
+    if (isChildAgeValid) {
       addChild({ type: newChildGender, age: `${newChildAge} años` });
       setShowAddChildForm(false);
       setNewChildGender("Sin especificar");
@@ -144,10 +150,15 @@ function FamilyProfile() {
                 <input
                   className="child-input"
                   type="number"
+                  min="0"
+                  max="99"
                   value={newChildAge}
                   onChange={(e) => setNewChildAge(e.target.value)}
                   placeholder="Ej: 5"
                 />
+                {newChildAge && !isChildAgeValid && (
+                  <span className="create-family-field-error">La edad debe estar entre 0 y 99 años</span>
+                )}
               </div>
             </div>
             <div className="add-child-actions">
@@ -162,7 +173,7 @@ function FamilyProfile() {
                 className="btn-child-save"
                 type="button"
                 onClick={submitChild}
-                disabled={!newChildAge}
+                disabled={!isChildAgeValid}
               >
                 Guardar
               </button>

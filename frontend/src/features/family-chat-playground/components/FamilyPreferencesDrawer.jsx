@@ -15,6 +15,8 @@ const EMPTY_DRAFT = {
   strollerFriendly: false,
   changingTable: false,
   rainSuitable: false,
+  wheelchairAccessible: false,
+  petsAllowed: false,
   maxDuration: "",
   freeOrLowCost: false,
 };
@@ -34,11 +36,13 @@ const EMPTY_DRAFT = {
  */
 function FamilyPreferencesDrawer({ open, value, onApply, onClose }) {
   const [draft, setDraft] = useState({ ...EMPTY_DRAFT, ...value });
+  const [durationTouched, setDurationTouched] = useState(false);
 
   // Al abrir, sincroniza el borrador con las preferencias vigentes.
   useEffect(() => {
     if (open) {
       setDraft({ ...EMPTY_DRAFT, ...value });
+      setDurationTouched(false);
     }
   }, [open, value]);
 
@@ -107,7 +111,7 @@ function FamilyPreferencesDrawer({ open, value, onApply, onClose }) {
         </header>
 
         <div className="fcp-drawer__body">
-          <fieldset className="fcp-field">
+          <fieldset className="fcp-field fcp-field--ages">
             <legend className="fcp-field__legend">Edad de los peques</legend>
             <div className="fcp-chips fcp-chips--wrap">
               {AGE_OPTIONS.map((age) => (
@@ -121,6 +125,28 @@ function FamilyPreferencesDrawer({ open, value, onApply, onClose }) {
                   onClick={() => toggleAge(age)}
                 >
                   {age}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+
+          <fieldset className="fcp-field fcp-field--ages">
+            <legend className="fcp-field__legend">Duración máxima</legend>
+            <div className="fcp-chips fcp-chips--wrap">
+              {DURATION_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={`fcp-chip ${
+                    durationTouched && draft.maxDuration === opt.value ? "is-active" : ""
+                  }`}
+                  aria-pressed={durationTouched && draft.maxDuration === opt.value}
+                  onClick={() => {
+                    setDurationTouched(true);
+                    setField("maxDuration", opt.value);
+                  }}
+                >
+                  {opt.label}
                 </button>
               ))}
             </div>
@@ -144,24 +170,8 @@ function FamilyPreferencesDrawer({ open, value, onApply, onClose }) {
             {renderSwitch("strollerFriendly", "Carrito")}
             {renderSwitch("changingTable", "Cambiador")}
             {renderSwitch("rainSuitable", "Cubierto o interior")}
-          </div>
-
-          <div className="fcp-field">
-            <label className="fcp-field__legend" htmlFor="fcp-duration">
-              Duración máxima
-            </label>
-            <select
-              id="fcp-duration"
-              className="fcp-input"
-              value={draft.maxDuration}
-              onChange={(event) => setField("maxDuration", event.target.value)}
-            >
-              {DURATION_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+            {renderSwitch("wheelchairAccessible", "Silla de ruedas")}
+            {renderSwitch("petsAllowed", "Mascotas")}
           </div>
 
           <div className="fcp-field fcp-field--switches">

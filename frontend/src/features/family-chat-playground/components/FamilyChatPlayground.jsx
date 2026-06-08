@@ -32,6 +32,8 @@ const DEFAULT_PREFS = {
   strollerFriendly: false,
   changingTable: false,
   rainSuitable: false,
+  wheelchairAccessible: false,
+  petsAllowed: false,
   maxDuration: "",
   freeOrLowCost: false,
 };
@@ -62,7 +64,10 @@ function prefsToFamilyProfile(prefs) {
       .filter((age) => age != null),
     municipality: prefs.municipality,
     strollerFriendly: prefs.strollerFriendly,
+    changingTable: prefs.changingTable,
     rainSuitable: prefs.rainSuitable,
+    wheelchairAccessible: prefs.wheelchairAccessible,
+    petsAllowed: prefs.petsAllowed,
     budget: prefs.freeOrLowCost ? 0 : null,
   };
 }
@@ -82,7 +87,7 @@ function FamilyChatPlayground({ onClose }) {
   const [prefs, setPrefs] = useState(DEFAULT_PREFS);
 
   const idRef = useRef(0);
-  const threadRef = useRef(null);
+  const mainRef = useRef(null);
 
   const nextId = () => {
     idRef.current += 1;
@@ -90,8 +95,10 @@ function FamilyChatPlayground({ onClose }) {
   };
 
   // Autoscroll al final del hilo cuando cambian los mensajes o el loading.
+  // El contenedor que realmente scrollea es .fcp-main (el hilo crece dentro de él),
+  // así que desplazamos ese nodo para dejar atrás el hero y ganar espacio de chat.
   useEffect(() => {
-    const node = threadRef.current;
+    const node = mainRef.current;
     if (node) {
       node.scrollTop = node.scrollHeight;
     }
@@ -193,7 +200,7 @@ function FamilyChatPlayground({ onClose }) {
         )}
       </header>
 
-      <main className="fcp-main">
+      <main className="fcp-main" ref={mainRef}>
         {/* 2. Hero con GUNI protagonista */}
         <section className="fcp-hero">
           <img src="/images/guni/guni-original.png" alt="GUNI" className="fcp-hero__guni-img" />
@@ -220,7 +227,7 @@ function FamilyChatPlayground({ onClose }) {
         />
 
         {/* 4 + 8. Chat y estados */}
-        <section className="fcp-thread" ref={threadRef} aria-live="polite">
+        <section className="fcp-thread" aria-live="polite">
           {messages.map((msg) => (
             <ChatBubble
               key={msg.id}

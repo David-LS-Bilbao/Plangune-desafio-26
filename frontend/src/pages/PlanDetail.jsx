@@ -135,6 +135,12 @@ function PlanDetail() {
       <div className="detail-header">
         <div className="detail-header__top">
           <h1 className="detail-title">{plan.title}</h1>
+          <div className="btn-back-wrapper">
+            <button type="button" className="btn-text-danger detail-back-btn" onClick={() => navigate(-1)}>
+              <span className="material-symbols-outlined">arrow_back</span>
+              Volver atrás
+            </button>
+          </div>
         </div>
         <div className="detail-location">
           <span className="material-symbols-outlined">location_on</span>
