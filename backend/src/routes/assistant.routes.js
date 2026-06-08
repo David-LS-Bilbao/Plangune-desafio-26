@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 
 import { validate } from '../middlewares/validate.js';
+import { assistantRateLimit } from '../middlewares/rateLimit.middleware.js';
 import { familyPlanHandler } from '../controllers/assistant.controller.js';
 
 const router = Router();
@@ -9,6 +10,8 @@ const router = Router();
 // Montado bajo /api/assistant desde routes/index.js
 router.post(
   '/family-plan',
+  // Rate limit estricto: el plan familiar puede tocar LLM/API externa (coste/latencia).
+  assistantRateLimit,
   // Validación mínima del payload antes de construir el fallback familiar.
   [
     body('message')

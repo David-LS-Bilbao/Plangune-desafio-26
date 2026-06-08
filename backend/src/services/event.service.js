@@ -38,10 +38,11 @@ function httpError(status, message) {
  * @param {number}  [filters.edad]          apto si edad_minima <= edad
  * @param {string}  [filters.fecha_desde]   ISO; fecha_inicio >= fecha_desde
  * @param {string}  [filters.fecha_hasta]   ISO; fecha_inicio <= fecha_hasta
+ * @param {{ skip?: number, take?: number }} [pagination] límite/offset para la API pública
  * @returns {Promise<Array>}
  */
-export async function getEvents(filters = {}) {
-  const events = await findEvents(filters);
+export async function getEvents(filters = {}, pagination) {
+  const events = await findEvents(filters, pagination);
   return events.map(serializeEvent);
 }
 
