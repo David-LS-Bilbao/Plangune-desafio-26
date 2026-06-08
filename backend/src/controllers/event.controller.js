@@ -1,4 +1,5 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { parsePagination } from '../utils/pagination.js';
 import { getEvents, getEventById } from '../services/event.service.js';
 
 /** Convierte 'true'/'false' (query string) a boolean, o undefined. */
@@ -31,7 +32,9 @@ export const listEvents = asyncHandler(async (req, res) => {
     fecha_hasta,
   };
 
-  res.status(200).json(await getEvents(filters));
+  // Paginación segura (límite duro): la API pública nunca devuelve eventos ilimitados.
+  const pagination = parsePagination(req.query);
+  res.status(200).json(await getEvents(filters, pagination));
 });
 
 /** GET /api/events/:id → detalle (404 si no existe). */

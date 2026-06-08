@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 import router from './routes/index.js';
+import { apiRateLimit } from './middlewares/rateLimit.middleware.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
 
 const DEFAULT_DEV_CLIENT_URL = 'http://localhost:5173';
@@ -29,6 +30,14 @@ function getAllowedOrigins() {
  */
 export function createApp() {
   const app = express();
+
+  // Detrás de un proxy inverso (Nginx Proxy Manager): confiar 1 salto para que req.ip y
+  // el rate-limit usen la IP real del cliente y no la del proxy. Controlado por env;
+  // NO activar en local/tests (express-rate-limit lo rechaza con trust proxy permisivo).
+  if (process.env.TRUST_PROXY === '1') {
+    app.set('trust proxy', 1);
+  }
+
   const allowedOrigins = getAllowedOrigins();
 
   // Seguridad y middlewares base
@@ -49,6 +58,9 @@ export function createApp() {
   if (process.env.NODE_ENV !== 'test') {
     app.use(morgan('dev'));
   }
+
+  // Rate limit global de la API (anti-abuso/burst). Omitido en tests; activo en dev/prod.
+  app.use('/api', apiRateLimit);
 
   // Rutas de la API
   app.use('/api', router);

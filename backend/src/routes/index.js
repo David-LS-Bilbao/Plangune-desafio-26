@@ -7,12 +7,14 @@ import eventRoutes from './event.routes.js';
 import favoriteRoutes from './favorite.routes.js';
 import healthRoutes from './health.routes.js';
 import incidentRoutes from './incident.routes.js';
+import readyRoutes from './ready.routes.js';
 import recommendationRoutes from './recommendation.routes.js';
 import reviewRoutes from './review.routes.js';
 
 const router = Router();
 
 router.use('/health', healthRoutes);
+router.use('/ready', readyRoutes);
 router.use('/auth', authRoutes);
 router.use('/activities', activityRoutes);
 router.use('/assistant', assistantRoutes);

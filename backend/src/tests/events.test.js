@@ -70,6 +70,28 @@ describe('GET /api/events', () => {
     expect(res.body.length).toBe(mockEvents.length);
   });
 
+  it('por defecto reenvía un take seguro (límite duro) al repositorio', async () => {
+    await request(app).get('/api/events');
+
+    const [, pagination] = findEvents.mock.calls.at(-1);
+    expect(pagination).toMatchObject({ skip: 0, take: 20 });
+    expect(pagination.take).toBeLessThanOrEqual(50);
+  });
+
+  it('reenvía page/limit como skip/take al repositorio', async () => {
+    await request(app).get('/api/events?page=2&limit=5');
+
+    const [, pagination] = findEvents.mock.calls.at(-1);
+    expect(pagination).toMatchObject({ skip: 5, take: 5 });
+  });
+
+  it('capa limit por encima del máximo a 50', async () => {
+    await request(app).get('/api/events?limit=9999');
+
+    const [, pagination] = findEvents.mock.calls.at(-1);
+    expect(pagination.take).toBe(50);
+  });
+
   it('filtra por territorio (devuelve solo coincidencias, subconjunto)', async () => {
     const res = await request(app).get('/api/events?territorio=Bizkaia');
 
