@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/auth/LoginForm";
 import NavbarResponsive from "../components/common/NavbarResponsive";
+import { useTranslation, Trans } from "react-i18next";
 import '../styles/login.css';
 
 function Login() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [registerRole, setRegisterRole] = useState("");
 
   const handleRegister = () => {
@@ -23,9 +25,9 @@ function Login() {
         <div className="login-card">
 
           <div className="login-header">
-            <h1>Tu familia, <span>tus planes.</span></h1>
+            <h1><Trans i18nKey="auth.login_title">Tu familia, <span>tus planes.</span></Trans></h1>
             <p>
-              Regístrate y disfruta más, buscando menos.
+              {t('auth.login_subtitle')}
             </p>
           </div>
 
@@ -35,7 +37,7 @@ function Login() {
 
             <div className="registration-section">
               <p className="registration-text">
-                ¿No tienes cuenta? Elige tu perfil:
+                {t('auth.no_account')}
               </p>
               <div className="role-grid">
                 <label className="role-label">
@@ -51,7 +53,7 @@ function Login() {
                     <span className="material-symbols-outlined role-icon-primary">
                       family_restroom
                     </span>
-                    <span className="role-title">Familia</span>
+                    <span className="role-title">{t('roles.family')}</span>
                     <div className="check-icon">
                       <span className="material-symbols-outlined fill">
                         check_circle
@@ -72,7 +74,7 @@ function Login() {
                     <span className="material-symbols-outlined role-icon-secondary">
                       storefront
                     </span>
-                    <span className="role-title">Negocio</span>
+                    <span className="role-title">{t('roles.business')}</span>
                     <div className="check-icon">
                       <span className="material-symbols-outlined fill">
                         check_circle
@@ -88,7 +90,7 @@ function Login() {
                   onClick={handleRegister}
                   disabled={!registerRole}
                 >
-                  Registrarse
+                  {t('auth.btn_register')}
                 </button>
               </div>
             </div>
