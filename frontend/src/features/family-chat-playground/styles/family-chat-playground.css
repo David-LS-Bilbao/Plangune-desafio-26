@@ -966,3 +966,89 @@
     max-width: 74%;
   }
 }
+
+/* ── FAB de GUNI (GuniFabLauncher) + overlay sobre /buscar ───── */
+.guni-fab {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 50%;
+  background: #f6f5f2;
+  border: 2px solid #163a4a;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  box-shadow: 0 4px 16px rgba(22, 58, 74, 0.32);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.guni-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(22, 58, 74, 0.4);
+}
+
+.guni-fab:active { transform: scale(0.95); }
+
+/* ── Overlay: FamilyChatPlayground lanzado desde el FAB ───────── */
+
+/* Cubre toda la pantalla con fondo sólido; bloquea el scroll propio
+   del overlay para que solo scrollee .fcp-main (mensajes). */
+.fcp--overlay {
+  z-index: 1000;
+  height: 100vh;    /* fallback para navegadores sin dvh */
+  height: 100dvh;   /* altura dinámica (evita barra de URL en móvil) */
+  overflow: hidden;
+}
+
+/* Oculta la bottom nav meramente visual en modo overlay. */
+.fcp--overlay .fcp-bottomnav {
+  display: none;
+}
+
+/* Sin la bottom nav, quitamos el padding extra del inputbar que le
+   reservaba espacio, y alineamos su padding horizontal con .fcp-main. */
+.fcp--overlay .fcp-inputbar {
+  padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom, 0px));
+}
+
+/* Iguala el padding horizontal del inputbar con el de fcp-main en móvil
+   también en la ruta /dev/family-chat (standalone). */
+.fcp-inputbar {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* ── Imagen PNG de GUNI (sustituye al avatar SVG) ────────────── */
+.guni-fab__img {
+  width: 2.75rem;
+  height: 2.75rem;
+  object-fit: contain;
+  display: block;
+  border-radius: 50%;
+}
+
+.fcp-hero__guni-img {
+  width: 124px;
+  height: 124px;
+  object-fit: contain;
+  display: block;
+}
+
+.fcp-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .fcp-hero__guni-img {
+    width: 140px;
+    height: 140px;
+  }
+}
