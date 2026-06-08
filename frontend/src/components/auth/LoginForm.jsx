@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../../store";
 
 /** Destino tras el login, según el rol devuelto por el backend. */
@@ -7,6 +8,7 @@ const HOME_BY_ROLE = { family: "/buscar", business: "/negocio", admin: "/admin" 
 
 function LoginForm() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const login = useAuthStore((state) => state.login);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,8 +28,8 @@ function LoginForm() {
       const status = err?.response?.status;
       setError(
         status === 401
-          ? "Correo o contraseña incorrectos."
-          : "No se ha podido iniciar sesión. Inténtalo de nuevo.",
+          ? t('auth.error_login')
+          : t('auth.error_login_default'),
       );
     } finally {
       setLoading(false);
@@ -39,14 +41,14 @@ function LoginForm() {
       {/* Email */}
       <div className="input-group">
         <label className="sr-only" htmlFor="email">
-          Correo electrónico
+          {t('auth.email_label')}
         </label>
         <div className="input-wrapper">
           <span className="material-symbols-outlined input-icon">mail</span>
           <input
             type="email"
             id="email"
-            placeholder="tu@email.com"
+            placeholder={t('auth.email_placeholder')}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -56,14 +58,14 @@ function LoginForm() {
       {/* Password */}
       <div className="input-group">
         <label className="sr-only" htmlFor="password">
-          Contraseña
+          {t('auth.password_label')}
         </label>
         <div className="input-wrapper" style={{ position: 'relative' }}>
           <span className="material-symbols-outlined input-icon">lock</span>
           <input
             type={showPassword ? "text" : "password"}
             id="password"
-            placeholder="••••••••"
+            placeholder={t('auth.password_placeholder')}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={{ paddingRight: '2.5rem' }}
@@ -107,7 +109,7 @@ function LoginForm() {
       <div className="submit-group">
         <button type="submit" className="btn-primary-new" disabled={loading}>
           <span className="material-symbols-outlined">{loading ? "hourglass_top" : "login"}</span>
-          {loading ? "Entrando…" : "Iniciar Sesión"}
+          {loading ? t('auth.btn_login_loading') : t('auth.btn_login')}
         </button>
       </div>
     </form>
