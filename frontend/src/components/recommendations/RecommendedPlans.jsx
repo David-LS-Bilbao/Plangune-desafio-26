@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { fetchRecommendations } from "../../services/recommendationsApi";
 import { recommendationsToCards } from "../../mappers/recommendationMapper";
@@ -15,7 +16,8 @@ import "./RecommendedPlans.css";
  *
  * Cada tarjeta se delega en RecommendationCard (reutilizada también por el panel de GUNI).
  */
-function RecommendedPlans({ context = {}, title = "Recomendado para tu familia" }) {
+function RecommendedPlans({ context = {}, title = "" }) {
+  const { t } = useTranslation();
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -47,10 +49,8 @@ function RecommendedPlans({ context = {}, title = "Recomendado para tu familia" 
   if (error) {
     return (
       <section className="rec-section">
-        <h2 className="rec-section__title">{title}</h2>
-        <p className="rec-section__muted">
-          No hemos podido cargar recomendaciones ahora mismo. Puedes seguir explorando los planes.
-        </p>
+        <h2 className="rec-section__title">{title || t("rec_card.default_title")}</h2>
+        <p className="rec-section__muted">{t("rec_card.error")}</p>
       </section>
     );
   }
@@ -58,22 +58,20 @@ function RecommendedPlans({ context = {}, title = "Recomendado para tu familia" 
   if (!loading && cards.length === 0) {
     return (
       <section className="rec-section">
-        <h2 className="rec-section__title">{title}</h2>
-        <p className="rec-section__muted">
-          Ajusta los filtros (edad, municipio, servicios) para recibir recomendaciones personalizadas.
-        </p>
+        <h2 className="rec-section__title">{title || t("rec_card.default_title")}</h2>
+        <p className="rec-section__muted">{t("rec_card.empty")}</p>
       </section>
     );
   }
 
   return (
-    <section className="rec-section" aria-label="Recomendaciones familiares">
-      <h2 className="rec-section__title">{title}</h2>
+    <section className="rec-section" aria-label={t("rec_card.section_label")}>
+      <h2 className="rec-section__title">{title || t("rec_card.default_title")}</h2>
 
       {loading ? (
         <div className="planner-state planner-state--inline">
-          <div className="planner-spinner" role="status" aria-label="Cargando recomendaciones" />
-          <p className="planner-state__text">Buscando los mejores planes para tu familia...</p>
+          <div className="planner-spinner" role="status" aria-label={t("rec_card.loading")} />
+          <p className="planner-state__text">{t("rec_card.loading")}</p>
         </div>
       ) : (
         <div className="rec-list">

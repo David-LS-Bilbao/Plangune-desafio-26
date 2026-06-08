@@ -1,49 +1,51 @@
 import React from 'react';
-
-const KPI_DATA = [
-  { label: 'Familias registradas', value: '842', trend: '+12% este mes', icon: 'group' },
-  { label: 'Negocios registrados', value: '156', trend: '+4 este mes', icon: 'storefront' },
-  { label: 'Planes activos', value: '1,204', trend: '+45 esta semana', icon: 'explore' },
-  { label: 'Reseñas totales', value: '3,450', trend: '4.8 media global', icon: 'star' },
-  { label: 'Incidencias', value: '12', trend: '3 críticas (Urgent)', icon: 'report_problem', trendError: true },
-  { label: 'Actividades pendientes', value: '28', trend: 'Por moderar', icon: 'pending_actions' },
-  { label: 'Recomendaciones gen.', value: '15.2k', trend: '82% CTR', icon: 'psychology' },
-  { label: 'Estrés fam. medio', value: 'Medio', trend: 'Moda poblacional', icon: 'stress_management' },
-];
+import { useTranslation } from 'react-i18next';
 
 const BAR_COLORS = ['bar-primary', 'bar-secondary', 'bar-tertiary', 'bar-accent'];
 
-const CATEGORIES = [
-  { name: 'Parque al aire libre', pct: 32 },
-  { name: 'Museo interactivo', pct: 24 },
-  { name: 'Taller creativo', pct: 18 },
-  { name: 'Restaurante con zona infantil', pct: 15 },
-];
-
-const FILTERS = [
-  { name: 'Apto carrito', pct: 45 },
-  { name: 'Cambiador', pct: 38 },
-  { name: 'Comida cerca', pct: 29 },
-  { name: 'A cubierto', pct: 22 },
-];
-
 function AdminData() {
+  const { t } = useTranslation();
+
+  const KPI_DATA = [
+    { label: t("admin_data.kpi_families"),  value: '842',   trend: t("admin_data.kpi_families_trend"),  icon: 'group' },
+    { label: t("admin_data.kpi_businesses"), value: '156',  trend: t("admin_data.kpi_businesses_trend"), icon: 'storefront' },
+    { label: t("admin_data.kpi_plans"),      value: '1,204', trend: t("admin_data.kpi_plans_trend"),     icon: 'explore' },
+    { label: t("admin_data.kpi_reviews"),    value: '3,450', trend: t("admin_data.kpi_reviews_trend"),   icon: 'star' },
+    { label: t("admin_data.kpi_incidents"),  value: '12',   trend: t("admin_data.kpi_incidents_trend"), icon: 'report_problem', trendError: true },
+    { label: t("admin_data.kpi_pending"),    value: '28',   trend: t("admin_data.kpi_pending_trend"),   icon: 'pending_actions' },
+    { label: t("admin_data.kpi_recs"),       value: '15.2k', trend: t("admin_data.kpi_recs_trend"),     icon: 'psychology' },
+    { label: t("admin_data.kpi_stress"),     value: t("admin_data.kpi_stress_value"), trend: t("admin_data.kpi_stress_trend"), icon: 'stress_management' },
+  ];
+
+  const CATEGORIES = [
+    { name: t("admin_data.cat_park"),       pct: 32 },
+    { name: t("admin_data.cat_museum"),     pct: 24 },
+    { name: t("admin_data.cat_workshop"),   pct: 18 },
+    { name: t("admin_data.cat_restaurant"), pct: 15 },
+  ];
+
+  const FILTERS = [
+    { name: t("admin_data.filter_stroller"), pct: 45 },
+    { name: t("admin_data.filter_changer"),  pct: 38 },
+    { name: t("admin_data.filter_food"),     pct: 29 },
+    { name: t("admin_data.filter_covered"),  pct: 22 },
+  ];
+
   return (
     <main className="admin-data-main">
-      {/* Page Header */}
       <div className="admin-data-header">
         <div>
-          <h2 className="data-title">Vista general</h2>
-          <p className="data-subtitle">Métricas globales, moderación activa y rendimiento del modelo de recomendación.</p>
+          <h2 className="data-title">{t("admin_data.title")}</h2>
+          <p className="data-subtitle">{t("admin_data.subtitle")}</p>
         </div>
         <div className="header-actions">
           <button className="btn-outline-sm">
             <span className="material-symbols-outlined">calendar_today</span>
-            Últimos 30 días
+            {t("admin_data.btn_last30")}
           </button>
           <button className="btn-primary-sm">
             <span className="material-symbols-outlined">download</span>
-            Exportar CSV
+            {t("admin_data.btn_export")}
           </button>
         </div>
       </div>
@@ -67,14 +69,12 @@ function AdminData() {
 
       {/* 2. Charts & Density + Recommender */}
       <div className="analytics-grid">
-        {/* Left (2 cols): Analytics */}
         <div className="analytics-left">
           <div className="analytics-search-card">
-            <h3 className="section-title">Analítica de búsqueda</h3>
+            <h3 className="section-title">{t("admin_data.search_analytics_title")}</h3>
             <div className="charts-pair">
-              {/* Categories Bar Chart */}
               <div className="chart-card">
-                <h4 className="chart-card-title">Categorías más buscadas</h4>
+                <h4 className="chart-card-title">{t("admin_data.categories_chart_title")}</h4>
                 <div className="bar-list">
                   {CATEGORIES.map((c, i) => (
                     <div key={i} className="bar-item">
@@ -89,9 +89,8 @@ function AdminData() {
                   ))}
                 </div>
               </div>
-              {/* Filters Bar Chart */}
               <div className="chart-card">
-                <h4 className="chart-card-title">Filtros familiares top</h4>
+                <h4 className="chart-card-title">{t("admin_data.filters_chart_title")}</h4>
                 <div className="bar-list">
                   {FILTERS.map((f, i) => (
                     <div key={i} className="bar-item">
@@ -109,21 +108,20 @@ function AdminData() {
             </div>
           </div>
 
-          {/* Recommender Performance */}
           <div className="chart-card mt-lg">
-            <h3 className="section-title mb-4">Rendimiento del recomendador</h3>
+            <h3 className="section-title mb-4">{t("admin_data.recommender_title")}</h3>
             <div className="recommender-grid">
               <div className="recommender-stat">
                 <p className="recommender-number">8.5k</p>
-                <p className="recommender-label">Tags "Ideal para tu familia"</p>
+                <p className="recommender-label">{t("admin_data.recommender_ideal_label")}</p>
               </div>
               <div className="recommender-chart">
-                <p className="recommender-chart-label">Pesos de factores del modelo (Impacto relativo)</p>
+                <p className="recommender-chart-label">{t("admin_data.recommender_chart_label")}</p>
                 <div className="stacked-bar">
-                  <div className="stack-segment bg-primary-container" style={{ width: '35%' }} title="Edad (35%)">EDAD 35%</div>
-                  <div className="stack-segment bg-secondary" style={{ width: '25%' }} title="Distancia (25%)">DIST 25%</div>
-                  <div className="stack-segment bg-tertiary-container" style={{ width: '20%' }} title="Valoración (20%)">VAL 20%</div>
-                  <div className="stack-segment bg-inverse-surface" style={{ width: '15%' }} title="Cambiador (15%)">CAMB 15%</div>
+                  <div className="stack-segment bg-primary-container" style={{ width: '35%' }} title="Edad (35%)">{t("admin_data.recommender_age")} 35%</div>
+                  <div className="stack-segment bg-secondary" style={{ width: '25%' }} title="Distancia (25%)">{t("admin_data.recommender_dist")} 25%</div>
+                  <div className="stack-segment bg-tertiary-container" style={{ width: '20%' }} title="Valoración (20%)">{t("admin_data.recommender_rating")} 20%</div>
+                  <div className="stack-segment bg-inverse-surface" style={{ width: '15%' }} title="Cambiador (15%)">{t("admin_data.recommender_changer")} 15%</div>
                   <div className="stack-segment bg-outline-variant" style={{ width: '5%' }}></div>
                 </div>
               </div>
@@ -131,23 +129,22 @@ function AdminData() {
           </div>
         </div>
 
-        {/* Right (1 col): Density Map */}
         <div className="analytics-right">
           <div className="density-card">
-            <h3 className="section-title">Densidad de actividad</h3>
+            <h3 className="section-title">{t("admin_data.density_title")}</h3>
             <div className="map-placeholder">
               <span className="material-symbols-outlined map-icon">map</span>
-              <p className="map-label">Mapa de calor Euskadi</p>
+              <p className="map-label">{t("admin_data.density_map_label")}</p>
               <div className="map-dot red" title="Bilbao"></div>
               <div className="map-dot green md" title="San Sebastián"></div>
               <div className="map-dot green sm" title="Vitoria"></div>
               <div className="map-deficit">
-                <p className="deficit-label">Zonas con deficit de planes:</p>
-                <span className="deficit-badge">Margen Izquierda (Alta Demanda)</span>
+                <p className="deficit-label">{t("admin_data.density_deficit_label")}</p>
+                <span className="deficit-badge">{t("admin_data.density_deficit_zone")}</span>
               </div>
             </div>
             <div className="age-chart-section">
-              <h4 className="age-chart-label">Edad de los peques</h4>
+              <h4 className="age-chart-label">{t("admin_data.age_chart_label")}</h4>
               <div className="age-bars">
                 <div className="age-bar-col">
                   <div className="age-bar bg-accent h-20" title="0-1"></div>
@@ -179,15 +176,14 @@ function AdminData() {
       <div className="moderation-section">
         <div className="moderation-card">
           <div className="section-title-row">
-            <h3 className="section-title">Centro de moderación</h3>
-            <button className="btn-link-sm">Ver todo</button>
+            <h3 className="section-title">{t("admin_data.moderation_title")}</h3>
+            <button className="btn-link-sm">{t("admin_data.moderation_see_all")}</button>
           </div>
           <div className="moderation-grid">
-            {/* Pending Activities */}
             <div className="mod-card">
               <div className="mod-card-header">
                 <h4 className="mod-card-title">
-                  <span className="material-symbols-outlined">pending_actions</span> Actividades pendientes
+                  <span className="material-symbols-outlined">pending_actions</span> {t("admin_data.mod_pending_title")}
                 </h4>
                 <span className="badge-neutral-sm">28</span>
               </div>
@@ -201,11 +197,10 @@ function AdminData() {
               </ul>
             </div>
 
-            {/* Businesses to Validate */}
             <div className="mod-card">
               <div className="mod-card-header">
                 <h4 className="mod-card-title">
-                  <span className="material-symbols-outlined">storefront</span> Negocios por validar
+                  <span className="material-symbols-outlined">storefront</span> {t("admin_data.mod_businesses_title")}
                 </h4>
                 <span className="badge-error-sm">5</span>
               </div>
@@ -219,25 +214,24 @@ function AdminData() {
               </ul>
             </div>
 
-            {/* Open Incidents */}
             <div className="mod-card">
               <div className="mod-card-header">
                 <h4 className="mod-card-title error">
-                  <span className="material-symbols-outlined">report</span> Incidencias abiertas
+                  <span className="material-symbols-outlined">report</span> {t("admin_data.mod_incidents_title")}
                 </h4>
                 <span className="badge-error-filled">3</span>
               </div>
               <ul className="mod-list">
                 <li className="mod-list-item">
                   <div className="incident-info">
-                    <span className="item-name error">Info desactualizada</span>
+                    <span className="item-name error">{t("admin_data.incident_outdated")}</span>
                     <span className="incident-desc">"Museo cerrado por obras"</span>
                   </div>
                   <button className="btn-icon-muted"><span className="material-symbols-outlined">open_in_new</span></button>
                 </li>
                 <li className="mod-list-item">
                   <div className="incident-info">
-                    <span className="item-name">Falta accesibilidad real</span>
+                    <span className="item-name">{t("admin_data.incident_accessibility")}</span>
                     <span className="incident-desc">"No se puede entrar con carrito gemelar"</span>
                   </div>
                   <button className="btn-icon-muted"><span className="material-symbols-outlined">open_in_new</span></button>
@@ -250,16 +244,16 @@ function AdminData() {
 
       {/* 4. Top Performance Table */}
       <div className="top-performance-section">
-        <h3 className="section-title">Top rendimiento</h3>
+        <h3 className="section-title">{t("admin_data.top_performance_title")}</h3>
         <div className="data-table-wrapper">
           <div className="table-scroll">
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Top Planes Familiares</th>
-                  <th>Categoría</th>
-                  <th className="text-center">Guardados</th>
-                  <th className="text-center">Valoración</th>
+                  <th>{t("admin_data.table_col_plan")}</th>
+                  <th>{t("admin_data.table_col_category")}</th>
+                  <th className="text-center">{t("admin_data.table_col_saved")}</th>
+                  <th className="text-center">{t("admin_data.table_col_rating")}</th>
                 </tr>
               </thead>
               <tbody>

@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 import GuniFabLauncher from "../components/assistant/GuniFabLauncher";
 import getPlanImage from "../utils/getPlanImage";
 
 function OfferCard({ colorVariant, badge, badgeType, date, dateIcon, title, subtitle, location, image, onNavigate }) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -35,12 +37,12 @@ function OfferCard({ colorVariant, badge, badgeType, date, dateIcon, title, subt
             type="button"
             onClick={(e) => { e.stopPropagation(); setExpanded((v) => !v); }}
           >
-            {expanded ? "Leer menos" : "Leer más"}
+            {expanded ? t("offers.read_less") : t("offers.read_more")}
           </button>
         )}
       </div>
       <button className="offer-user-card__btn" type="button">
-        Ver oferta
+        {t("offers.view_offer")}
       </button>
     </div>
   );
@@ -48,39 +50,40 @@ function OfferCard({ colorVariant, badge, badgeType, date, dateIcon, title, subt
 
 function OffersUser() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const dynamicOffers = useBusinessStore((state) => state.offers);
 
   const staticOffers = [
     {
       id: "static-3",
-      badge: "ESPECIAL",
+      badge: t("offers.badge_special"),
       badgeType: "accent",
-      date: "Este fin de semana",
+      date: t("offers.date_this_weekend"),
       dateIcon: "event",
-      title: "Juegos en la playa de Ereaga",
-      subtitle: "Descubre los mejores miradores y playas accesibles con carrito de la costa vasca.",
+      title: t("offers.static3_title"),
+      subtitle: t("offers.static3_subtitle"),
       location: "Getxo · Costa",
       planId: "/planes/2",
     },
     {
       id: "static-1",
-      badge: "OFERTA",
+      badge: t("offers.badge_offer"),
       badgeType: "secondary",
-      date: "Hasta 31 Oct",
+      date: t("offers.static1_date"),
       dateIcon: "calendar_today",
-      title: "2x1 en menú infantil",
-      subtitle: "Comida Familiar de Domingo",
+      title: t("offers.static1_title"),
+      subtitle: t("offers.static1_subtitle"),
       location: "Bilbao",
       planId: "/planes/3",
     },
     {
       id: "static-2",
-      badge: "TALLER",
+      badge: t("offers.badge_workshop"),
       badgeType: "primary",
-      date: "Solo miércoles",
+      date: t("offers.static2_date"),
       dateIcon: "event",
-      title: "Taller gratuito",
-      subtitle: "Taller de Otoño Creativo",
+      title: t("offers.static2_title"),
+      subtitle: t("offers.static2_subtitle"),
       location: "Bilbao",
       planId: "/planes/10",
     },
@@ -94,7 +97,7 @@ function OffersUser() {
       id: offer.id,
       badge: "OFERTA",
       badgeType: "primary",
-      date: offer.meta || "Por tiempo limitado",
+      date: offer.meta || t("offers.date_limited_time"),
       dateIcon: "event",
       title: offer.title,
       subtitle: offer.activity || offer.description,
@@ -115,7 +118,7 @@ function OffersUser() {
   return (
     <>
       <main className="offers-user-main">
-        <h1 className="offers-user-title">Ofertas para tu familia</h1>
+        <h1 className="offers-user-title">{t("offers.page_title")}</h1>
 
         <div className="offers-user-list">
           {allOffers.map((offer, i) => (

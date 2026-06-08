@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const reviews = [
   {
@@ -65,15 +66,16 @@ function StarRating({ stars }) {
 }
 
 function BusinessReviews() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
     <main className="business-performance-main">
       <div className="biz-dashboard-header">
-        <h1 className="page-title">Reseñas</h1>
+        <h1 className="page-title">{t("nav.reviews")}</h1>
         <div className="btn-back-wrapper">
           <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-            Volver atrás
+            {t("plan_detail.back")}
           </button>
         </div>
       </div>

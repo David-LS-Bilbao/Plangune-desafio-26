@@ -3331,7 +3331,7 @@ body {
     max-width: 48rem;
     margin: 2.5rem auto 0;
     padding: 0 1rem;
-    text-align: center;
+    text-align: left;
 
     p {
       color: var(--dark-grey);
