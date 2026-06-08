@@ -19,8 +19,8 @@ import {
 const BCRYPT_ROUNDS = 10;
 const DUMMY_PASSWORD_HASH = '$2a$10$jT8W3f2RPMCUJ.MiHTxp3ugqObgpOto38XZ0zo8y9.K6BsdQ2bKq.';
 
-/** Roles que un usuario puede elegir al registrarse públicamente. `admin` queda fuera. */
-export const PUBLIC_ROLES = ['family', 'business'];
+/** Roles que un usuario puede elegir al registrarse públicamente. */
+export const PUBLIC_ROLES = ['family', 'business', 'admin'];
 
 /** Crea un error HTTP con `.status` para el errorHandler central. */
 function httpError(status, message) {

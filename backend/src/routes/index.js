@@ -22,6 +22,9 @@ router.use('/incidents', incidentRoutes);
 router.use('/recommendations', recommendationRoutes);
 router.use('/reviews', reviewRoutes);
 
-// Futuras rutas: /business, /admin...
+import adminRoutes from './admin.routes.js';
+
+// Futuras rutas: /business
+router.use('/admin', adminRoutes);
 
 export default router;

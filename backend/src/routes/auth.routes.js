@@ -25,7 +25,7 @@ const registerValidator = [
     .withMessage('La contraseña no debe superar 72 caracteres'),
   body('role')
     .isIn(PUBLIC_ROLES)
-    .withMessage('El rol debe ser family o business'),
+    .withMessage('El rol debe ser family, business o admin'),
 ];
 
 const loginValidator = [

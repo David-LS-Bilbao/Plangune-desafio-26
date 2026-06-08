@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAdminStore, useBusinessStore } from "../store";
 
 function AdminDashboard() {
   const [reviewMessage, setReviewMessage] = useState("");
-  const { pendingBusinesses, approveBusiness, rejectBusiness, stats } = useAdminStore();
+  const { pendingBusinesses, approveBusiness, rejectBusiness, stats, fetchAdminData, isLoading } = useAdminStore();
   const businessOffers = useBusinessStore(state => state.offers);
+
+  useEffect(() => {
+    fetchAdminData();
+  }, [fetchAdminData]);
 
   const handleApprove = (id) => {
     approveBusiness(id);
@@ -19,6 +23,10 @@ function AdminDashboard() {
       setTimeout(() => setReviewMessage(""), 2000);
     }
   };
+
+  if (isLoading) {
+    return <main className="admin-dashboard-main"><p>Cargando datos de administración...</p></main>;
+  }
 
   return (
     <main className="admin-dashboard-main">

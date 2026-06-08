@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import { fetchEventById } from "../services/eventsApi";
+import { fetchReviewsByEvent, createReview } from "../services/reviewsApi";
 import { eventToPlan } from "../mappers/eventMapper";
 import { useFavorites } from "../context/FavoritesContext";
 import getPlanImage from "../utils/getPlanImage";
@@ -49,23 +50,31 @@ function PlanDetail() {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(5);
-  const [reviews, setReviews] = useState([
-    {
-      id: 1,
-      author: "Familia Agirre",
-      avatar: "FA",
-      time: "Hace 2 semanas",
-      text: "Excelente plan para el fin de semana. Muy bien acondicionado para carritos.",
-      rating: 5,
-    },
-  ]);
+  const [reviews, setReviews] = useState([]);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   const load = () => {
     setLoading(true);
     setError(false);
     setNotFound(false);
-    fetchEventById(id)
-      .then((event) => setPlan(eventToPlan(event)))
+    
+    Promise.all([
+      fetchEventById(id),
+      fetchReviewsByEvent(id).catch(() => []) // Fallback a vacío si falla
+    ])
+      .then(([event, fetchedReviews]) => {
+        setPlan(eventToPlan(event));
+        // Mapear reseñas del backend al formato que espera la UI
+        const mappedReviews = fetchedReviews.map(r => ({
+          id: r.id,
+          author: r.user?.email ? r.user.email.split('@')[0] : "Usuario",
+          avatar: r.user?.email ? r.user.email.substring(0, 2).toUpperCase() : "U",
+          time: new Date(r.created_at).toLocaleDateString(),
+          text: r.comment || "Sin comentarios",
+          rating: r.rating,
+        }));
+        setReviews(mappedReviews);
+      })
       .catch((err) => {
         if (err?.response?.status === 404) setNotFound(true);
         else setError(true);
@@ -262,25 +271,25 @@ function PlanDetail() {
             <button
               className="detail-btn detail-btn--primary"
               type="button"
-              onClick={() => {
+              disabled={isSubmittingReview}
+              onClick={async () => {
                 if (!newReviewText.trim()) return;
-                setReviews((prev) => [
-                  {
-                    id: Date.now(),
-                    author: "Tú",
-                    avatar: "TU",
-                    time: "Justo ahora",
-                    text: newReviewText,
-                    rating: newReviewRating,
-                  },
-                  ...prev,
-                ]);
-                setNewReviewText("");
-                setNewReviewRating(5);
-                setShowReviewForm(false);
+                setIsSubmittingReview(true);
+                try {
+                  await createReview(id, newReviewRating, newReviewText);
+                  setNewReviewText("");
+                  setNewReviewRating(5);
+                  setShowReviewForm(false);
+                  load(); // Recargar reseñas desde el backend
+                } catch (err) {
+                  console.error("Error al publicar la reseña:", err);
+                  alert("No se pudo publicar la reseña. Inicia sesión e inténtalo de nuevo.");
+                } finally {
+                  setIsSubmittingReview(false);
+                }
               }}
             >
-              Publicar reseña
+              {isSubmittingReview ? "Publicando..." : "Publicar reseña"}
             </button>
           </div>
         )}

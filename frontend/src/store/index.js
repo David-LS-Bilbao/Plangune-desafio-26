@@ -127,30 +127,56 @@ export const useBusinessStore = create((set, get) => ({
   setSubscription: (plan) => set({ subscription: plan }),
 }));
 
+import { fetchDashboardStats, fetchPendingBusinesses, approveBusinessApi, rejectBusinessApi } from '../services/adminApi';
+
 // --- ADMIN STORE (Users, Pending Businesses) ---
 export const useAdminStore = create((set, get) => ({
-  pendingBusinesses: [
-    { id: 101, name: "Txikipark Aventuras", email: "info@txiki.com", requestDate: "2026-06-01" },
-    { id: 102, name: "Taller Creativo Bilbao", email: "hola@taller.es", requestDate: "2026-06-02" },
-  ],
+  pendingBusinesses: [],
   approvedBusinesses: [],
-  approveBusiness: (id) => {
-    const business = get().pendingBusinesses.find((b) => b.id === id);
-    if (business) {
-      set({
-        pendingBusinesses: get().pendingBusinesses.filter((b) => b.id !== id),
-        approvedBusinesses: [...get().approvedBusinesses, business],
-      });
+  stats: {
+    totalUsers: 0,
+    activeFamilies: 0,
+    activeBusinesses: 0,
+    monthlyRevenue: 0,
+  },
+  isLoading: false,
+
+  fetchAdminData: async () => {
+    set({ isLoading: true });
+    try {
+      const [stats, pending] = await Promise.all([
+        fetchDashboardStats(),
+        fetchPendingBusinesses()
+      ]);
+      set({ stats, pendingBusinesses: pending, isLoading: false });
+    } catch (error) {
+      console.error("Error fetching admin data:", error);
+      set({ isLoading: false });
     }
   },
-  rejectBusiness: (id) => {
-    set({ pendingBusinesses: get().pendingBusinesses.filter((b) => b.id !== id) });
+
+  approveBusiness: async (id) => {
+    try {
+      await approveBusinessApi(id);
+      const business = get().pendingBusinesses.find((b) => b.id === id);
+      if (business) {
+        set({
+          pendingBusinesses: get().pendingBusinesses.filter((b) => b.id !== id),
+          approvedBusinesses: [...get().approvedBusinesses, business],
+        });
+      }
+    } catch (error) {
+      console.error("Error approving business:", error);
+    }
   },
-  stats: {
-    totalUsers: 1542,
-    activeFamilies: 1200,
-    activeBusinesses: 340,
-    monthlyRevenue: 4500,
+
+  rejectBusiness: async (id) => {
+    try {
+      await rejectBusinessApi(id);
+      set({ pendingBusinesses: get().pendingBusinesses.filter((b) => b.id !== id) });
+    } catch (error) {
+      console.error("Error rejecting business:", error);
+    }
   }
 }));
 
