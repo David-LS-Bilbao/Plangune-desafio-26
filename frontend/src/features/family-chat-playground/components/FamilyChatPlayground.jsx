@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 
-import GuniMascot from "./GuniMascot";
 import ChatBubble from "./ChatBubble";
 import QuickPromptChips from "./QuickPromptChips";
 import FamilyPreferencesDrawer from "./FamilyPreferencesDrawer";
@@ -69,9 +68,12 @@ function prefsToFamilyProfile(prefs) {
 
 /**
  * Playground visual aislado del chat familiar con GUNI.
- * Ruta: /dev/family-chat
+ * Ruta: /dev/family-chat (standalone) o como overlay desde GuniFabLauncher.
+ *
+ * @param {function} [onClose] - Si se provee, muestra botón × en el header
+ *   y llama a onClose al pulsarlo. Úsalo para cerrar el overlay del FAB.
  */
-function FamilyChatPlayground() {
+function FamilyChatPlayground({ onClose }) {
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
@@ -157,7 +159,7 @@ function FamilyChatPlayground() {
   };
 
   return (
-    <div className="fcp">
+    <div className={`fcp${onClose ? " fcp--overlay" : ""}`}>
       {/* 1. Header interno (no toca la navegación global) */}
       <header className="fcp-header">
         <button
@@ -169,20 +171,31 @@ function FamilyChatPlayground() {
           ☰
         </button>
         <span className="fcp-header__brand">Plangune</span>
-        <button
-          type="button"
-          className="fcp-iconbtn"
-          aria-label="Ajustes"
-          onClick={() => setDrawerOpen(true)}
-        >
-          ⚙️
-        </button>
+        {onClose ? (
+          <button
+            type="button"
+            className="fcp-iconbtn"
+            aria-label="Cerrar chat"
+            onClick={onClose}
+          >
+            ✕
+          </button>
+        ) : (
+          <button
+            type="button"
+            className="fcp-iconbtn"
+            aria-label="Ajustes"
+            onClick={() => setDrawerOpen(true)}
+          >
+            ⚙️
+          </button>
+        )}
       </header>
 
       <main className="fcp-main">
         {/* 2. Hero con GUNI protagonista */}
         <section className="fcp-hero">
-          <GuniMascot state={loading ? "thinking" : "idle"} size="lg" />
+          <img src="/images/guni/guni-original.png" alt="GUNI" className="fcp-hero__guni-img" />
           <h1 className="fcp-hero__title">GUNI</h1>
           <p className="fcp-hero__subtitle">
             Tu guía familiar para encontrar planes cómodos
@@ -230,7 +243,7 @@ function FamilyChatPlayground() {
           {loading && (
             <div className="fcp-msg fcp-msg--guni">
               <span className="fcp-msg__avatar" aria-hidden="true">
-                <GuniMascot size="sm" state="thinking" />
+                <img src="/images/guni/guni-original.png" alt="GUNI" className="fcp-avatar-img" />
               </span>
               <div className="fcp-bubble fcp-bubble--thinking">
                 <span className="fcp-typing">
