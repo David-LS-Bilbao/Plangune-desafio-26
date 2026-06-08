@@ -2,6 +2,15 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBusinessStore } from "../store";
 
+const SUGGESTED_SERVICES = [
+  "Apto Carrito",
+  "Cambiador",
+  "Trona",
+  "Interior",
+  "Aire Libre",
+  "Menú infantil",
+];
+
 function BusinessDashboard() {
   const navigate = useNavigate();
   const [activityName, setActivityName] = useState("");
@@ -10,7 +19,7 @@ function BusinessDashboard() {
   const [zone, setZone] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [services, setServices] = useState(["Carrito", "Cambiador"]);
+  const [services, setServices] = useState([]);
   const [newService, setNewService] = useState("");
   const [message, setMessage] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
@@ -65,6 +74,13 @@ function BusinessDashboard() {
     setServices((prev) => prev.filter((s) => s !== serviceToRemove));
   };
 
+  const handleSuggestionClick = (suggestion) => {
+    touch("services");
+    if (!services.includes(suggestion)) {
+      setServices((prev) => [...prev, suggestion]);
+    }
+  };
+
   const resetForm = () => {
     setActivityName("");
     setCategory("");
@@ -72,7 +88,7 @@ function BusinessDashboard() {
     setZone("");
     setPrice("");
     setDescription("");
-    setServices(["Carrito", "Cambiador"]);
+    setServices([]);
     setCoverImage(null);
     setMessage("");
     setTouched({});
@@ -293,6 +309,25 @@ function BusinessDashboard() {
                 )}
               </div>
               {isServicesInvalid && <span className="biz-field-error">Añade al menos un servicio</span>}
+
+              {SUGGESTED_SERVICES.some((s) => !services.includes(s)) && (
+                <div className="biz-suggestions">
+                  <span className="biz-suggestions__label">Sugerencias:</span>
+                  <div className="biz-tags-list">
+                    {SUGGESTED_SERVICES.filter((s) => !services.includes(s)).map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        className="biz-service-suggestion"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                      >
+                        <span className="material-symbols-outlined">add</span>
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="biz-activity-form create-offer-notice">

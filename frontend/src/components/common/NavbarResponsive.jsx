@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import logo from '../../assets/logo.svg';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../../store';
+import LanguageSwitcher from './LanguageSwitcher';
 import '../../styles/navbar-responsive.css';
 
 function NavbarResponsive() {
@@ -10,26 +12,27 @@ function NavbarResponsive() {
   const location = useLocation();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { t } = useTranslation();
 
   const defaultLinks = [
-    { to: '/ofertas', icon: 'local_offer', label: 'Ofertas', exact: false },
-    { to: '/planes', icon: 'event', label: 'Planes', exact: false },
-    { to: '/', icon: 'home', label: 'Inicio', exact: true },
-    { to: '/buscar', icon: 'search', label: 'Buscar', exact: false },
-    { to: user ? '/perfil' : '/login', icon: 'account_circle', label: 'Mi perfil', exact: false },
+    { to: '/ofertas', icon: 'local_offer', label: t('nav.offers'), exact: false },
+    { to: '/planes', icon: 'event', label: t('nav.plans'), exact: false },
+    { to: '/', icon: 'home', label: t('nav.home'), exact: true },
+    { to: '/buscar', icon: 'search', label: t('nav.search'), exact: false },
+    { to: user ? '/perfil' : '/login', icon: 'account_circle', label: t('nav.profile'), exact: false },
   ];
 
   const adminLinks = [
-    { to: '/admin', icon: 'dashboard', label: 'Dashboard', exact: true },
-    { to: '/admin/data', icon: 'analytics', label: 'Datos', exact: true },
+    { to: '/admin', icon: 'dashboard', label: t('nav.dashboard'), exact: true },
+    { to: '/admin/data', icon: 'analytics', label: t('nav.data'), exact: true },
   ];
 
   const businessLinks = [
-    { to: '/negocio/ofertas', icon: 'local_offer', label: 'Ofertas', exact: true },
-    { to: '/negocio', icon: 'event', label: 'Actividades', exact: true },
-    { to: '/negocio/dashboard', icon: 'dashboard', label: 'Dashboard', exact: true },
-    { to: '/negocio/resenas', icon: 'reviews', label: 'Reseñas', exact: false },
-    { to: '/negocio/rendimiento', icon: 'bar_chart', label: 'Rendimiento', exact: false },
+    { to: '/negocio/ofertas', icon: 'local_offer', label: t('nav.offers'), exact: true },
+    { to: '/negocio', icon: 'event', label: t('nav.activities'), exact: true },
+    { to: '/negocio/dashboard', icon: 'dashboard', label: t('nav.dashboard'), exact: true },
+    { to: '/negocio/resenas', icon: 'reviews', label: t('nav.reviews'), exact: false },
+    { to: '/negocio/rendimiento', icon: 'bar_chart', label: t('nav.performance'), exact: false },
   ];
 
   const links =
@@ -38,15 +41,15 @@ function NavbarResponsive() {
     defaultLinks;
 
   const defaultDesktopLinks = [
-    { to: '/ofertas', label: 'Ofertas', exact: false },
-    { to: '/planes', label: 'Planes', exact: false },
-    { to: '/favoritos', label: 'Favoritos', exact: false },
-    { to: '/buscar', label: 'Buscar', exact: false },
-    { to: user ? '/perfil' : '/login', label: 'Perfil', exact: false },
+    { to: '/ofertas', label: t('nav.offers'), exact: false },
+    { to: '/planes', label: t('nav.plans'), exact: false },
+    { to: '/favoritos', label: t('nav.favorites'), exact: false },
+    { to: '/buscar', label: t('nav.search'), exact: false },
+    { to: user ? '/perfil' : '/login', label: t('nav.profile'), exact: false },
   ];
 
   const businessDesktopLinks = [
-    { to: '/negocio/dashboard', label: 'Dashboard', exact: true },
+    { to: '/negocio/dashboard', label: t('nav.dashboard'), exact: true },
   ];
 
   const desktopLinks =
@@ -70,29 +73,29 @@ function NavbarResponsive() {
 
   const menuItems = (() => {
     if (!user) return [
-      { label: 'Iniciar sesión', path: '/login', icon: 'login' },
-      { label: 'Explorar planes', path: '/planes', icon: 'explore' },
+      { label: t('nav.login'), path: '/login', icon: 'login' },
+      { label: t('nav.plans'), path: '/planes', icon: 'explore' },
     ];
     if (user.role === 'family') return [
-      { label: 'Buscar', path: '/buscar', icon: 'search' },
-      { label: 'Ofertas', path: '/ofertas', icon: 'local_offer' },
-      { label: 'Planes', path: '/planes', icon: 'explore' },
-      { label: 'Favoritos', path: '/favoritos', icon: 'favorite' },
-      { label: 'Mi perfil', path: '/perfil', icon: 'person' },
+      { label: t('nav.search'), path: '/buscar', icon: 'search' },
+      { label: t('nav.offers'), path: '/ofertas', icon: 'local_offer' },
+      { label: t('nav.plans'), path: '/planes', icon: 'explore' },
+      { label: t('nav.favorites'), path: '/favoritos', icon: 'favorite' },
+      { label: t('nav.profile'), path: '/perfil', icon: 'person' },
     ];
     if (user.role === 'business') return [
-      { label: 'Dashboard', path: '/negocio/dashboard', icon: 'dashboard' },
-      { label: 'Actividades', path: '/negocio', icon: 'event' },
-      { label: 'Ofertas', path: '/negocio/ofertas', icon: 'local_offer' },
-      { label: 'Rendimiento', path: '/negocio/rendimiento', icon: 'bar_chart' },
-      { label: 'Reseñas', path: '/negocio/resenas', icon: 'reviews' },
-      { label: 'Visibilidad', path: '/negocio/estrategia', icon: 'rocket_launch' },
-      { label: 'Suscripción', path: '/negocio/suscripciones', icon: 'workspace_premium' },
-      { label: 'Editar perfil', path: '/negocio/perfil', icon: 'person' },
+      { label: t('nav.dashboard'), path: '/negocio/dashboard', icon: 'dashboard' },
+      { label: t('nav.activities'), path: '/negocio', icon: 'event' },
+      { label: t('nav.offers'), path: '/negocio/ofertas', icon: 'local_offer' },
+      { label: t('nav.performance'), path: '/negocio/rendimiento', icon: 'bar_chart' },
+      { label: t('nav.reviews'), path: '/negocio/resenas', icon: 'reviews' },
+      { label: t('nav.visibility'), path: '/negocio/estrategia', icon: 'rocket_launch' },
+      { label: t('nav.subscription'), path: '/negocio/suscripciones', icon: 'workspace_premium' },
+      { label: t('nav.edit_profile'), path: '/negocio/perfil', icon: 'person' },
     ];
     if (user.role === 'admin') return [
-      { label: 'Dashboard', path: '/admin', icon: 'admin_panel_settings' },
-      { label: 'Datos', path: '/admin/data', icon: 'database' },
+      { label: t('nav.dashboard'), path: '/admin', icon: 'admin_panel_settings' },
+      { label: t('nav.data'), path: '/admin/data', icon: 'database' },
     ];
     return [];
   })();
@@ -107,16 +110,19 @@ function NavbarResponsive() {
             <img src={logo} alt="Plangune logo" />
           </Link>
 
-          {/* Botón hamburguesa / X a la derecha */}
-          <button
-            aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
-            className="nr-icon-button"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            <span className={`material-symbols-outlined nr-menu-icon${menuOpen ? ' nr-menu-icon--open' : ''}`}>
-              {menuOpen ? 'close' : 'menu'}
-            </span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <LanguageSwitcher />
+            {/* Botón hamburguesa / X a la derecha */}
+            <button
+              aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
+              className="nr-icon-button"
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              <span className={`material-symbols-outlined nr-menu-icon${menuOpen ? ' nr-menu-icon--open' : ''}`}>
+                {menuOpen ? 'close' : 'menu'}
+              </span>
+            </button>
+          </div>
         </div>
 
         {/* Overlay: oscurece debajo del header pero no el header mismo */}
@@ -134,7 +140,7 @@ function NavbarResponsive() {
           ))}
           {user && (
             <button type="button" className="nr-menu-item nr-menu-item-danger" onClick={handleLogout}>
-              Cerrar sesión
+              {t('nav.logout')}
             </button>
           )}
           {user && (
@@ -142,7 +148,7 @@ function NavbarResponsive() {
               <div>
                 <p className="nr-menu-user-name">{user.name}</p>
                 <p className="nr-menu-user-role">
-                  {user.role === 'family' ? 'Familia' : user.role === 'business' ? 'Negocio' : 'Administrador'}
+                  {user.role === 'family' ? t('roles.family') : user.role === 'business' ? t('roles.business') : t('roles.admin')}
                 </p>
               </div>
               <div className="nr-menu-avatar">{user.avatar}</div>
@@ -222,10 +228,13 @@ function NavbarResponsive() {
             {user && (
               <li>
                 <button className="nr-top-link nr-top-link--logout" onClick={handleLogout}>
-                  CERRAR SESIÓN
+                  {t('nav.logout_upper')}
                 </button>
               </li>
             )}
+            <li className="nr-top-lang-item">
+              <LanguageSwitcher />
+            </li>
           </ul>
         </div>
       </nav>

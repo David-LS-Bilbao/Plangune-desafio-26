@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store";
 import NavbarResponsive from "../components/common/NavbarResponsive";
 import "../styles/login.css";
@@ -15,6 +16,7 @@ const HOME_BY_ROLE = { family: "/buscar", business: "/negocio" };
 function Register() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const registerAccount = useAuthStore((state) => state.register);
 
   const [email, setEmail] = useState("");
@@ -34,11 +36,11 @@ function Register() {
     } catch (err) {
       const status = err?.response?.status;
       if (status === 409) {
-        setError("Ya existe una cuenta con ese correo. Prueba a iniciar sesión.");
+        setError(t('auth.error_register_exists'));
       } else if (status === 422) {
-        setError("Revisa el correo y que la contraseña tenga al menos 8 caracteres.");
+        setError(t('auth.error_register_invalid'));
       } else {
-        setError("No se ha podido crear la cuenta. Inténtalo de nuevo.");
+        setError(t('auth.error_register_default'));
       }
     } finally {
       setLoading(false);
@@ -51,21 +53,21 @@ function Register() {
       <div className="login-wrapper">
         <div className="login-card">
           <div className="login-header">
-            <h1>Crea tu cuenta</h1>
-            <p>Regístrate para guardar tus planes favoritos y recibir recomendaciones.</p>
+            <h1>{t('auth.register_title')}</h1>
+            <p>{t('auth.register_subtitle')}</p>
           </div>
 
           <div className="login-body">
             <form className="login-form-new" onSubmit={handleSubmit}>
               {/* Email */}
               <div className="input-group">
-                <label className="sr-only" htmlFor="email">Correo electrónico</label>
+                <label className="sr-only" htmlFor="email">{t('auth.email_label')}</label>
                 <div className="input-wrapper">
                   <span className="material-symbols-outlined input-icon">mail</span>
                   <input
                     type="email"
                     id="email"
-                    placeholder="tu@email.com"
+                    placeholder={t('auth.email_placeholder')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -75,13 +77,13 @@ function Register() {
 
               {/* Password */}
               <div className="input-group">
-                <label className="sr-only" htmlFor="password">Contraseña</label>
+                <label className="sr-only" htmlFor="password">{t('auth.password_label')}</label>
                 <div className="input-wrapper">
                   <span className="material-symbols-outlined input-icon">lock</span>
                   <input
                     type="password"
                     id="password"
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder={t('auth.password_placeholder')}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     minLength={8}
@@ -92,7 +94,7 @@ function Register() {
 
               {/* Rol */}
               <div className="registration-section" style={{ marginTop: 0 }}>
-                <p className="registration-text">¿Cómo vas a usar Plangune?</p>
+                <p className="registration-text">{t('auth.how_to_use')}</p>
                 <div className="role-grid">
                   <label className="role-label">
                     <input
@@ -105,7 +107,7 @@ function Register() {
                     />
                     <div className="role-card">
                       <span className="material-symbols-outlined role-icon-primary">family_restroom</span>
-                      <span className="role-title">Familia</span>
+                      <span className="role-title">{t('roles.family')}</span>
                       <div className="check-icon">
                         <span className="material-symbols-outlined fill">check_circle</span>
                       </div>
@@ -122,7 +124,7 @@ function Register() {
                     />
                     <div className="role-card">
                       <span className="material-symbols-outlined role-icon-secondary">storefront</span>
-                      <span className="role-title">Negocio</span>
+                      <span className="role-title">{t('roles.business')}</span>
                       <div className="check-icon">
                         <span className="material-symbols-outlined fill">check_circle</span>
                       </div>
@@ -140,14 +142,14 @@ function Register() {
               <div className="submit-group">
                 <button type="submit" className="btn-primary-new" disabled={loading}>
                   <span className="material-symbols-outlined">{loading ? "hourglass_top" : "person_add"}</span>
-                  {loading ? "Creando cuenta…" : "Crear cuenta"}
+                  {loading ? t('auth.btn_create_account_loading') : t('auth.btn_create_account')}
                 </button>
               </div>
             </form>
 
             <div className="registration-section">
               <p className="registration-text">
-                ¿Ya tienes cuenta? <Link to="/login" className="btn-link">Inicia sesión</Link>
+                {t('auth.already_have_account')} <Link to="/login" className="btn-link">{t('auth.btn_login_link')}</Link>
               </p>
             </div>
           </div>

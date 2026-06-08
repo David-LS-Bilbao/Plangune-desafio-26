@@ -27,7 +27,7 @@ function RecommendationCard({ card }) {
         {card.hasDetail && (
           <button
             type="button"
-            className="rec-fav"
+            className={`rec-fav${favorite ? " rec-fav--active" : ""}`}
             aria-label={favorite ? "Quitar de favoritos" : "Añadir a favoritos"}
             aria-pressed={favorite}
             onClick={() => toggleFavorite(card.id)}

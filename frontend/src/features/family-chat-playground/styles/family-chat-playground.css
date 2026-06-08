@@ -55,11 +55,10 @@
 }
 
 .fcp-header__brand {
-  font-family: "Montserrat", "Inter", sans-serif;
-  font-weight: 700;
-  font-size: 1.1rem;
-  letter-spacing: 0.01em;
-  color: var(--fcp-navy);
+  height: 3rem;
+  width: auto;
+  object-fit: contain;
+  display: block;
 }
 
 .fcp-iconbtn {
@@ -749,20 +748,20 @@
   position: absolute;
   top: 0;
   left: 0;
-  bottom: 0;
-  width: min(86%, 340px);
+  right: 0;
+  max-height: min(86%, 620px);
   display: flex;
   flex-direction: column;
   background: var(--fcp-white);
-  border-top-right-radius: 18px;
+  border-bottom-left-radius: 18px;
   border-bottom-right-radius: 18px;
-  box-shadow: 8px 0 28px rgba(22, 58, 74, 0.22);
-  transform: translateX(-100%);
+  box-shadow: 0 8px 28px rgba(22, 58, 74, 0.22);
+  transform: translateY(-100%);
   transition: transform 0.28s ease;
 }
 
 .fcp-drawer-root.is-open .fcp-drawer {
-  transform: translateX(0);
+  transform: translateY(0);
 }
 
 .fcp-drawer__head {
@@ -809,6 +808,7 @@
 .fcp-drawer__foot {
   flex: 0 0 auto;
   padding: 1rem;
+  padding-top: 1.25rem;
   padding-bottom: calc(1rem + var(--fcp-safe-bottom));
   border-top: 1px solid var(--fcp-border);
 }
@@ -824,6 +824,10 @@
 
 .fcp-field--switches {
   gap: 0.85rem;
+}
+
+.fcp-field--ages .fcp-field__legend {
+  margin-bottom: 0.75rem;
 }
 
 .fcp-field__legend {
@@ -921,16 +925,30 @@
     justify-content: center;
     gap: 1rem;
     position: relative;
+    /* El gris claro de la cabecera solo cubre el ancho del chat (680px
+       centrados); fuera de esa franja se ve el tono oscuro del overlay. */
+    background: linear-gradient(
+      to right,
+      rgba(22, 58, 74, 0.92) 0,
+      rgba(22, 58, 74, 0.92) calc(50% - 340px),
+      var(--fcp-white) calc(50% - 340px),
+      var(--fcp-white) calc(50% + 340px),
+      rgba(22, 58, 74, 0.92) calc(50% + 340px),
+      rgba(22, 58, 74, 0.92) 100%
+    );
   }
 
+  /* Los botones del header se anclan a los bordes de la misma columna
+     centrada (max-width: 680px) que .fcp-main y .fcp-inputbar, en vez
+     de a los bordes de la pantalla. */
   .fcp-header .fcp-iconbtn:first-child {
     position: absolute;
-    left: 1rem;
+    left: max(1rem, calc(50% - 340px));
   }
 
   .fcp-header .fcp-iconbtn:last-child {
     position: absolute;
-    right: 1rem;
+    right: max(1rem, calc(50% - 340px));
   }
 
   .fcp-main {
@@ -965,6 +983,19 @@
   .fcp-msg {
     max-width: 74%;
   }
+
+  /* El desplegable de preferencias se ancla a la misma columna centrada
+     (max-width: 680px) que el resto del contenido del chat. */
+  .fcp-drawer {
+    left: 50%;
+    right: auto;
+    width: min(100%, 680px);
+    transform: translate(-50%, -100%);
+  }
+
+  .fcp-drawer-root.is-open .fcp-drawer {
+    transform: translate(-50%, 0);
+  }
 }
 
 /* ── FAB de GUNI (GuniFabLauncher) + overlay sobre /buscar ───── */
@@ -994,6 +1025,14 @@
 
 .guni-fab:active { transform: scale(0.95); }
 
+/* En mobile la barra inferior de navegación (.nr-bottom-nav) ocupa esa esquina:
+   subimos el FAB para que no se monte encima. */
+@media (max-width: 839px) {
+  .guni-fab {
+    bottom: 6rem;
+  }
+}
+
 /* ── Overlay: FamilyChatPlayground lanzado desde el FAB ───────── */
 
 /* Cubre toda la pantalla con fondo sólido; bloquea el scroll propio
@@ -1003,6 +1042,23 @@
   height: 100vh;    /* fallback para navegadores sin dvh */
   height: 100dvh;   /* altura dinámica (evita barra de URL en móvil) */
   overflow: hidden;
+  background: rgba(22, 58, 74, 0.92);
+}
+
+/* En pantallas anchas el chat ocupa una columna central de 680px:
+   esa franja queda en gris claro opaco y el resto se mantiene oscuro. */
+@media (min-width: 768px) {
+  .fcp--overlay {
+    background: linear-gradient(
+      to right,
+      rgba(22, 58, 74, 0.92) 0,
+      rgba(22, 58, 74, 0.92) calc(50% - 340px),
+      var(--fcp-white) calc(50% - 340px),
+      var(--fcp-white) calc(50% + 340px),
+      rgba(22, 58, 74, 0.92) calc(50% + 340px),
+      rgba(22, 58, 74, 0.92) 100%
+    );
+  }
 }
 
 /* Oculta la bottom nav meramente visual en modo overlay. */

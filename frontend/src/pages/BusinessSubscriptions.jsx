@@ -20,6 +20,7 @@ const PLANS = [
     price: "0€",
     period: "/mes",
     cta: "Obtener gratis",
+    free: true,
     features: [
       "Ficha de negocio con foto",
       "Descripción básica (200 caracteres)",
@@ -56,6 +57,7 @@ const PLANS = [
     period: "/mes",
     annual: "1.071€/año (25% descuento)",
     cta: "Obtener Gailur",
+    top: true,
     features: [
       "Ficha premium con fotos ilimitadas",
       "Descripción avanzada (1000 caracteres)",
@@ -136,7 +138,7 @@ function BusinessSubscriptions() {
           return (
             <article
               key={plan.name}
-              className={`subscription-card${plan.featured ? " featured" : ""}${isActive ? " active" : ""}`}
+              className={`subscription-card${plan.featured ? " featured" : ""}${plan.top ? " top" : ""}${isActive ? " active" : ""}`}
             >
               {isActive ? (
                 <div className="subscription-active-badge">
@@ -148,6 +150,16 @@ function BusinessSubscriptions() {
                   <span className="material-symbols-outlined fill" style={{ fontSize: "1rem" }}>star</span>
                   Recomendado
                 </div>
+              ) : plan.top ? (
+                <div className="subscription-top-badge">
+                  <span className="material-symbols-outlined fill" style={{ fontSize: "1rem" }}>military_tech</span>
+                  Plan TOP
+                </div>
+              ) : plan.free ? (
+                <div className="subscription-free-badge">
+                  <span className="material-symbols-outlined fill" style={{ fontSize: "1rem" }}>sell</span>
+                  Plan gratuito
+                </div>
               ) : null}
 
               <div className="subscription-top">
@@ -158,7 +170,21 @@ function BusinessSubscriptions() {
                 </span>
               </div>
 
-              {plan.annual && <p className="subscription-annual">{plan.annual}</p>}
+              <button
+                className="btn-primary-full"
+                type="button"
+                disabled={isActive}
+                onClick={() => handleSelectPlan(plan.name)}
+              >
+                {isActive ? "Plan actual" : plan.cta}
+              </button>
+
+              {plan.annual && (
+                <div className="subscription-annual">
+                  <span className="subscription-annual__label">Oferta especial</span>
+                  <span className="subscription-annual__value">{plan.annual}</span>
+                </div>
+              )}
 
               <ul className="subscription-list">
                 {plan.features.map((feature) => {
@@ -177,18 +203,32 @@ function BusinessSubscriptions() {
                   );
                 })}
               </ul>
-
-              <button
-                className="btn-primary-full"
-                type="button"
-                disabled={isActive}
-                onClick={() => handleSelectPlan(plan.name)}
-              >
-                {isActive ? "Plan actual" : plan.cta}
-              </button>
             </article>
           );
         })}
+      </section>
+
+      <section className="subscriptions-pitch">
+        <h2 className="subscriptions-pitch__title">Haz que tu negocio sea El Plan.</h2>
+        <p className="subscriptions-pitch__lead">
+          El lugar donde las familias de Euskadi eligen estar
+        </p>
+        <p>
+          Tienes un local increíble, instalaciones adaptadas y una gran oferta. Sin embargo,
+          llega el fin de semana y sientes que tu inversión en publicidad se pierde en el
+          ruido de las redes sociales. Las familias que buscan desesperadamente tiempo de
+          calidad cerca de ti no te ven en el momento decisivo: cuando están decidiendo
+          adónde ir.
+        </p>
+        <p>
+          PlanGune es el canal de conexión definitivo. No vendemos likes; te conectamos con
+          familias que están en tu zona, buscando exactamente lo que tú ofreces. Destacarás
+          en su pantalla justo cuando filtren buscando un local "A cubierto", con
+          "Cambiador" o "Gratis". Además, tus ofertas tendrán un escaparate brutal,
+          impactando en tiempo real incluso a los miles de usuarios que navegan por la app
+          sin estar registrados. Deja de disparar al aire. Tú pon la experiencia; nosotros
+          llevamos a las familias hasta tu puerta.
+        </p>
       </section>
     </main>
   );

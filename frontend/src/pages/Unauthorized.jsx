@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store";
 
 /**
@@ -7,6 +8,7 @@ import { useAuthStore } from "../store";
  * (p. ej. una familia accediendo a /admin). No expone detalles técnicos.
  */
 function Unauthorized() {
+  const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
 
   // Destino "a casa" según el rol, para reconducir sin fricción.
@@ -29,13 +31,12 @@ function Unauthorized() {
       <span className="material-symbols-outlined" style={{ fontSize: "3rem", color: "var(--accent-color, #e76f51)" }}>
         lock
       </span>
-      <h1 style={{ margin: 0 }}>No tienes acceso a esta página</h1>
+      <h1 style={{ margin: 0 }}>{t('auth.unauthorized_title')}</h1>
       <p style={{ maxWidth: "32rem", color: "var(--on-surface-variant, #666)" }}>
-        Tu cuenta no tiene permisos para ver esta sección. Si crees que es un error, revisa con qué
-        perfil has iniciado sesión.
+        {t('auth.unauthorized_desc')}
       </p>
       <Link to={home} className="btn-primary" style={{ textDecoration: "none" }}>
-        Volver a mi inicio
+        {t('auth.unauthorized_back')}
       </Link>
     </main>
   );

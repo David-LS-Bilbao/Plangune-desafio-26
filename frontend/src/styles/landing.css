@@ -134,8 +134,8 @@
 
                 h2 {
                     margin: 0;
-                    font-size: 2rem;
-                    line-height: 2.2rem;
+                    font-size: 2.3rem;
+                    line-height: 2.5rem;
                 }
 
                 p {
@@ -143,10 +143,12 @@
                     font-family: var(--font-poppins);
                     font-size: 1.2rem;
                     line-height: 28px;
+                    color: var(--dark-grey);
 
-                    &:last-of-type {
-                        font-weight: 700;
-                        color: var(--secondary-color);
+                    &:first-of-type {
+                        font-size: 1.4rem;
+                        font-weight: 600;
+                        color: #aaaaaa;
                     }
                 }
             }
@@ -682,6 +684,17 @@
     100% {
         clip-path: inset(0 0% 0 0 round 3rem);
         background: var(--accent-color);
+    }
+}
+
+@keyframes btnFillAnimSecondary {
+    0% {
+        clip-path: inset(0 100% 0 0 round 3rem);
+    }
+
+    100% {
+        clip-path: inset(0 0% 0 0 round 3rem);
+        background: var(--secondary-color);
     }
 }
 

@@ -13,7 +13,7 @@ export const mockEvents = [
     business_id: 1,
     fuente: 'manual',
     external_id: null,
-    title: 'Exposición interactiva en el museo',
+    title: 'Guggenheim txiki',
     description: 'Sala sensorial para peques con zona de juego y cuentacuentos.',
     categoria: 'museo',
     tipo_plantilla: null,

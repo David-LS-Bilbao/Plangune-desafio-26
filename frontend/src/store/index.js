@@ -93,10 +93,7 @@ export const useAuthStore = create((set) => ({
 export const useUserStore = create((set, get) => ({
   favorites: [],
   reservations: [],
-  children: [
-    { id: 1, name: "Ibai", age: 5 },
-    { id: 2, name: "Ane", age: 8 },
-  ],
+  children: [],
   toggleFavorite: (planId) => {
     const { favorites } = get();
     if (favorites.includes(planId)) {

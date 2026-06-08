@@ -1,7 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import PlanCard from "../components/common/PlanCard";
 import RecommendedPlans from "../components/recommendations/RecommendedPlans";
-import GuniFabLauncher from "../components/assistant/GuniFabLauncher";
 import { fetchEvents } from "../services/eventsApi";
 import { eventsToPlans } from "../mappers/eventMapper";
 
@@ -51,12 +50,14 @@ function isFreePlan(plan) {
 function PlansSearch() {
   const [query, setQuery] = useState("");
   const [territorio, setTerritorio] = useState("");
+  const [territorioTodos, setTerritorioTodos] = useState(false);
   const [ageFilters, setAgeFilters] = useState([]);
   const [activeFeatures, setActiveFeatures] = useState([]);
 
   const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [searched, setSearched] = useState(false);
 
   // Evita condiciones de carrera: solo aplica la respuesta de la última petición.
   const requestIdRef = useRef(0);
@@ -98,33 +99,30 @@ function PlansSearch() {
     return ctx;
   }, [query, ageFilters, activeFeatures]);
 
-  // Búsqueda contra la API con debounce al cambiar cualquier filtro.
-  useEffect(() => {
+  // Búsqueda contra la API: solo se dispara al pulsar "Buscar", para no saturarla
+  // con una petición por cada cambio de filtro.
+  const handleSearch = () => {
     const id = ++requestIdRef.current;
+    setSearched(true);
     setLoading(true);
     setError(false);
 
-    const timer = setTimeout(() => {
-      fetchEvents(buildFilters())
-        .then((events) => {
-          if (id !== requestIdRef.current) return; // respuesta obsoleta
-          let result = eventsToPlans(events);
-          if (activeFeatures.includes("Gratis")) result = result.filter(isFreePlan);
-          setPlans(result);
-        })
-        .catch(() => {
-          if (id === requestIdRef.current) setError(true);
-        })
-        .finally(() => {
-          if (id === requestIdRef.current) setLoading(false);
-        });
-    }, 350);
+    fetchEvents(buildFilters())
+      .then((events) => {
+        if (id !== requestIdRef.current) return; // respuesta obsoleta
+        let result = eventsToPlans(events);
+        if (activeFeatures.includes("Gratis")) result = result.filter(isFreePlan);
+        setPlans(result);
+      })
+      .catch(() => {
+        if (id === requestIdRef.current) setError(true);
+      })
+      .finally(() => {
+        if (id === requestIdRef.current) setLoading(false);
+      });
+  };
 
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, territorio, ageFilters, activeFeatures]);
-
-  const activeCount = ageFilters.length + activeFeatures.length + (territorio ? 1 : 0);
+  const activeCount = ageFilters.length + activeFeatures.length + (territorio || territorioTodos ? 1 : 0);
 
   return (
     <main className="plans-user-main">
@@ -145,18 +143,31 @@ function PlansSearch() {
         </div>
 
         <div className="search-form__group">
-          <label className="section-label" htmlFor="territorio">Territorio</label>
-          <select
-            id="territorio"
-            className="input-with-icon"
-            value={territorio}
-            onChange={(e) => setTerritorio(e.target.value)}
-          >
-            <option value="">Todos</option>
+          <span className="section-label">Territorio</span>
+          <div className="search-form__pills">
+            <span
+              className={`search-pill${territorioTodos ? " active" : ""}`}
+              onClick={() => { setTerritorio(""); setTerritorioTodos(true); }}
+            >
+              Todos
+            </span>
             {TERRITORIOS.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <span
+                key={t}
+                className={`search-pill${territorio === t ? " active" : ""}`}
+                onClick={() => {
+                  if (territorio === t) {
+                    setTerritorio("");
+                  } else {
+                    setTerritorio(t);
+                    setTerritorioTodos(false);
+                  }
+                }}
+              >
+                {t}
+              </span>
             ))}
-          </select>
+          </div>
         </div>
 
         <div className="search-form__group">
@@ -193,32 +204,43 @@ function PlansSearch() {
           <div className="search-form__active-filters">
             <span className="search-form__active-label">Filtros activos:</span>
             {territorio && <span className="search-form__active-tag">{territorio}</span>}
+            {territorioTodos && <span className="search-form__active-tag">Todos</span>}
             {[...ageFilters, ...activeFeatures].map((f) => (
               <span key={f} className="search-form__active-tag">{f}</span>
             ))}
           </div>
         )}
+
+        <button type="button" className="btn-primary search-form__submit" onClick={handleSearch} disabled={loading}>
+          <span className="material-symbols-outlined">search</span>
+          {loading ? "Buscando..." : "Buscar"}
+        </button>
       </div>
 
-      <GuniFabLauncher />
+      <RecommendedPlans context={recommendationContext} title="¿Has echado una ojeada a estos planes?" />
 
-      <RecommendedPlans context={recommendationContext} />
+      {!searched && (
+        <div className="planner-state">
+          <span className="material-symbols-outlined planner-state__icon">explore</span>
+          <p className="planner-state__text">Ajusta los filtros y pulsa "Buscar" para ver planes.</p>
+        </div>
+      )}
 
-      {loading && (
+      {searched && loading && (
         <div className="planner-state">
           <div className="planner-spinner" role="status" aria-label="Buscando planes" />
           <p className="planner-state__text">Buscando planes...</p>
         </div>
       )}
 
-      {!loading && error && (
+      {searched && !loading && error && (
         <div className="planner-state">
           <span className="material-symbols-outlined planner-state__icon">cloud_off</span>
           <p className="planner-state__text">No hemos podido buscar planes. Inténtalo de nuevo.</p>
         </div>
       )}
 
-      {!loading && !error && (
+      {searched && !loading && !error && (
         <>
           <h2 className="search-form__results-title">
             {plans.length > 0

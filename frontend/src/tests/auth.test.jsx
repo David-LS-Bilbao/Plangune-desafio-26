@@ -43,23 +43,23 @@ describe("Login (frontend)", () => {
 
     // Los campos del formulario identifican el login de forma inequívoca
     // (la navbar también tiene un botón "Iniciar sesión", de ahí que no lo usemos aquí).
-    expect(await screen.findByPlaceholderText("tu@email.com")).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText(/tu@email\.com/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText("••••••••")).toBeInTheDocument();
   });
 
-  it("submit correcto guarda la sesión y redirige según el rol (family → /buscar)", async () => {
+  it("submit correcto guarda la sesión y redirige según el rol (family → /)", async () => {
     apiLogin.mockResolvedValue(familyUser);
 
     render(
       <MemoryRouter initialEntries={["/login"]}>
         <Routes>
           <Route path="/login" element={<LoginForm />} />
-          <Route path="/buscar" element={<div>PANTALLA_BUSCAR</div>} />
+          <Route path="/" element={<div>PANTALLA_INICIO</div>} />
         </Routes>
       </MemoryRouter>,
     );
 
-    fireEvent.change(screen.getByPlaceholderText("tu@email.com"), {
+    fireEvent.change(screen.getByPlaceholderText(/tu@email\.com/i), {
       target: { value: "familia@demo.com" },
     });
     fireEvent.change(screen.getByPlaceholderText("••••••••"), {
@@ -67,7 +67,7 @@ describe("Login (frontend)", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /iniciar sesión/i }));
 
-    expect(await screen.findByText("PANTALLA_BUSCAR")).toBeInTheDocument();
+    expect(await screen.findByText("PANTALLA_INICIO")).toBeInTheDocument();
     expect(apiLogin).toHaveBeenCalledWith("familia@demo.com", "Demo1234!");
     expect(useAuthStore.getState().user).toMatchObject({ role: "family" });
   });
@@ -83,7 +83,7 @@ describe("Login (frontend)", () => {
       </MemoryRouter>,
     );
 
-    fireEvent.change(screen.getByPlaceholderText("tu@email.com"), {
+    fireEvent.change(screen.getByPlaceholderText(/tu@email\.com/i), {
       target: { value: "familia@demo.com" },
     });
     fireEvent.change(screen.getByPlaceholderText("••••••••"), {
@@ -106,7 +106,7 @@ describe("Guards de rutas", () => {
     );
 
     // Acaba en el login (formulario visible).
-    expect(await screen.findByPlaceholderText("tu@email.com")).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText(/tu@email\.com/i)).toBeInTheDocument();
   });
 
   it("sin sesión, /negocio/ofertas redirige a /login", async () => {
@@ -118,7 +118,7 @@ describe("Guards de rutas", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByPlaceholderText("tu@email.com")).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText(/tu@email\.com/i)).toBeInTheDocument();
   });
 
   it("sin sesión, /negocio/suscripciones redirige a /login", async () => {
@@ -130,7 +130,7 @@ describe("Guards de rutas", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByPlaceholderText("tu@email.com")).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText(/tu@email\.com/i)).toBeInTheDocument();
   });
 
   it("sin sesión, /ofertas es accesible (escaparate público)", async () => {
