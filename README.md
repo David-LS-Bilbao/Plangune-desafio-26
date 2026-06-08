@@ -853,6 +853,18 @@ docs/
 
 ---
 
+## Production/Demo deployment
+
+Despliegue en VPS (IONOS) detrás de **Nginx Proxy Manager**, con solo `80/443` públicos. El backend Express es la única fachada `/api`; PostgreSQL y servicios internos **no** se exponen a Internet.
+
+* Guía de despliegue: [docs/deployment/vps-demo-deploy.md](docs/deployment/vps-demo-deploy.md)
+* Checklist de seguridad pre-deploy: [docs/security/predeploy-checklist.md](docs/security/predeploy-checklist.md)
+* Plantilla compose de producción: [compose.prod.yaml](compose.prod.yaml)
+
+> No ejecutar deploy sin completar el checklist. Los secretos reales (JWT, DB, API keys) viven **fuera del repo** (env del host / Docker), nunca versionados.
+
+---
+
 ## Seguridad básica
 
 Medidas mínimas previstas:
