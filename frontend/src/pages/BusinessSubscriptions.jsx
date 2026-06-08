@@ -2,32 +2,100 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useBusinessStore } from "../store";
 
+/**
+ * Pantalla demostrativa de planes de pago del área negocio (NO procesa pagos reales).
+ * Copy de Marketing: planes Landa (gratis) / Mendi (destacado) / Gailur.
+ *
+ * El plan gratuito se muestra como "Landa", pero internamente el store usa "Free" para el
+ * tier gratuito (BusinessStrategy.jsx depende de `subscription === "Free"` para su gate de
+ * upgrade). Por eso se mapea Free↔Landa solo en esta pantalla.
+ */
+const FREE_PLAN = "Landa";
+const storeToDisplay = (sub) => (!sub || sub === "Free" ? FREE_PLAN : sub);
+const displayToStore = (name) => (name === FREE_PLAN ? "Free" : name);
+
+const PLANS = [
+  {
+    name: "Landa",
+    price: "0€",
+    period: "/mes",
+    cta: "Obtener gratis",
+    features: [
+      "Ficha de negocio con foto",
+      "Descripción básica (200 caracteres)",
+      "Datos de contacto",
+      "Directorio por provincia (Visualización en mapa)",
+      "Recibir Valoraciones y Reseñas",
+      "Crear ofertas promocionales",
+    ],
+  },
+  {
+    name: "Mendi",
+    price: "39€",
+    period: "/mes",
+    annual: "374€/año (20% descuento)",
+    cta: "Obtener Mendi",
+    featured: true,
+    features: [
+      "Ficha mejorada con 6 fotos",
+      "Descripción avanzada (500 caracteres)",
+      "Destacado TOP RESULTADOS (2 veces/mes)",
+      "Pin destacado en mapa",
+      {
+        text: "Acceso a ACTIVIDAD:",
+        sub: ["Panel de negocio", "Plan de visibilidad", "1 filtro personalizado"],
+      },
+      "Newsletter (1 vez/mes)",
+      "Menciones en nuestras RRSS",
+      "Soporte 24h + reportes mensuales",
+    ],
+  },
+  {
+    name: "Gailur",
+    price: "119€",
+    period: "/mes",
+    annual: "1.071€/año (25% descuento)",
+    cta: "Obtener Gailur",
+    features: [
+      "Ficha premium con fotos ilimitadas",
+      "Descripción avanzada (1000 caracteres)",
+      "Destacado SIEMPRE EN TOP",
+      "Pin permanente en mapa + Banner Hero",
+      "Panel de negocio avanzado",
+      "Plan de visibilidad avanzado",
+      "1 filtro PATROCINADO GLOBAL (2 días/mes)",
+      "Newsletter (2 vez/mes)",
+      "Menciones prioritarias en nuestras RRSS",
+      "Asesor dedicado",
+      "Reportes semanales avanzados",
+    ],
+  },
+];
+
 function BusinessSubscriptions() {
   const navigate = useNavigate();
   const { subscription, setSubscription } = useBusinessStore();
-  const [selectedPlan, setSelectedPlan] = useState(subscription);
+  const [selectedPlan, setSelectedPlan] = useState(storeToDisplay(subscription));
   const [toastMsg, setToastMsg] = useState("");
 
   const handleSelectPlan = (planName) => {
     if (planName === selectedPlan) return;
     setSelectedPlan(planName);
-    setSubscription(planName);
-    setToastMsg(`✓ Plan ${planName} activado correctamente`);
+    setSubscription(displayToStore(planName));
+    setToastMsg(
+      planName === FREE_PLAN
+        ? "✓ Plan Landa activado. Solicitud registrada para demo."
+        : `✓ Solicitud de ${planName} registrada para demo. Nuestro equipo contactará contigo.`,
+    );
     setTimeout(() => setToastMsg(""), 3500);
   };
 
   const handleCancelPlan = () => {
-    setSelectedPlan("Free");
+    setSelectedPlan(FREE_PLAN);
     setSubscription("Free");
-    setToastMsg("✓ Plan cancelado. Ahora estás en el plan Free");
+    setToastMsg("✓ Plan cancelado. Vuelves al plan Landa (gratis).");
     setTimeout(() => setToastMsg(""), 3500);
   };
-
-  const plans = [
-    { name: "Base", price: "€29/mes", features: ["Visibilidad básica en el buscador", "2 ofertas patrocinadas", "Acceso a estadísticas simples"] },
-    { name: "Pro", price: "€59/mes", features: ["Prioridad en resultados", "Destacados en el mapa", "Filtro patrocinado activado", "Mailing mensual a familias"], featured: true },
-    { name: "Premium", price: "€99/mes", features: ["Todo Pro + destacado extra", "Campañas de mailing personalizadas", "Soporte prioritario"] },
-  ];
 
   return (
     <main className="business-subscriptions-main">
@@ -48,52 +116,75 @@ function BusinessSubscriptions() {
         </div>
       </div>
 
-      {selectedPlan && (
-        <div className="subscription-active-banner">
-          <span className="material-symbols-outlined fill">workspace_premium</span>
-          <span>Plan activo: <strong>{selectedPlan}</strong></span>
-          {selectedPlan !== "Free" && (
-            <button
-              type="button"
-              className="subscription-cancel-btn"
-              onClick={handleCancelPlan}
-            >
-              Cancelar plan
-            </button>
-          )}
-        </div>
-      )}
+      <div className="subscription-active-banner">
+        <span className="material-symbols-outlined fill">workspace_premium</span>
+        <span>Plan actual: <strong>{selectedPlan}</strong></span>
+        {selectedPlan !== FREE_PLAN && (
+          <button type="button" className="subscription-cancel-btn" onClick={handleCancelPlan}>
+            Cancelar plan
+          </button>
+        )}
+      </div>
+
+      <p className="subscriptions-note">
+        Pantalla demostrativa de propuesta comercial: la contratación no procesa pagos reales.
+      </p>
 
       <section className="subscriptions-grid">
-        {plans.map((plan) => {
+        {PLANS.map((plan) => {
           const isActive = selectedPlan === plan.name;
           return (
             <article
               key={plan.name}
-              className={`subscription-card${plan.featured ? ' featured' : ''}${isActive ? ' active' : ''}`}
+              className={`subscription-card${plan.featured ? " featured" : ""}${isActive ? " active" : ""}`}
             >
-              {isActive && (
+              {isActive ? (
                 <div className="subscription-active-badge">
-                  <span className="material-symbols-outlined fill" style={{ fontSize: '1rem' }}>check_circle</span>
+                  <span className="material-symbols-outlined fill" style={{ fontSize: "1rem" }}>check_circle</span>
                   Plan actual
                 </div>
-              )}
+              ) : plan.featured ? (
+                <div className="subscription-recommended-badge">
+                  <span className="material-symbols-outlined fill" style={{ fontSize: "1rem" }}>star</span>
+                  Recomendado
+                </div>
+              ) : null}
+
               <div className="subscription-top">
                 <span className="subscription-name">{plan.name}</span>
-                <span className="subscription-price">{plan.price}</span>
+                <span className="subscription-price">
+                  {plan.price}
+                  <span className="subscription-period">{plan.period}</span>
+                </span>
               </div>
+
+              {plan.annual && <p className="subscription-annual">{plan.annual}</p>}
+
               <ul className="subscription-list">
-                {plan.features.map((f) => (
-                  <li key={f}>{f}</li>
-                ))}
+                {plan.features.map((feature) => {
+                  const item = typeof feature === "string" ? { text: feature } : feature;
+                  return (
+                    <li key={item.text}>
+                      {item.text}
+                      {item.sub && (
+                        <ul className="subscription-sublist">
+                          {item.sub.map((s) => (
+                            <li key={s}>{s}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
+
               <button
                 className="btn-primary-full"
                 type="button"
                 disabled={isActive}
                 onClick={() => handleSelectPlan(plan.name)}
               >
-                {isActive ? 'Plan activo' : 'Seleccionar plan'}
+                {isActive ? "Plan actual" : plan.cta}
               </button>
             </article>
           );
