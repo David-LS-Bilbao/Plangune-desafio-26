@@ -3,6 +3,7 @@ import { useAdminStore, useBusinessStore } from "../store";
 
 function AdminDashboard() {
   const [reviewMessage, setReviewMessage] = useState("");
+  const [processingId, setProcessingId] = useState(null);
   const { pendingBusinesses, approveBusiness, rejectBusiness, stats, fetchAdminData, isLoading } = useAdminStore();
   const businessOffers = useBusinessStore(state => state.offers);
 
@@ -10,15 +11,19 @@ function AdminDashboard() {
     fetchAdminData();
   }, [fetchAdminData]);
 
-  const handleApprove = (id) => {
-    approveBusiness(id);
+  const handleApprove = async (id) => {
+    setProcessingId(id);
+    await approveBusiness(id);
+    setProcessingId(null);
     setReviewMessage("El negocio ha sido aprobado.");
     setTimeout(() => setReviewMessage(""), 2000);
   };
   
-  const handleReject = (id) => {
+  const handleReject = async (id) => {
     if(window.confirm("¿Estás seguro de rechazar este negocio?")) {
-      rejectBusiness(id);
+      setProcessingId(id);
+      await rejectBusiness(id);
+      setProcessingId(null);
       setReviewMessage("El negocio ha sido rechazado.");
       setTimeout(() => setReviewMessage(""), 2000);
     }
@@ -113,16 +118,18 @@ function AdminDashboard() {
                     <button
                       className="btn-reject"
                       type="button"
+                      disabled={processingId === business.id}
                       onClick={() => handleReject(business.id)}
                     >
-                      Rechazar
+                      {processingId === business.id ? "..." : "Rechazar"}
                     </button>
                     <button
                       className="btn-approve"
                       type="button"
+                      disabled={processingId === business.id}
                       onClick={() => handleApprove(business.id)}
                     >
-                      Aprobar
+                      {processingId === business.id ? "Procesando..." : "Aprobar"}
                     </button>
                   </div>
                 </div>

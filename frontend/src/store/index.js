@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { mockPlans } from "../mocks/data";
 import {
   login as apiLogin,
   register as apiRegister,
@@ -112,7 +111,7 @@ export const useUserStore = create((set, get) => ({
 
 // --- BUSINESS STORE (Offers, Subscription, Stats) ---
 export const useBusinessStore = create((set, get) => ({
-  offers: mockPlans.slice(0, 2).map((p) => ({ ...p, status: 'active' })), // mock some initial offers
+  offers: [], // Offers will be managed via API later
   subscription: "Free", // Free, Base, Pro, Premium
   stats: {
     views: 1240,
@@ -125,9 +124,12 @@ export const useBusinessStore = create((set, get) => ({
   }),
   deleteOffer: (id) => set({ offers: get().offers.filter((o) => o.id !== id) }),
   setSubscription: (plan) => set({ subscription: plan }),
+  strategyFeatures: [],
+  setStrategyFeatures: (features) => set({ strategyFeatures: features }),
 }));
 
 import { fetchDashboardStats, fetchPendingBusinesses, approveBusinessApi, rejectBusinessApi } from '../services/adminApi';
+import { fetchEvents } from '../services/eventsApi';
 
 // --- ADMIN STORE (Users, Pending Businesses) ---
 export const useAdminStore = create((set, get) => ({
@@ -182,7 +184,18 @@ export const useAdminStore = create((set, get) => ({
 
 // --- PLANS STORE (Search, Filters, Data) ---
 export const usePlansStore = create((set, get) => ({
-  allPlans: mockPlans,
+  allPlans: [],
+  isLoading: false,
+  fetchPlans: async () => {
+    set({ isLoading: true });
+    try {
+      const plans = await fetchEvents();
+      set({ allPlans: plans, isLoading: false });
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      set({ isLoading: false });
+    }
+  },
   searchQuery: "",
   setSearchQuery: (query) => set({ searchQuery: query }),
 

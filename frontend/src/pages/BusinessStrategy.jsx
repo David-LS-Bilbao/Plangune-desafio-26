@@ -4,10 +4,10 @@ import { useBusinessStore } from "../store";
 
 function BusinessStrategy() {
   const navigate = useNavigate();
+  const { subscription, strategyFeatures, setStrategyFeatures } = useBusinessStore();
   const [strategyOptimized, setStrategyOptimized] = useState(false);
-  const [selectedFeatures, setSelectedFeatures] = useState([]);
+  const [selectedFeatures, setSelectedFeatures] = useState(strategyFeatures || []);
   const [upgradeMessage, setUpgradeMessage] = useState("");
-  const { subscription } = useBusinessStore();
 
   const handleFeatureClick = (featureId) => {
     if (subscription === "Free") {
@@ -26,7 +26,9 @@ function BusinessStrategy() {
     if (subscription === "Free" && selectedFeatures.length > 0) {
        return;
     }
+    setStrategyFeatures(selectedFeatures);
     setStrategyOptimized(true);
+    setTimeout(() => setStrategyOptimized(false), 3000);
   };
 
   return (
