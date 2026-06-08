@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import PlanCard from "../components/common/PlanCard";
 import RecommendedPlans from "../components/recommendations/RecommendedPlans";
 import { fetchEvents } from "../services/eventsApi";
@@ -55,8 +55,9 @@ function PlansSearch() {
   const [activeFeatures, setActiveFeatures] = useState([]);
 
   const [plans, setPlans] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [searched, setSearched] = useState(false);
 
   // Evita condiciones de carrera: solo aplica la respuesta de la última petición.
   const requestIdRef = useRef(0);
@@ -98,31 +99,28 @@ function PlansSearch() {
     return ctx;
   }, [query, ageFilters, activeFeatures]);
 
-  // Búsqueda contra la API con debounce al cambiar cualquier filtro.
-  useEffect(() => {
+  // Búsqueda contra la API: solo se dispara al pulsar "Buscar", para no saturarla
+  // con una petición por cada cambio de filtro.
+  const handleSearch = () => {
     const id = ++requestIdRef.current;
+    setSearched(true);
     setLoading(true);
     setError(false);
 
-    const timer = setTimeout(() => {
-      fetchEvents(buildFilters())
-        .then((events) => {
-          if (id !== requestIdRef.current) return; // respuesta obsoleta
-          let result = eventsToPlans(events);
-          if (activeFeatures.includes("Gratis")) result = result.filter(isFreePlan);
-          setPlans(result);
-        })
-        .catch(() => {
-          if (id === requestIdRef.current) setError(true);
-        })
-        .finally(() => {
-          if (id === requestIdRef.current) setLoading(false);
-        });
-    }, 350);
-
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, territorio, ageFilters, activeFeatures]);
+    fetchEvents(buildFilters())
+      .then((events) => {
+        if (id !== requestIdRef.current) return; // respuesta obsoleta
+        let result = eventsToPlans(events);
+        if (activeFeatures.includes("Gratis")) result = result.filter(isFreePlan);
+        setPlans(result);
+      })
+      .catch(() => {
+        if (id === requestIdRef.current) setError(true);
+      })
+      .finally(() => {
+        if (id === requestIdRef.current) setLoading(false);
+      });
+  };
 
   const activeCount = ageFilters.length + activeFeatures.length + (territorio || territorioTodos ? 1 : 0);
 
@@ -212,25 +210,37 @@ function PlansSearch() {
             ))}
           </div>
         )}
+
+        <button type="button" className="btn-primary search-form__submit" onClick={handleSearch} disabled={loading}>
+          <span className="material-symbols-outlined">search</span>
+          {loading ? "Buscando..." : "Buscar"}
+        </button>
       </div>
 
-      <RecommendedPlans context={recommendationContext} />
+      <RecommendedPlans context={recommendationContext} title="¿Has echado una ojeada a estos planes?" />
 
-      {loading && (
+      {!searched && (
+        <div className="planner-state">
+          <span className="material-symbols-outlined planner-state__icon">explore</span>
+          <p className="planner-state__text">Ajusta los filtros y pulsa "Buscar" para ver planes.</p>
+        </div>
+      )}
+
+      {searched && loading && (
         <div className="planner-state">
           <div className="planner-spinner" role="status" aria-label="Buscando planes" />
           <p className="planner-state__text">Buscando planes...</p>
         </div>
       )}
 
-      {!loading && error && (
+      {searched && !loading && error && (
         <div className="planner-state">
           <span className="material-symbols-outlined planner-state__icon">cloud_off</span>
           <p className="planner-state__text">No hemos podido buscar planes. Inténtalo de nuevo.</p>
         </div>
       )}
 
-      {!loading && !error && (
+      {searched && !loading && !error && (
         <>
           <h2 className="search-form__results-title">
             {plans.length > 0

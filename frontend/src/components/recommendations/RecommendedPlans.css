@@ -144,6 +144,6 @@
     flex-wrap: wrap;
   }
   .rec-card {
-    flex: 1 1 calc(50% - 0.45rem);
+    flex: 0 1 calc(50% - 0.45rem);
   }
 }

@@ -20,6 +20,31 @@ function formatDate(iso) {
   });
 }
 
+/** Clave de localStorage donde se guardan las reseñas añadidas por el usuario, por plan. */
+function reviewsStorageKey(planId) {
+  return `txikiplan:reviews:${planId}`;
+}
+
+/** Lee del localStorage las reseñas guardadas localmente para un plan. */
+function loadStoredReviews(planId) {
+  try {
+    const raw = localStorage.getItem(reviewsStorageKey(planId));
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Guarda en localStorage las reseñas añadidas por el usuario para un plan. */
+function storeReviews(planId, userReviews) {
+  try {
+    localStorage.setItem(reviewsStorageKey(planId), JSON.stringify(userReviews));
+  } catch {
+    // localStorage no disponible (modo privado, cuota...): la reseña queda solo en memoria.
+  }
+}
+
 /** URL de Google Maps (coordenadas si existen, si no por texto de ubicación). */
 function mapsUrl(plan) {
   if (plan.latitud != null && plan.longitud != null) {
@@ -49,16 +74,21 @@ function PlanDetail() {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReviewText, setNewReviewText] = useState("");
   const [newReviewRating, setNewReviewRating] = useState(5);
-  const [reviews, setReviews] = useState([
-    {
-      id: 1,
-      author: "Familia Agirre",
-      avatar: "FA",
-      time: "Hace 2 semanas",
-      text: "Excelente plan para el fin de semana. Muy bien acondicionado para carritos.",
-      rating: 5,
-    },
-  ]);
+  const seedReview = {
+    id: 1,
+    author: "Familia Agirre",
+    avatar: "FA",
+    time: "Hace 2 semanas",
+    text: "Excelente plan para el fin de semana. Muy bien acondicionado para carritos.",
+    rating: 5,
+  };
+  const [reviews, setReviews] = useState([seedReview]);
+
+  // Recupera las reseñas guardadas localmente para este plan al cambiar de plan.
+  useEffect(() => {
+    setReviews([...loadStoredReviews(id), seedReview]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const load = () => {
     setLoading(true);
@@ -270,17 +300,19 @@ function PlanDetail() {
               type="button"
               onClick={() => {
                 if (!newReviewText.trim()) return;
-                setReviews((prev) => [
-                  {
-                    id: Date.now(),
-                    author: "Tú",
-                    avatar: "TU",
-                    time: "Justo ahora",
-                    text: newReviewText,
-                    rating: newReviewRating,
-                  },
-                  ...prev,
-                ]);
+                const review = {
+                  id: Date.now(),
+                  author: "Tú",
+                  avatar: "TU",
+                  time: "Justo ahora",
+                  text: newReviewText,
+                  rating: newReviewRating,
+                };
+                setReviews((prev) => {
+                  const next = [review, ...prev];
+                  storeReviews(id, next.filter((r) => r.id !== seedReview.id));
+                  return next;
+                });
                 setNewReviewText("");
                 setNewReviewRating(5);
                 setShowReviewForm(false);

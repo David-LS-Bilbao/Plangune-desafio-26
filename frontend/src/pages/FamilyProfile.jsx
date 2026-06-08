@@ -9,15 +9,55 @@ function FamilyProfile() {
   const updateUser = useAuthStore((state) => state.updateUser);
   const { children, addChild, removeChild } = useUserStore();
   const [preferences, setPreferences] = useState({
-    carrito: true,
-    cambiador: true,
+    carrito: false,
+    cambiador: false,
     mascota: false,
     interior: false,
-    presupuesto: true,
+    presupuesto: false,
     tranquilos: false,
   });
   const [avatar, setAvatar] = useState(user?.avatar || "FA");
+  const [familyName, setFamilyName] = useState(user?.familyName || "");
+  const [location, setLocation] = useState(user?.location || "");
+  const [members, setMembers] = useState(user?.members || "");
+  const [phone, setPhone] = useState(user?.phone || "");
+  const [email, setEmail] = useState(user?.email || "");
   const [saved, setSaved] = useState(false);
+  const [touched, setTouched] = useState({});
+
+  const touch = (field) => setTouched((prev) => ({ ...prev, [field]: true }));
+  const isInvalid = (field, value) => touched[field] && !String(value).trim();
+
+  const EMAIL_FORMAT_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailError = (() => {
+    if (!touched.email) return "";
+    const raw = String(email).trim();
+    if (!raw) return "Indica tu correo electrónico";
+    if (!EMAIL_FORMAT_REGEX.test(raw)) return "El email debe tener un formato correcto";
+    return "";
+  })();
+  const isEmailInvalid = emailError !== "";
+
+  const membersError = (() => {
+    if (!touched.members) return "";
+    const raw = String(members).trim();
+    if (!raw) return "Indica cuántos sois en el hogar";
+    const value = Number(raw);
+    if (value < 0) return "El número de miembros no puede ser negativo";
+    if (raw.replace("-", "").length > 2) return "El número de miembros debe tener como máximo dos dígitos";
+    return "";
+  })();
+  const isMembersInvalid = membersError !== "";
+
+  const PHONE_FORMAT_REGEX = /^[+\d][\d\s]{8,}$/;
+  const phoneError = (() => {
+    if (!touched.phone) return "";
+    const raw = String(phone).trim();
+    if (!raw) return "Indica un teléfono de contacto";
+    if (!PHONE_FORMAT_REGEX.test(raw)) return "El teléfono debe tener un formato correcto";
+    return "";
+  })();
+  const isPhoneInvalid = phoneError !== "";
 
   const [showAddChildForm, setShowAddChildForm] = useState(false);
   const [newChildGender, setNewChildGender] = useState("Sin especificar");
@@ -59,7 +99,11 @@ function FamilyProfile() {
   };
 
   const handleSaveProfile = () => {
-    updateUser({ preferences });
+    setTouched({ familyName: true, location: true, members: true, phone: true, email: true });
+    if (!familyName.trim() || !location.trim() || !members.trim() || !phone.trim() || !email.trim()) return;
+    if (isMembersInvalid || isPhoneInvalid || isEmailInvalid) return;
+
+    updateUser({ familyName, location, members, phone, email, preferences });
     setSaved(true);
     window.setTimeout(() => setSaved(false), 2000);
   };
@@ -96,21 +140,62 @@ function FamilyProfile() {
 
       <div className="profile-form-card">
       <section className="profile-section">
-        <label htmlFor="location" className="section-label">
-          Ubicación habitual
+        <label htmlFor="familyName" className="section-label">
+          Nombre de la familia
         </label>
-        <div className="input-with-icon">
+        <div className={`input-with-icon${isInvalid("familyName", familyName) ? " input-with-icon--error" : ""}`}>
+          <span className="material-symbols-outlined icon">family_restroom</span>
+          <input
+            type="text"
+            id="familyName"
+            value={familyName}
+            onChange={(e) => setFamilyName(e.target.value)}
+            onBlur={() => touch("familyName")}
+            placeholder="Ej: Familia Etxebarria"
+          />
+        </div>
+        {isInvalid("familyName", familyName) && <span className="create-family-field-error">Ponle un nombre a tu familia</span>}
+      </section>
+
+      <section className="profile-section">
+        <label htmlFor="location" className="section-label">
+          Ubicación
+        </label>
+        <div className={`input-with-icon${isInvalid("location", location) ? " input-with-icon--error" : ""}`}>
           <span className="material-symbols-outlined icon">location_on</span>
           <input
             type="text"
             id="location"
-            defaultValue="Bilbao"
-            placeholder="Ciudad o código postal"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            onBlur={() => touch("location")}
+            placeholder="Ej: Bilbao"
           />
         </div>
+        {isInvalid("location", location) && <span className="create-family-field-error">Indica vuestra ubicación</span>}
       </section>
 
       <section className="profile-section">
+        <label htmlFor="members" className="section-label">
+          Miembros en el hogar
+        </label>
+        <div className={`input-with-icon${isMembersInvalid ? " input-with-icon--error" : ""}`}>
+          <span className="material-symbols-outlined icon">group</span>
+          <input
+            type="number"
+            id="members"
+            min="0"
+            max="99"
+            value={members}
+            onChange={(e) => setMembers(e.target.value)}
+            onBlur={() => touch("members")}
+            placeholder="Ej: 4"
+          />
+        </div>
+        {isMembersInvalid && <span className="create-family-field-error">{membersError}</span>}
+      </section>
+
+      <section className="profile-section profile-section--children">
         <div className="section-header">
           <h2 className="section-label mb-0">Edades de los peques</h2>
           <button
@@ -210,6 +295,42 @@ function FamilyProfile() {
             </div>
           ))}
         </div>
+      </section>
+
+      <section className="profile-section">
+        <label htmlFor="phone" className="section-label">
+          Teléfono
+        </label>
+        <div className={`input-with-icon${isPhoneInvalid ? " input-with-icon--error" : ""}`}>
+          <span className="material-symbols-outlined icon">phone</span>
+          <input
+            type="text"
+            id="phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            onBlur={() => touch("phone")}
+            placeholder="Ej: 600 123 456"
+          />
+        </div>
+        {isPhoneInvalid && <span className="create-family-field-error">{phoneError}</span>}
+      </section>
+
+      <section className="profile-section">
+        <label htmlFor="email" className="section-label">
+          Correo electrónico
+        </label>
+        <div className={`input-with-icon${isEmailInvalid ? " input-with-icon--error" : ""}`}>
+          <span className="material-symbols-outlined icon">mail</span>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            onBlur={() => touch("email")}
+            placeholder="Ej: familia@ejemplo.com"
+          />
+        </div>
+        {isEmailInvalid && <span className="create-family-field-error">{emailError}</span>}
       </section>
 
       <section className="profile-section">
