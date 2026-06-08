@@ -55,6 +55,7 @@ export function errorHandler(err, req, res, next) {
   // 1) Base de datos no disponible (Prisma init/conexión/auth) → 503 genérico.
   //    Nunca se filtra el mensaje interno (tampoco en desarrollo).
   if (isDbUnavailableError(err)) {
+    console.error("DB Unavailable Error:", err);
     res.status(503).json({ error: 'Service temporarily unavailable' });
     return;
   }
@@ -73,5 +74,6 @@ export function errorHandler(err, req, res, next) {
   const mustMask = isPrismaError(err) || process.env.NODE_ENV === 'production';
   const message = mustMask ? 'Internal Server Error' : err.message || 'Internal Server Error';
 
+  console.error("Unhandled Error:", err);
   res.status(status).json({ error: message });
 }
