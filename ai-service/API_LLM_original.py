@@ -5,6 +5,11 @@ import pandas as pd
 import requests
 import ollama
 import sys
+try:
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
+except Exception:
+    pass
 import requests
 from datetime import datetime, timedelta
 import os
@@ -512,6 +517,19 @@ lang_dict={"ES":"Español","EU":"Euskera","FR":"Francés"}
 CSV_PATH = "events_weather.csv"
 CACHE_HOURS = 6
 
+def get_last_updated_str():
+    if not hasattr(I, "last_updated") or len(I.last_updated) == 0:
+        return "No informado"
+    val = I.last_updated[0]
+    if isinstance(val, str):
+        if "." in val:
+            return val.split(".")[0]
+        return val
+    try:
+        return val.strftime("%Y-%m-%d %H:%M:%S")
+    except Exception:
+        return str(val)
+
 
 # =========================
 # WEATHER FUNCTION
@@ -621,7 +639,7 @@ def format_event_md(event: dict, lang: str = "Es") -> str:
 - 🌬️ Viento: {fmt(wind_speed, " km/h")}
 - 🌧️ Precipitación: {fmt(precipitation, "%")}
 
-*Ultima atualización: {I.last_updated[0]}
+*Ultima atualización: {get_last_updated_str()}
 """
 
     # --- Coordinates ---
@@ -749,7 +767,7 @@ def format_event_md(event: dict, lang: str = "Es") -> str:
 - 🌬️ Viento: {fmt(wind_speed, " km/h")}
 - 🌧️ Precipitación: {fmt(precipitation, "%")}
 
-*Última atualización: {I.last_updated[0][:-7]}
+*Última actualización: {get_last_updated_str()}
 """
 
     # --- Coordinates ---

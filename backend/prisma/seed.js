@@ -153,6 +153,7 @@ async function seedEvents() {
   for (const event of mockEvents) {
     const { id, ...raw } = event;
     const data = prepareEventForPrisma(raw);
+    data.status = 'approved';
     await prisma.event.upsert({
       where:  { id },
       update: data,

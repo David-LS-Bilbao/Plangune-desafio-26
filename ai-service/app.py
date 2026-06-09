@@ -55,6 +55,7 @@ def run_llm_script(question: str) -> str | None:
             [sys.executable, SCRIPT_PATH, question],
             capture_output=True,
             text=True,
+            encoding="utf-8",
             timeout=SCRIPT_TIMEOUT_SECONDS,
         )
     except subprocess.TimeoutExpired:
@@ -100,5 +101,5 @@ def family_plan():
 
 
 if __name__ == "__main__":
-    print("🚀 ai-service (LLM local) escuchando en http://0.0.0.0:5001")
+    print("ai-service (LLM local) escuchando en http://0.0.0.0:5001")
     app.run(host="0.0.0.0", port=5001, debug=False)

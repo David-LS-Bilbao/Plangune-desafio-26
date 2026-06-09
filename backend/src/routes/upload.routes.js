@@ -2,14 +2,20 @@ import { Router } from 'express';
 import multer from 'multer';
 import path from 'path';
 import { requireAuth, requireRole } from '../middlewares/auth.middleware.js';
+import fs from 'fs';
 
 const router = Router();
+
+const uploadDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Configuración de almacenamiento físico
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // Apunta a backend/uploads/
-    cb(null, path.join(process.cwd(), 'uploads'));
+    cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
