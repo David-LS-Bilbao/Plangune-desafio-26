@@ -39,3 +39,7 @@ __pycache__/
 ai-service/events_weather.csv
 # Caché que el chatbot Data genera en runtime (no versionar)
 data/**/events_weather.csv
+
+# Instaladores y archivos temporales grandes
+*.exe
+events_weather.csv
