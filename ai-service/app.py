@@ -49,12 +49,20 @@ def run_llm_script(question: str) -> str | None:
     Ejecuta API_LLM_original.py pasando la pregunta del usuario como argumento.
     Usa sys.executable (el mismo intérprete del venv). Devuelve el stdout (Markdown)
     o None si falla / timeout / stdout vacío.
+
+    El Markdown lleva emojis (🎭, 📅, …). En Windows la consola por defecto usa cp1252
+    y `print()` lanzaría UnicodeEncodeError → returncode != 0 → fallback. Forzamos UTF-8
+    en el subprocess (encoding del pipe + PYTHONUTF8/PYTHONIOENCODING en el hijo) para que
+    funcione independientemente de cómo se haya arrancado este servidor.
     """
+    child_env = {**os.environ, "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
     try:
         result = subprocess.run(
             [sys.executable, SCRIPT_PATH, question],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            env=child_env,
             timeout=SCRIPT_TIMEOUT_SECONDS,
         )
     except subprocess.TimeoutExpired:

@@ -9,6 +9,13 @@ import requests
 from datetime import datetime, timedelta
 import os
 
+# El Markdown de salida lleva emojis. En Windows stdout usa cp1252 por defecto y
+# print() lanzaría UnicodeEncodeError. Forzamos UTF-8 si el intérprete lo permite.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except (AttributeError, ValueError):
+    pass
+
 VENT_TYPES_API = "https://api.euskadi.eus/culture/events/v1.0/eventType"
 UPCOMING_EVENTS_API = "https://api.euskadi.eus/culture/events/v1.0/events/upcoming"
 
