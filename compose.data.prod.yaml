@@ -1,0 +1,61 @@
+# compose.data.prod.yaml — Overlay de PRODUCCIÓN para el chat GUNI (chatbot + Ollama)
+#
+# DIFERIDO para la demo: el VPS usa GUNI con Gemini (cloud), no este chatbot. Este overlay
+# queda listo para cuando se decida activar el LLM local. Es PESADO (Ollama + modelo ~5 GB)
+# y, a diferencia del recomendador, el chatbot NECESITA salida a internet
+# (api.euskadi.eus, open-meteo), por eso va en una red propia con acceso a internet.
+#
+# Uso (en el VPS, junto al stack principal ya levantado con compose.prod.yaml):
+#   docker compose -f compose.data.prod.yaml up -d --build
+#   docker compose -f compose.data.prod.yaml exec ollama ollama pull qwen2.5-coder:latest
+# Y en backend/.env.production (host, no versionado), activar:
+#   LLM_ASSISTANT_ENABLED=true
+#   LLM_ASSISTANT_CONTRACT=get-question
+#   LLM_ASSISTANT_API_URL=http://data-chatbot:5000
+#   LLM_ASSISTANT_TIMEOUT_MS=30000
+# Luego recrear el backend para releer el env.
+#
+# ⚠️ SEGURIDAD: el chatbot ejecuta eval() sobre código generado por el LLM (riesgo del repo
+#    Data). No exponer a internet y no habilitar sin revisar ese eval(). Ver data/README.md.
+
+services:
+  data-chatbot:
+    build:
+      context: ./data
+      dockerfile: chatbot/Dockerfile
+    image: desafio26-data-chatbot:prod
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+    # Sin `ports`: lo alcanza el backend por nombre de servicio en la red interna.
+    expose:
+      - "5000"
+    depends_on:
+      - ollama
+    networks:
+      - plangune_internal # el backend lo alcanza aquí (http://data-chatbot:5000)
+      - plangune_chat # salida a internet + acceso a ollama
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    expose:
+      - "11434"
+    volumes:
+      - desafio26_ollama_models:/root/.ollama
+    networks:
+      - plangune_chat # interno al stack de chat (no se publica)
+
+volumes:
+  desafio26_ollama_models:
+    name: desafio26_ollama_models
+
+networks:
+  # Red interna real de pLANGUNE (la misma que comparten backend ↔ postgres ↔ recomendador).
+  # external: true → debe existir ya; si no, compose falla en vez de crear una red a ciegas.
+  plangune_internal:
+    external: true
+    name: ${PLANGUNE_INTERNAL_NETWORK:?set PLANGUNE_INTERNAL_NETWORK al nombre real de la red interna}
+  # Red propia del chat CON salida a internet (el chatbot llama a api.euskadi.eus/open-meteo).
+  plangune_chat:
+    driver: bridge

@@ -6,7 +6,10 @@
  *   - event.repository.js        → datos del fallback local (mockEvents en memoria).
  *
  * Por defecto (beforeEach) Data está DESHABILITADO → el endpoint usa el fallback local.
- * Los bloques específicos de Data lo habilitan y controlan `fetchDataPlanes`.
+ * Los bloques específicos de Data lo habilitan y controlan `fetchDataRecomendar`.
+ *
+ * Contrato real de Data: POST /recomendar { id_user, consulta, filtros }
+ *   → { user_id, municipio, fallback, n_candidatos, resultados: [...] }
  *
  * Los vi.mock se declaran ANTES de importar createApp (Vitest los hoista).
  */
@@ -14,7 +17,8 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 
 vi.mock('../clients/dataRecommender.client.js', () => ({
   isDataRecommenderEnabled: vi.fn(),
-  fetchDataPlanes: vi.fn(),
+  getDataUserId: vi.fn(() => 0),
+  fetchDataRecomendar: vi.fn(),
 }));
 
 vi.mock('../repositories/event.repository.js', () => ({
@@ -27,7 +31,7 @@ import request from 'supertest';
 import { createApp } from '../app.js';
 import { mockEvents } from '../seed/mockEvents.js';
 import { findEvents } from '../repositories/event.repository.js';
-import { isDataRecommenderEnabled, fetchDataPlanes } from '../clients/dataRecommender.client.js';
+import { isDataRecommenderEnabled, fetchDataRecomendar } from '../clients/dataRecommender.client.js';
 
 const app = createApp();
 
@@ -116,19 +120,45 @@ describe('GET /api/recommendations · fallback local (Data deshabilitado)', () =
 });
 
 // ---------------------------------------------------------------------------
-// Data API como recomendador principal
+// Data API como recomendador principal (POST /recomendar)
 // ---------------------------------------------------------------------------
 
 describe('GET /api/recommendations · Data API principal', () => {
-  // "Planes" simulados que devolvería Flask /planes.
-  const dataPlanes = [
-    { external_id: 'data-1', id: 101, title: 'Plan Data 1', municipio: 'Bilbao', score: 3 },
-    { external_id: 'data-2', id: 102, title: 'Plan Data 2', municipio: 'Getxo', score: 2 },
+  // "Planes" simulados con el shape REAL de Data (models/Recommender).
+  const dataResultados = [
+    {
+      id: 101,
+      title: 'Plan Data 1',
+      categoria: 'Museo',
+      municipio: 'Bilbao',
+      price: '0',
+      imagen_url: null,
+      website: null,
+      score: 0.82,
+    },
+    {
+      id: 102,
+      title: 'Plan Data 2',
+      categoria: 'Parque',
+      municipio: 'Getxo',
+      price: null,
+      imagen_url: null,
+      website: null,
+      score: 0.71,
+    },
   ];
+  // Respuesta completa de /recomendar.
+  const dataResponse = {
+    user_id: 0,
+    municipio: 'Bilbao',
+    fallback: false,
+    n_candidatos: 2,
+    resultados: dataResultados,
+  };
 
-  it('Data OK (array directo) → devuelve items con source "data-api"', async () => {
+  it('Data OK ({ resultados }) → devuelve items con source "data-api"', async () => {
     isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue(dataPlanes);
+    fetchDataRecomendar.mockResolvedValue(dataResponse);
 
     const res = await request(app).get('/api/recommendations?municipality=Bilbao&childrenAges=2');
 
@@ -145,34 +175,74 @@ describe('GET /api/recommendations · Data API principal', () => {
     expect(findEvents).not.toHaveBeenCalled();
   });
 
-  it('normaliza el shape crudo de Data al shape de events (title, booleanos, edad, id null)', async () => {
+  it('Data OK (array directo) → aceptado de forma defensiva', async () => {
     isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue([
-      {
-        nombre: 'Aizian',
-        descripcion: 'Restaurante acogedor',
-        direccion: 'Lehendakari Leizaola, 29',
-        precio: null,
-        municipio: 'Bilbao',
-        territorio: 'bizkaia',
-        es_carrito: true,
-        es_lluvia: true,
-        es_mascotas: 'False',
-        es_silla_ruedas: 'True',
-        edad_minima: '0',
-        lat: 43.2675,
-        lng: -2.9418,
-        score: 1,
-        reasons: ['Recomendado por el servicio Data'],
-      },
-    ]);
+    fetchDataRecomendar.mockResolvedValue(dataResultados);
+
+    const res = await request(app).get('/api/recommendations?municipality=Bilbao');
+
+    expect(res.status).toBe(200);
+    expect(res.body.length).toBe(2);
+    expect(res.body.every((item) => item.source === 'data-api')).toBe(true);
+  });
+
+  it('normaliza el plan de Data al shape de events (title, municipio, price, id)', async () => {
+    isDataRecommenderEnabled.mockReturnValue(true);
+    fetchDataRecomendar.mockResolvedValue({
+      resultados: [
+        {
+          id: 101,
+          title: 'Museo Guggenheim',
+          categoria: 'Museo',
+          municipio: 'Bilbao',
+          price: '0',
+          imagen_url: 'https://example.test/img.jpg',
+          website: 'https://example.test',
+          score: 0.9,
+        },
+      ],
+    });
 
     const res = await request(app).get('/api/recommendations?municipality=Bilbao');
 
     expect(res.status).toBe(200);
     const item = res.body[0];
-    // event con shape de events (no el crudo de Data)
-    expect(item.event.title).toBe('Aizian');
+    expect(item.event.title).toBe('Museo Guggenheim');
+    expect(item.event.municipio).toBe('Bilbao');
+    expect(item.event.price).toBe('0');
+    expect(item.event.id).toBe(101);
+    // alias legacy + metadatos preservados
+    expect(item.activity).toEqual(item.event);
+    expect(item.source).toBe('data-api');
+    expect(typeof item.score).toBe('number');
+    expect(Array.isArray(item.reasons)).toBe(true);
+  });
+
+  it('normalizador robusto: también acepta shape legacy (nombre/es_lluvia/strings)', async () => {
+    isDataRecommenderEnabled.mockReturnValue(true);
+    fetchDataRecomendar.mockResolvedValue({
+      resultados: [
+        {
+          nombre: 'Aizian',
+          descripcion: 'Restaurante acogedor',
+          direccion: 'Lehendakari Leizaola, 29',
+          precio: null,
+          municipio: 'Bilbao',
+          es_carrito: true,
+          es_lluvia: true,
+          es_mascotas: 'False',
+          es_silla_ruedas: 'True',
+          edad_minima: '0',
+          score: 1,
+        },
+      ],
+    });
+
+    const res = await request(app).get('/api/recommendations?municipality=Bilbao');
+
+    expect(res.status).toBe(200);
+    const item = res.body[0];
+    expect(item.event.title).toBe('Aizian'); // desde nombre
     expect(item.event.nombre).toBeUndefined();
     expect(item.event.description).toBe('Restaurante acogedor');
     expect(item.event.address).toBe('Lehendakari Leizaola, 29');
@@ -182,34 +252,17 @@ describe('GET /api/recommendations · Data API principal', () => {
     expect(typeof item.event.es_mascotas).toBe('boolean');
     expect(item.event.edad_minima).toBe(0);
     expect(typeof item.event.edad_minima).toBe('number');
-    expect(item.event.id).toBeNull(); // Data sin id interno
-    // alias legacy + metadatos preservados
-    expect(item.activity).toEqual(item.event);
-    expect(item.source).toBe('data-api');
-    expect(typeof item.score).toBe('number');
-    expect(Array.isArray(item.reasons)).toBe(true);
-  });
-
-  it('Data OK (shape { total, filtros, resultados }) → source "data-api"', async () => {
-    isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue({
-      total: 2,
-      filtros: { ubicacion: 'Bilbao' },
-      resultados: dataPlanes,
-    });
-
-    const res = await request(app).get('/api/recommendations?municipality=Bilbao');
-
-    expect(res.status).toBe(200);
-    expect(res.body.length).toBe(2);
-    expect(res.body.every((item) => item.source === 'data-api')).toBe(true);
-    expect(res.body[0].activity.id).toBe(res.body[0].event.id); // alias legacy
-    expect(findEvents).not.toHaveBeenCalled();
   });
 
   it('Data { resultados: [] } (sin resultados) → fallback local', async () => {
     isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue({ total: 0, filtros: {}, resultados: [] });
+    fetchDataRecomendar.mockResolvedValue({
+      user_id: 0,
+      municipio: null,
+      fallback: false,
+      n_candidatos: 0,
+      resultados: [],
+    });
 
     const res = await request(app).get('/api/recommendations');
 
@@ -217,33 +270,32 @@ describe('GET /api/recommendations · Data API principal', () => {
     expect(res.body.every((item) => item.source === 'local-fallback')).toBe(true);
   });
 
-  it('el controller parsea los filtros adicionales y los envía a Data', async () => {
+  it('construye el body POST /recomendar: consulta (municipio + edades) y filtros booleanos', async () => {
     isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue(dataPlanes);
+    fetchDataRecomendar.mockResolvedValue(dataResponse);
 
     await request(app).get(
       '/api/recommendations?municipality=Bilbao&childrenAges=2,5&strollerFriendly=true&rainSuitable=true' +
-        '&changingTable=true&wheelchairAccessible=true&petsAllowed=true&includeKulturklik=true&limit=5',
+        '&changingTable=true&wheelchairAccessible=true&petsAllowed=true&budget=0&limit=5',
     );
 
-    expect(fetchDataPlanes).toHaveBeenCalledTimes(1);
-    const params = fetchDataPlanes.mock.calls[0][0];
-    // Filtros existentes mapeados
-    expect(params.ubicacion).toBe('Bilbao');
-    expect(params.edad_max).toBe(2); // min(childrenAges)
-    expect(params.carrito).toBe(true);
-    expect(params.lluvia).toBe(true);
-    // Filtros adicionales mapeados al nombre de Data
-    expect(params.cambiador).toBe(true);
-    expect(params.silla_ruedas).toBe(true);
-    expect(params.mascotas).toBe(true);
-    expect(params.kulturklik).toBe(true);
-    expect(params.limite).toBe(5);
+    expect(fetchDataRecomendar).toHaveBeenCalledTimes(1);
+    const body = fetchDataRecomendar.mock.calls[0][0];
+    // Consulta en texto libre: municipio + edades (Data extrae el municipio del texto)
+    expect(body.consulta).toContain('Bilbao');
+    expect(body.consulta).toContain('2, 5');
+    // Filtros booleanos con los nombres reales de Data
+    expect(body.filtros.carrito).toBe(true);
+    expect(body.filtros.interior).toBe(true); // rainSuitable → interior
+    expect(body.filtros.cambiador).toBe(true);
+    expect(body.filtros.accesible).toBe(true); // wheelchairAccessible → accesible
+    expect(body.filtros.mascota).toBe(true);
+    expect(body.filtros.gratis).toBe(true); // budget=0 → gratis
   });
 
   it('Data OK → activity sigue siendo alias de event', async () => {
     isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue(dataPlanes);
+    fetchDataRecomendar.mockResolvedValue(dataResponse);
 
     const res = await request(app).get('/api/recommendations');
 
@@ -255,7 +307,7 @@ describe('GET /api/recommendations · Data API principal', () => {
     isDataRecommenderEnabled.mockReturnValue(true);
     const abortError = new Error('The operation was aborted');
     abortError.name = 'AbortError';
-    fetchDataPlanes.mockRejectedValue(abortError);
+    fetchDataRecomendar.mockRejectedValue(abortError);
 
     const res = await request(app).get('/api/recommendations');
 
@@ -269,7 +321,7 @@ describe('GET /api/recommendations · Data API principal', () => {
     isDataRecommenderEnabled.mockReturnValue(true);
     const error = new Error('Data API respondió 503');
     error.status = 503;
-    fetchDataPlanes.mockRejectedValue(error);
+    fetchDataRecomendar.mockRejectedValue(error);
 
     const res = await request(app).get('/api/recommendations');
 
@@ -279,7 +331,7 @@ describe('GET /api/recommendations · Data API principal', () => {
 
   it('Data respuesta vacía (array vacío) → fallback local', async () => {
     isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue([]);
+    fetchDataRecomendar.mockResolvedValue([]);
 
     const res = await request(app).get('/api/recommendations');
 
@@ -288,9 +340,9 @@ describe('GET /api/recommendations · Data API principal', () => {
     expect(res.body.every((item) => item.source === 'local-fallback')).toBe(true);
   });
 
-  it('Data respuesta inválida (no-array) → fallback local', async () => {
+  it('Data respuesta inválida (no-array, sin resultados) → fallback local', async () => {
     isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue({ unexpected: 'shape' });
+    fetchDataRecomendar.mockResolvedValue({ unexpected: 'shape' });
 
     const res = await request(app).get('/api/recommendations');
 
@@ -302,35 +354,34 @@ describe('GET /api/recommendations · Data API principal', () => {
     const seisPlanes = Array.from({ length: 6 }, (_, i) => ({
       id: 200 + i,
       title: `Plan Data ${i + 1}`,
-      score: 6 - i,
+      municipio: 'Bilbao',
+      score: 1 - i * 0.1,
     }));
     isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue(seisPlanes);
+    fetchDataRecomendar.mockResolvedValue({ resultados: seisPlanes });
 
     const res = await request(app).get('/api/recommendations?municipality=Bilbao');
 
     expect(res.status).toBe(200);
     expect(res.body.length).toBe(3); // contrato estable: máx 3 por defecto
     expect(res.body.every((item) => item.source === 'data-api')).toBe(true);
-    // A Data se le pidió limite=3 por defecto.
-    expect(fetchDataPlanes.mock.calls[0][0].limite).toBe(3);
   });
 
-  it('Data devuelve más de 5 planes con limit=5 → Express devuelve 5 y Data recibe limite=5', async () => {
+  it('Data devuelve más de 5 planes con limit=5 → Express devuelve 5', async () => {
     const sietePlanes = Array.from({ length: 7 }, (_, i) => ({
       id: 300 + i,
       title: `Plan Data ${i + 1}`,
-      score: 7 - i,
+      municipio: 'Bilbao',
+      score: 1 - i * 0.1,
     }));
     isDataRecommenderEnabled.mockReturnValue(true);
-    fetchDataPlanes.mockResolvedValue(sietePlanes);
+    fetchDataRecomendar.mockResolvedValue({ resultados: sietePlanes });
 
     const res = await request(app).get('/api/recommendations?municipality=Bilbao&limit=5');
 
     expect(res.status).toBe(200);
     expect(res.body.length).toBe(5);
     expect(res.body.every((item) => item.source === 'data-api')).toBe(true);
-    expect(fetchDataPlanes.mock.calls[0][0].limite).toBe(5);
   });
 });
 
