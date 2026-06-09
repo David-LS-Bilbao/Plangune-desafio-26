@@ -4,6 +4,7 @@ import {
   register as apiRegister,
   fetchMe as apiFetchMe,
   logout as apiLogout,
+  loginWithGoogle as apiLoginWithGoogle,
 } from "../services/authApi";
 
 // --- AUTH STORE (login real con JWT en cookie httpOnly) ---
@@ -61,6 +62,20 @@ export const useAuthStore = create((set) => ({
     const user = decorateUser(await apiLogin(email, password));
     cacheUser(user);
     set({ user, status: "authenticated" });
+    if (user.role === 'family') {
+      useUserStore.getState().fetchUserFavorites();
+    }
+    return user;
+  },
+
+  /** Login real con Google. Lanza si falla la autenticación. */
+  loginWithGoogle: async (credential, role) => {
+    const user = decorateUser(await apiLoginWithGoogle(credential, role));
+    cacheUser(user);
+    set({ user, status: "authenticated" });
+    if (user.role === 'family') {
+      useUserStore.getState().fetchUserFavorites();
+    }
     return user;
   },
 
@@ -88,17 +103,49 @@ export const useAuthStore = create((set) => ({
   },
 }));
 
+import { fetchFavorites, addFavorite, removeFavorite } from "../services/favoritesApi";
+
 // --- USER STORE (Family: Favorites, Profile, Reservations) ---
 export const useUserStore = create((set, get) => ({
   favorites: [],
   reservations: [],
   children: [],
-  toggleFavorite: (planId) => {
+  
+  fetchUserFavorites: async () => {
+    try {
+      const data = await fetchFavorites();
+      // data comes as [{user_id, event_id, event: {...}}, ...] or similar depending on the controller,
+      // wait, the controller returns what? Let's assume it returns eventIds array or we extract them.
+      // the controller listFavoritesHandler calls listFavorites service.
+      // We'll store event_ids in the store to match planId.
+      const ids = data.map(f => f.event_id || f.id);
+      set({ favorites: ids });
+    } catch (err) {
+      console.error("Error fetching favorites", err);
+    }
+  },
+
+  toggleFavorite: async (planId) => {
     const { favorites } = get();
-    if (favorites.includes(planId)) {
+    const isFav = favorites.includes(planId);
+    
+    // Optimistic UI update
+    if (isFav) {
       set({ favorites: favorites.filter((id) => id !== planId) });
     } else {
       set({ favorites: [...favorites, planId] });
+    }
+
+    try {
+      if (isFav) {
+        await removeFavorite(planId);
+      } else {
+        await addFavorite(planId);
+      }
+    } catch (err) {
+      console.error("Error toggling favorite", err);
+      // Revert if failed
+      set({ favorites });
     }
   },
   isFavorite: (planId) => get().favorites.includes(planId),
@@ -118,7 +165,25 @@ export const useBusinessStore = create((set, get) => ({
     clicks: 350,
     reservations: 42,
   },
-  addOffer: (offer) => set({ offers: [...get().offers, { status: 'pending', ...offer, id: Date.now() }] }),
+  fetchOffers: async () => {
+    try {
+      const data = await fetchBusinessEvents();
+      // Mapear de formato backend (snake_case) a frontend si fuera necesario, 
+      // por simplicidad lo guardamos directo asumiendo compatibilidad.
+      set({ offers: data });
+    } catch (err) {
+      console.error("Error fetching offers", err);
+    }
+  },
+  addOffer: async (offer) => {
+    try {
+      const created = await createEvent(offer);
+      set({ offers: [...get().offers, created] });
+    } catch (err) {
+      console.error("Error creating offer", err);
+      set({ offers: [...get().offers, { status: 'pending', ...offer, id: Date.now() }] });
+    }
+  },
   updateOffer: (id, partial) => set({
     offers: get().offers.map((o) => (o.id === id ? { ...o, ...partial } : o)),
   }),
@@ -128,13 +193,14 @@ export const useBusinessStore = create((set, get) => ({
   setStrategyFeatures: (features) => set({ strategyFeatures: features }),
 }));
 
-import { fetchDashboardStats, fetchPendingBusinesses, approveBusinessApi, rejectBusinessApi } from '../services/adminApi';
-import { fetchEvents } from '../services/eventsApi';
+import { fetchDashboardStats, fetchPendingBusinesses, approveBusinessApi, rejectBusinessApi, fetchPendingEvents, approveEventApi, rejectEventApi } from '../services/adminApi';
+import { fetchEvents, fetchBusinessEvents, createEvent } from '../services/eventsApi';
 
 // --- ADMIN STORE (Users, Pending Businesses) ---
 export const useAdminStore = create((set, get) => ({
   pendingBusinesses: [],
   approvedBusinesses: [],
+  pendingEvents: [],
   stats: {
     totalUsers: 0,
     activeFamilies: 0,
@@ -146,11 +212,12 @@ export const useAdminStore = create((set, get) => ({
   fetchAdminData: async () => {
     set({ isLoading: true });
     try {
-      const [stats, pending] = await Promise.all([
+      const [stats, pending, events] = await Promise.all([
         fetchDashboardStats(),
-        fetchPendingBusinesses()
+        fetchPendingBusinesses(),
+        fetchPendingEvents()
       ]);
-      set({ stats, pendingBusinesses: pending, isLoading: false });
+      set({ stats, pendingBusinesses: pending, pendingEvents: events, isLoading: false });
     } catch (error) {
       console.error("Error fetching admin data:", error);
       set({ isLoading: false });
@@ -178,6 +245,24 @@ export const useAdminStore = create((set, get) => ({
       set({ pendingBusinesses: get().pendingBusinesses.filter((b) => b.id !== id) });
     } catch (error) {
       console.error("Error rejecting business:", error);
+    }
+  },
+
+  approveEvent: async (id) => {
+    try {
+      await approveEventApi(id);
+      set({ pendingEvents: get().pendingEvents.filter((e) => e.id !== id) });
+    } catch (error) {
+      console.error("Error approving event:", error);
+    }
+  },
+
+  rejectEvent: async (id) => {
+    try {
+      await rejectEventApi(id);
+      set({ pendingEvents: get().pendingEvents.filter((e) => e.id !== id) });
+    } catch (error) {
+      console.error("Error rejecting event:", error);
     }
   }
 }));

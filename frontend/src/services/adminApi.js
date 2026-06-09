@@ -37,3 +37,18 @@ export async function rejectBusinessApi(id) {
   const { data } = await apiClient.patch(`/admin/businesses/${id}/reject`);
   return data;
 }
+
+export async function fetchPendingEvents() {
+  const { data } = await apiClient.get('/admin/events/pending');
+  return data;
+}
+
+export async function approveEventApi(id) {
+  const { data } = await apiClient.patch(`/admin/events/${id}/approve`);
+  return data;
+}
+
+export async function rejectEventApi(id) {
+  const { data } = await apiClient.patch(`/admin/events/${id}/reject`);
+  return data;
+}

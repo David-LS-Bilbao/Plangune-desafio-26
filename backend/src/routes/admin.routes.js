@@ -4,7 +4,10 @@ import {
   getDashboardStats,
   getPendingBusinesses,
   approveBusiness,
-  rejectBusiness
+  rejectBusiness,
+  getPendingEvents,
+  approveEvent,
+  rejectEvent
 } from '../controllers/admin.controller.js';
 
 const router = Router();
@@ -16,5 +19,9 @@ router.get('/dashboard', getDashboardStats);
 router.get('/businesses/pending', getPendingBusinesses);
 router.patch('/businesses/:id/approve', approveBusiness);
 router.patch('/businesses/:id/reject', rejectBusiness);
+
+router.get('/events/pending', getPendingEvents);
+router.patch('/events/:id/approve', approveEvent);
+router.patch('/events/:id/reject', rejectEvent);
 
 export default router;

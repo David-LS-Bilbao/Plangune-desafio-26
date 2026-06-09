@@ -3,8 +3,12 @@
 Seguridad básica del backend MVP. Criterio: **OWASP básico + pragmatismo MVP**, sin
 sobreingeniería. Complementa [ai/skills/SKILL_SECURITY_MINIMUM.md](ai/skills/SKILL_SECURITY_MINIMUM.md).
 
-> Estado actual: runtime **mock en memoria**, **sin auth**. Las medidas que dependen de
-> usuarios/roles se documentan como **deuda futura**, no están implementadas.
+> ⚠️ **Parcialmente histórico.** Desde que se escribió este documento se implementaron: auth
+> real (JWT + cookie httpOnly), CORS con **allowlist explícita** (`CLIENT_URL`), **rate limiting**
+> (global + asistente), **validación de entorno** en producción y endpoint **`/api/ready`**. Para
+> el estado vigente pre-deploy, la fuente de verdad es
+> [security/predeploy-checklist.md](security/predeploy-checklist.md). Algunas secciones marcadas
+> abajo como "deuda futura" (auth, rate limiting, CORS) **ya están cubiertas**.
 
 ## Secretos y configuración
 

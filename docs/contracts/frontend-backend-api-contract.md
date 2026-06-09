@@ -80,6 +80,15 @@ Devuelve un **array** de eventos (shape real de la tabla `events`, **snake_case*
 | `fecha_desde` | ISO 8601 | `2026-07-01` | `fecha_inicio >= fecha_desde` |
 | `fecha_hasta` | ISO 8601 | `2026-07-31` | `fecha_inicio <= fecha_hasta` |
 
+**Paginación (límite duro):**
+
+| Param | Tipo | Por defecto | Máximo | Semántica |
+|---|---|---|---|---|
+| `page`  | entero ≥ 1 | `1`  | —    | página; `skip = (page − 1) · limit` |
+| `limit` | entero ≥ 1 | `20` | `50` | tamaño de página; valores > 50 se **capan a 50** |
+
+La respuesta **sigue siendo un array** (no se introduce envoltorio `{ data, pagination }`). Valores inválidos de `page`/`limit` usan los por defecto (no devuelven 422). El endpoint **nunca** devuelve resultados ilimitados. Ejemplo: `GET /api/events?page=1&limit=20`.
+
 Filtros mal formados (boolean inválido, `edad` no numérica, fecha no ISO) → **422**.
 
 **Ejemplo request:** `GET /api/events?municipio=Bilbao&es_carrito=true&edad=2`

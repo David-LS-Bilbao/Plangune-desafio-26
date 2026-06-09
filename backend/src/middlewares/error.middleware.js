@@ -68,6 +68,12 @@ export function errorHandler(err, req, res, next) {
     return;
   }
 
+  // Log server-side para observabilidad en el VPS (NUNCA se envía al cliente; tampoco se
+  // loguean variables de entorno). Silenciado en tests para no ensuciar la salida.
+  if (process.env.NODE_ENV !== 'test') {
+    console.error(`[error] ${status} ${req.method} ${req.originalUrl}: ${err?.message ?? 'unknown'}`);
+  }
+
   // 3) Resto de 5xx. Cualquier error de Prisma se enmascara SIEMPRE (dev y prod)
   //    para no filtrar detalles internos (tablas, columnas, credenciales...).
   //    Errores no-Prisma conservan el mensaje en desarrollo para depuración.

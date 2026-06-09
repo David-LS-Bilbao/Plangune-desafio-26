@@ -3,7 +3,7 @@
 
 @font-face {
     font-family: 'Fredoka One';
-    src: url('../assets/fonts/FredokaOne-Regular.woff2') format('woff2');
+    src: url('../assets/fonts/FredokaOne-Regular.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -11,7 +11,7 @@
 
 @font-face {
     font-family: 'Varela Round';
-    src: url('../assets/fonts/VarelaRound-Regular.woff2') format('woff2');
+    src: url('../assets/fonts/VarelaRound-Regular.ttf') format('truetype');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -19,14 +19,22 @@
 
 @font-face {
     font-family: 'Poppins';
-    src: url('../assets/fonts/Poppins-ExtraBold.woff2') format('woff2');
+    src: url('../assets/fonts/Poppins-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Poppins';
+    src: url('../assets/fonts/Poppins-ExtraBold.ttf') format('truetype');
     font-weight: 800;
     font-style: normal;
     font-display: swap;
 }
 @font-face {
     font-family: 'Poppins';
-    src: url('../assets/fonts/Poppins-Medium.woff2') format('woff2');
+    src: url('../assets/fonts/Poppins-Medium.ttf') format('truetype');
     font-weight: 500;
     font-style: normal;
     font-display: swap;

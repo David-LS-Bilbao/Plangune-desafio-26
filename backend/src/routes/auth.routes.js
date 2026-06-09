@@ -8,6 +8,7 @@ import { PUBLIC_ROLES } from '../services/auth.service.js';
 import {
   registerHandler,
   loginHandler,
+  googleLoginHandler,
   meHandler,
   logoutHandler,
 } from '../controllers/auth.controller.js';
@@ -38,9 +39,18 @@ const loginValidator = [
     .withMessage('La contraseña no debe superar 72 caracteres'),
 ];
 
+const googleLoginValidator = [
+  body('credential').isString().notEmpty().withMessage('El token de Google es obligatorio'),
+  body('role')
+    .optional()
+    .isIn(PUBLIC_ROLES)
+    .withMessage('El rol debe ser family o business'),
+];
+
 // Montado bajo /api/auth desde routes/index.js
 router.post('/register', authRateLimit, registerValidator, validate, registerHandler);
 router.post('/login', authRateLimit, loginValidator, validate, loginHandler);
+router.post('/google', authRateLimit, googleLoginValidator, validate, googleLoginHandler);
 router.get('/me', requireAuth, meHandler);
 router.post('/logout', logoutHandler);
 

@@ -1,6 +1,6 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { signToken, getExpiresInMs } from '../utils/jwt.js';
-import { registerUser, loginUser, getCurrentUser } from '../services/auth.service.js';
+import { registerUser, loginUser, googleLoginUser, getCurrentUser } from '../services/auth.service.js';
 
 /**
  * Controladores de autenticación (POST /register, POST /login, GET /me, POST /logout).
@@ -56,4 +56,12 @@ export const logoutHandler = asyncHandler(async (_req, res) => {
   res.status(200).json({ ok: true });
 });
 
-export default { registerHandler, loginHandler, meHandler, logoutHandler };
+/** POST /api/auth/google — inicia sesión o registra usando el token de Google. */
+export const googleLoginHandler = asyncHandler(async (req, res) => {
+  const { credential, role } = req.body;
+  const user = await googleLoginUser({ credential, role });
+  setAuthCookie(res, user);
+  res.status(200).json({ user });
+});
+
+export default { registerHandler, loginHandler, googleLoginHandler, meHandler, logoutHandler };

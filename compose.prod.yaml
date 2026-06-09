@@ -1,0 +1,101 @@
+# compose.prod.yaml — PLANTILLA de producción para VPS (DESAFIO-26 / pLANGUNE)
+#
+# ⚠️ PLANTILLA: NO contiene secretos reales y NO se usa en desarrollo (eso es compose.yaml).
+#    No despliega nada por sí sola. Revísala y adáptala antes de cualquier deploy.
+#
+# Topología segura pensada para Nginx Proxy Manager (NPM):
+#   - NPM (en su propia stack) hace de único punto de entrada HTTPS público.
+#   - El backend NO publica 3000 a internet: solo se EXPONE en la red Docker compartida
+#     con NPM (plangune_proxy). NPM lo enruta por nombre de servicio.
+#   - PostgreSQL vive en una red INTERNA y privada (plangune_internal, sin salida a internet)
+#     y NO publica 5432. Solo el backend lo alcanza.
+#
+# Preparación (una vez, en el VPS), fuera de este archivo:
+#   1) Crear la red compartida con NPM:   docker network create plangune_proxy
+#   2) Crear backend/.env.production a partir de backend/.env.example, con secretos REALES
+#      (JWT_SECRET >=32, CLOUD_ASSISTANT_API_KEY, etc.). NUNCA commitear ese archivo.
+#   3) Exportar las credenciales de Postgres (p. ej. en un .env junto a este compose):
+#      POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD.
+#   4) docker compose -f compose.prod.yaml up -d --build
+#
+# Arranque: docker compose -f compose.prod.yaml ...
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: desafio26-backend:prod
+    restart: unless-stopped
+    # Variables NO secretas. Las claves (JWT_SECRET, CLOUD_ASSISTANT_API_KEY...) llegan por
+    # env_file desde un archivo con secretos REALES que NO se commitea (ver paso 2 arriba).
+    # `required: false`: la plantilla valida sin ese archivo; si falta en runtime, el arranque
+    # falla limpio por la validación de entorno (config/env.js) en lugar de servir inseguro.
+    env_file:
+      - path: ./backend/.env.production
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      # Detrás de Nginx Proxy Manager: imprescindible para que el rate limit use la IP real.
+      TRUST_PROXY: "1"
+      # Origen del frontend (ajustar al dominio real servido por NPM).
+      CLIENT_URL: https://plangune.davlos.es
+      # DB por nombre de servicio en la red interna. Las credenciales vienen de variables del
+      # host/.env (interpolación de compose); NO se hardcodean contraseñas aquí.
+      DATABASE_URL: postgresql://${POSTGRES_USER:?set POSTGRES_USER}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:?set POSTGRES_DB}?schema=public
+    # NO se publica el puerto a internet (sin `ports`). Solo visible en la red de NPM.
+    expose:
+      - "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Liveness del proceso. Para readiness con DB, NPM/orquestador puede sondear /api/ready.
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - plangune_internal # acceso a Postgres (privado)
+      - plangune_proxy # expuesto a Nginx Proxy Manager (sin publicar puertos)
+
+  postgres:
+    image: postgres:16-alpine # versión concreta (no `latest`)
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER}
+      # Sin contraseña por defecto: compose falla si no se define (evita credenciales débiles).
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    # NO se publica 5432 a internet (sin `ports`). Solo alcanzable por el backend.
+    expose:
+      - "5432"
+    volumes:
+      - desafio26_pgdata_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - plangune_internal # red privada: sin salida a internet
+
+volumes:
+  desafio26_pgdata_prod:
+    name: desafio26_pgdata_prod
+
+networks:
+  # Privada e interna: solo backend ↔ postgres, SIN acceso a/desde internet.
+  plangune_internal:
+    driver: bridge
+    internal: true
+  # Compartida con Nginx Proxy Manager. Se crea aparte: `docker network create plangune_proxy`.
+  plangune_proxy:
+    external: true

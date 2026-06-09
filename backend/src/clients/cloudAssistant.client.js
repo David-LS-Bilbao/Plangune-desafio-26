@@ -28,6 +28,19 @@ const SUPPORTED_PROVIDERS = new Set(['gemini']);
 
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models';
 
+// --- Política de reintentos (solo errores transitorios) ---------------------
+// Gemini devuelve 503 intermitente bajo carga. Reintentamos como máximo MAX_RETRIES
+// veces (MAX_RETRIES+1 intentos en total) con backoff corto, para no disparar la
+// latencia total ni bloquear la demo. 429 (rate-limit/cuota) NO se reintenta: bajo
+// saturación sostenida, reintentar multiplica las llamadas y empeora el rate-limit;
+// es mejor caer al fallback local de inmediato. NUNCA se reintentan errores no
+// recuperables: 429, 4xx, JSON inválido, respuesta sin texto, falta de key, provider
+// no soportado, ni abort/timeout (ya se agotó el presupuesto de tiempo).
+const RETRYABLE_STATUS = new Set([500, 502, 503, 504]);
+const MAX_RETRIES = 2;
+const BACKOFF_MS = [400, 900];
+const RETRY_AFTER_CAP_MS = 1500;
+
 /** ¿Está habilitado el proveedor cloud? */
 export function isCloudAssistantEnabled() {
   return process.env.CLOUD_ASSISTANT_ENABLED === 'true';
@@ -130,33 +143,74 @@ function extractGeminiText(data) {
   return parts.map((part) => (typeof part?.text === 'string' ? part.text : '')).join('').trim();
 }
 
-/**
- * Llama a Gemini (REST `:generateContent`) con fetch nativo + AbortController.
- * La API key viaja en cabecera `x-goog-api-key` (no en la URL) para no filtrarla en logs.
- */
-async function fetchGemini({ message, familyProfile }, { apiKey, model, timeoutMs }) {
-  const url = `${GEMINI_BASE}/${encodeURIComponent(model)}:generateContent`;
-  const prompt = buildPrompt(message, familyProfile);
+/** Pausa breve para el backoff entre reintentos. */
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
+/**
+ * Lee `Retry-After` (en segundos) de la respuesta y lo pasa a ms, capado a
+ * RETRY_AFTER_CAP_MS. Devuelve null si falta o no es un número razonable; no
+ * intentamos parsear el formato fecha HTTP (en ese caso usamos el backoff por defecto).
+ */
+function parseRetryAfterMs(response) {
+  const raw = response?.headers?.get?.('retry-after');
+  if (!raw) return null;
+  const seconds = Number(raw);
+  if (!Number.isFinite(seconds) || seconds <= 0) return null;
+  return Math.min(seconds * 1000, RETRY_AFTER_CAP_MS);
+}
+
+/**
+ * Un intento contra Gemini (REST `:generateContent`) con fetch nativo + AbortController.
+ * La API key viaja en cabecera `x-goog-api-key` (no en la URL) para no filtrarla en logs.
+ *
+ * Marca el error con `.retryable = true` SOLO si es transitorio (5xx 500/502/503/504,
+ * o red tipo "fetch failed"); adjunta `.retryAfterMs` si el proveedor envía `Retry-After`.
+ * El resto (429 rate-limit, otros 4xx, JSON inválido, sin texto, abort/timeout) se lanza
+ * SIN `.retryable`. Ningún error incluye la API key ni el cuerpo de la respuesta.
+ */
+async function attemptGemini(url, body, { apiKey, timeoutMs }) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey,
-      },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      }),
-      signal: controller.signal,
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-key': apiKey,
+        },
+        body,
+        signal: controller.signal,
+      });
+    } catch (err) {
+      // Abort/timeout: NO reintentable (ya se agotó el presupuesto de tiempo).
+      if (err?.name === 'AbortError') {
+        throw cloudError('Cloud assistant (gemini) agotó el tiempo de espera');
+      }
+      // Red/DNS transitoria (undici lanza TypeError "fetch failed"): reintentable.
+      const netError = cloudError('Fallo de red al contactar el cloud assistant (gemini)');
+      if (err instanceof TypeError || /fetch failed/i.test(err?.message || '')) {
+        netError.retryable = true;
+      }
+      throw netError;
+    }
 
     if (!response.ok) {
       // Status genérico; NO se incluye cuerpo/cabeceras (podrían traer detalles internos).
-      throw cloudError(`Cloud assistant (gemini) respondió ${response.status}`, response.status);
+      const httpError = cloudError(
+        `Cloud assistant (gemini) respondió ${response.status}`,
+        response.status,
+      );
+      if (RETRYABLE_STATUS.has(response.status)) {
+        httpError.retryable = true;
+        const retryAfterMs = parseRetryAfterMs(response);
+        if (retryAfterMs !== null) httpError.retryAfterMs = retryAfterMs;
+      }
+      throw httpError;
     }
 
     let data;
@@ -175,6 +229,35 @@ async function fetchGemini({ message, familyProfile }, { apiKey, model, timeoutM
   } finally {
     clearTimeout(timer);
   }
+}
+
+/**
+ * Llama a Gemini con reintento corto ante fallos transitorios (503/429/5xx/red).
+ * Intentos totales: MAX_RETRIES + 1. Backoff: BACKOFF_MS (o `Retry-After` capado).
+ * Si se agotan los reintentos o el error NO es recuperable, relanza para que
+ * `assistant.service.js` caiga al fallback local. Mantiene CLOUD_ASSISTANT_TIMEOUT_MS
+ * por intento (los transitorios suelen fallar rápido, así que el total no se dispara).
+ */
+async function fetchGemini({ message, familyProfile }, { apiKey, model, timeoutMs }) {
+  const url = `${GEMINI_BASE}/${encodeURIComponent(model)}:generateContent`;
+  const prompt = buildPrompt(message, familyProfile);
+  const body = JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }] });
+
+  let lastError;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt += 1) {
+    try {
+      return await attemptGemini(url, body, { apiKey, timeoutMs });
+    } catch (err) {
+      lastError = err;
+      // Sin más intentos o error no recuperable → relanzar (el service hará fallback).
+      if (attempt >= MAX_RETRIES || err?.retryable !== true) throw err;
+      const waitMs = err.retryAfterMs ?? BACKOFF_MS[attempt] ?? BACKOFF_MS[BACKOFF_MS.length - 1];
+      await sleep(waitMs);
+    }
+  }
+
+  // Inalcanzable: el bucle siempre retorna o relanza. Defensivo por claridad.
+  throw lastError;
 }
 
 /**

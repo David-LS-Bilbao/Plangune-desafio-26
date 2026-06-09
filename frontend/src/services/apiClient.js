@@ -28,17 +28,19 @@ async function fetchWrapper(method, url, options = {}) {
     }
   }
 
+  const isFormData = options.data instanceof FormData;
+
   const fetchOptions = {
     method,
     headers: {
-      "Content-Type": "application/json",
+      ...(!isFormData && { "Content-Type": "application/json" }),
       ...options.headers,
     },
     credentials: "include", // Equivalent to withCredentials: true
   };
 
   if (options.data) {
-    fetchOptions.body = JSON.stringify(options.data);
+    fetchOptions.body = isFormData ? options.data : JSON.stringify(options.data);
   }
 
   // Handle timeout roughly like axios does

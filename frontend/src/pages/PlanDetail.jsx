@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { fetchEventById } from "../services/eventsApi";
 import { fetchReviewsByEvent, createReview } from "../services/reviewsApi";
@@ -7,18 +8,43 @@ import { eventToPlan } from "../mappers/eventMapper";
 import { useFavorites } from "../context/FavoritesContext";
 import getPlanImage from "../utils/getPlanImage";
 
-/** Formatea una fecha ISO a texto legible en español (o null si no hay). */
-function formatDate(iso) {
+/** Formatea una fecha ISO a texto legible según el idioma activo (o null si no hay). */
+function formatDate(iso, locale) {
   if (!iso) return null;
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
-  return d.toLocaleDateString("es-ES", {
+  return d.toLocaleDateString(locale, {
     weekday: "long",
     day: "numeric",
     month: "long",
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+/** Clave de localStorage donde se guardan las reseñas añadidas por el usuario, por plan. */
+function reviewsStorageKey(planId) {
+  return `txikiplan:reviews:${planId}`;
+}
+
+/** Lee del localStorage las reseñas guardadas localmente para un plan. */
+function loadStoredReviews(planId) {
+  try {
+    const raw = localStorage.getItem(reviewsStorageKey(planId));
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Guarda en localStorage las reseñas añadidas por el usuario para un plan. */
+function storeReviews(planId, userReviews) {
+  try {
+    localStorage.setItem(reviewsStorageKey(planId), JSON.stringify(userReviews));
+  } catch {
+    // localStorage no disponible (modo privado, cuota...): la reseña queda solo en memoria.
+  }
 }
 
 /** URL de Google Maps (coordenadas si existen, si no por texto de ubicación). */
@@ -29,17 +55,18 @@ function mapsUrl(plan) {
   return `https://www.google.com/maps/search/${encodeURIComponent(plan.location)}`;
 }
 
-const SERVICES = [
-  { key: "es_carrito", icon: "stroller", label: "Carrito" },
-  { key: "es_cambiador", icon: "baby_changing_station", label: "Cambiador" },
-  { key: "es_interior", icon: "home", label: "Interior" },
-  { key: "es_silla_ruedas", icon: "accessible", label: "Silla de ruedas" },
-  { key: "es_mascotas", icon: "pets", label: "Mascotas" },
+const SERVICE_KEYS = [
+  { key: "es_carrito", icon: "stroller", labelKey: "plan_detail.service_stroller" },
+  { key: "es_cambiador", icon: "baby_changing_station", labelKey: "plan_detail.service_changer" },
+  { key: "es_interior", icon: "home", labelKey: "plan_detail.service_indoor" },
+  { key: "es_silla_ruedas", icon: "accessible", labelKey: "plan_detail.service_wheelchair" },
+  { key: "es_mascotas", icon: "pets", labelKey: "plan_detail.service_pets" },
 ];
 
 function PlanDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const { isFavorite, toggleFavorite } = useFavorites();
 
   const [plan, setPlan] = useState(null);
@@ -91,8 +118,8 @@ function PlanDetail() {
     return (
       <main className="plan-detail-main">
         <div className="planner-state">
-          <div className="planner-spinner" role="status" aria-label="Cargando plan" />
-          <p className="planner-state__text">Cargando plan...</p>
+          <div className="planner-spinner" role="status" aria-label={t("plan_detail.loading")} />
+          <p className="planner-state__text">{t("plan_detail.loading")}</p>
         </div>
       </main>
     );
@@ -103,9 +130,9 @@ function PlanDetail() {
       <main className="plan-detail-main">
         <div className="planner-state">
           <span className="material-symbols-outlined planner-state__icon">search_off</span>
-          <p className="planner-state__text">Este plan no existe o ya no está disponible.</p>
+          <p className="planner-state__text">{t("plan_detail.not_found")}</p>
           <button className="planner-retry" type="button" onClick={() => navigate("/planes")}>
-            Ver todos los planes
+            {t("plan_detail.see_all_plans")}
           </button>
         </div>
       </main>
@@ -117,9 +144,9 @@ function PlanDetail() {
       <main className="plan-detail-main">
         <div className="planner-state">
           <span className="material-symbols-outlined planner-state__icon">cloud_off</span>
-          <p className="planner-state__text">No hemos podido cargar el plan. Inténtalo de nuevo.</p>
+          <p className="planner-state__text">{t("plan_detail.error")}</p>
           <button className="planner-retry" type="button" onClick={load}>
-            Reintentar
+            {t("plan_detail.retry")}
           </button>
         </div>
       </main>
@@ -127,15 +154,15 @@ function PlanDetail() {
   }
 
   const favorite = isFavorite(plan.id);
-  const fecha = formatDate(plan.fecha);
-  const availableServices = SERVICES.filter((s) => plan[s.key]);
+  const fecha = formatDate(plan.fecha, i18n.language === "eu" ? "eu-ES" : "es-ES");
+  const availableServices = SERVICE_KEYS.filter((s) => plan[s.key]);
 
   const infoCards = [
-    { icon: "child_care", label: "Edad", value: plan.ageRange, color: "tertiary" },
-    { icon: "euro_symbol", label: "Precio", value: plan.price, color: "primary" },
-    { icon: "category", label: "Categoría", value: plan.category, color: "accent" },
+    { icon: "child_care", label: t("plan_detail.label_age"), value: plan.ageRange, color: "tertiary" },
+    { icon: "euro_symbol", label: t("plan_detail.label_price"), value: plan.price, color: "primary" },
+    { icon: "category", label: t("plan_detail.label_category"), value: plan.category, color: "accent" },
     fecha
-      ? { icon: "calendar_today", label: "Fecha", value: fecha, color: "primary", span2: true }
+      ? { icon: "calendar_today", label: t("plan_detail.label_date"), value: fecha, color: "primary", span2: true }
       : null,
   ].filter(Boolean);
 
@@ -147,7 +174,7 @@ function PlanDetail() {
           <div className="btn-back-wrapper">
             <button type="button" className="btn-text-danger detail-back-btn" onClick={() => navigate(-1)}>
               <span className="material-symbols-outlined">arrow_back</span>
-              Volver atrás
+              {t("plan_detail.back")}
             </button>
           </div>
         </div>
@@ -184,12 +211,12 @@ function PlanDetail() {
       {/* Servicios familiares (datos reales del backend); solo se listan los disponibles */}
       {availableServices.length > 0 && (
         <section className="detail-services">
-          <h3 className="detail-services__title">Servicios familiares</h3>
+          <h3 className="detail-services__title">{t("plan_detail.services_title")}</h3>
           <div className="detail-services__list">
             {availableServices.map((s) => (
               <span key={s.key} className="detail-service-chip">
                 <span className="material-symbols-outlined">{s.icon}</span>
-                {s.label}
+                {t(s.labelKey)}
               </span>
             ))}
           </div>
@@ -203,7 +230,7 @@ function PlanDetail() {
           onClick={() => window.open(mapsUrl(plan), "_blank", "noopener")}
         >
           <span className="material-symbols-outlined">directions</span>
-          Cómo llegar
+          {t("plan_detail.directions")}
         </button>
 
         <button
@@ -212,7 +239,7 @@ function PlanDetail() {
           onClick={() => toggleFavorite(plan.id)}
         >
           <span className={`material-symbols-outlined${favorite ? " fill" : ""}`}>favorite</span>
-          {favorite ? "Guardado en favoritos" : "Guardar en favoritos"}
+          {favorite ? t("plan_detail.saved_favorite") : t("plan_detail.save_favorite")}
         </button>
       </section>
 
@@ -222,10 +249,10 @@ function PlanDetail() {
         <button
           className="detail-report-btn"
           type="button"
-          onClick={() => setReportStatus("Tu reporte ha sido enviado. Gracias.")}
+          onClick={() => setReportStatus(t("plan_detail.report_sent"))}
         >
           <span className="material-symbols-outlined">report</span>
-          Reportar incidencia
+          {t("plan_detail.report_btn")}
         </button>
         {reportStatus && <p className="detail-status">{reportStatus}</p>}
       </div>
@@ -233,7 +260,7 @@ function PlanDetail() {
       <section className="detail-reviews">
         <div className="detail-reviews__header">
           <div>
-            <h3 className="detail-reviews__title">Reseñas familiares</h3>
+            <h3 className="detail-reviews__title">{t("plan_detail.reviews_title")}</h3>
             {plan.rating != null && (
               <div className="detail-reviews__rating">
                 <span className="detail-reviews__score">{plan.rating}</span>
@@ -250,13 +277,13 @@ function PlanDetail() {
             type="button"
             onClick={() => setShowReviewForm((v) => !v)}
           >
-            {showReviewForm ? "Cancelar" : "Añadir reseña"}
+            {showReviewForm ? t("plan_detail.cancel") : t("plan_detail.add_review")}
           </button>
         </div>
 
         {showReviewForm && (
           <div className="detail-review-form">
-            <h4 className="detail-review-form__title">Tu valoración</h4>
+            <h4 className="detail-review-form__title">{t("plan_detail.your_rating")}</h4>
             <div className="detail-review-form__stars">
               {[1, 2, 3, 4, 5].map((star) => (
                 <span
@@ -272,7 +299,7 @@ function PlanDetail() {
               className="detail-review-form__textarea"
               value={newReviewText}
               onChange={(e) => setNewReviewText(e.target.value)}
-              placeholder="Cuéntanos tu experiencia..."
+              placeholder={t("plan_detail.review_placeholder")}
             />
             <button
               className="detail-btn detail-btn--primary"
@@ -289,13 +316,13 @@ function PlanDetail() {
                   load(); // Recargar reseñas desde el backend
                 } catch (err) {
                   console.error("Error al publicar la reseña:", err);
-                  alert("No se pudo publicar la reseña. Inicia sesión e inténtalo de nuevo.");
+                  alert(t("plan_detail.error_review_publish", "No se pudo publicar la reseña. Inicia sesión e inténtalo de nuevo."));
                 } finally {
                   setIsSubmittingReview(false);
                 }
               }}
             >
-              {isSubmittingReview ? "Publicando..." : "Publicar reseña"}
+              {isSubmittingReview ? t("plan_detail.publishing", "Publicando...") : t("plan_detail.publish_review")}
             </button>
           </div>
         )}

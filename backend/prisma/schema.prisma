@@ -109,6 +109,7 @@ model Event {
   price           String?   @db.VarChar
   imagen_url      String?
   tipo_evento     String?   @db.VarChar(100)
+  status          String    @default("pending") @db.VarChar(20)
 
   business                 Business?                    @relation(fields: [business_id], references: [id], onDelete: SetNull)
   plan_events              PlanEvent[]

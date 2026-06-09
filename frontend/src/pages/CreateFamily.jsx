@@ -8,10 +8,12 @@ function CreateFamily() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const registerAccount = useAuthStore((state) => state.register);
+  const updateUser = useAuthStore((state) => state.updateUser);
   const [form, setForm] = useState({
     familyName: "",
     location: "",
     members: "",
+    phone: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -53,24 +55,37 @@ function CreateFamily() {
   })();
   const isMembersInvalid = membersError !== "";
 
+  const PHONE_FORMAT_REGEX = /^[+\d][\d\s]{8,}$/;
+  const phoneError = (() => {
+    if (!touched.phone) return "";
+    const raw = String(form.phone).trim();
+    if (!raw) return "Indica un teléfono de contacto";
+    if (!PHONE_FORMAT_REGEX.test(raw)) return "El teléfono debe tener un formato correcto";
+    return "";
+  })();
+  const isPhoneInvalid = phoneError !== "";
+
   const isConfirmPasswordInvalid =
     touched.confirmPassword &&
     (!form.confirmPassword.trim() || form.confirmPassword !== form.password);
 
-  // Registro real (rol family). Los datos extra (nombre familia, miembros) aún no se
-  // persisten en backend en esta fase: solo se crea la cuenta de usuario.
+  // Registro real (rol family). Los datos extra (nombre familia, ubicación, miembros, teléfono)
+  // aún no se persisten en backend en esta fase: se guardan en cliente con updateUser, igual
+  // que el resto del perfil (avatar, preferencias), para que aparezcan ya rellenos al editar.
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
-    setTouched({ familyName: true, location: true, members: true, email: true, password: true, confirmPassword: true });
+    setTouched({ familyName: true, location: true, members: true, phone: true, email: true, password: true, confirmPassword: true });
     if (Object.keys(form).some((field) => !String(form[field]).trim())) return;
+    if (!PHONE_FORMAT_REGEX.test(form.phone.trim())) return;
     if (isEmailFormatInvalid(form.email)) return;
     if (form.confirmPassword !== form.password) return;
     setError("");
     setLoading(true);
     try {
       await registerAccount({ email: form.email, password: form.password, role: "family" });
-      navigate("/buscar", { replace: true });
+      updateUser({ familyName: form.familyName, location: form.location, members: form.members, phone: form.phone });
+      navigate("/", { replace: true });
     } catch (err) {
       const status = err?.response?.status;
       setError(
@@ -125,6 +140,15 @@ function CreateFamily() {
               <input id="members" name="members" type="number" value={form.members} onChange={handleChange} onBlur={() => touch("members")} placeholder="Ej: 4" min="0" max="99" required />
             </div>
             {isMembersInvalid && <span className="create-family-field-error">{membersError}</span>}
+          </div>
+
+          <div className="create-family-form__group">
+            <label className="section-label" htmlFor="phone">{t('onboarding.phone')}</label>
+            <div className={`input-with-icon${isPhoneInvalid ? " input-with-icon--error" : ""}`}>
+              <span className="material-symbols-outlined icon">phone</span>
+              <input id="phone" name="phone" type="tel" value={form.phone} onChange={handleChange} onBlur={() => touch("phone")} placeholder="Ej: 600 123 456" required />
+            </div>
+            {isPhoneInvalid && <span className="create-family-field-error">{phoneError}</span>}
           </div>
 
           <div className="create-family-form__group">

@@ -47,6 +47,8 @@ services:
       CLIENT_URL: "http://localhost:5173"
     ports:
       - "3000:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/ready').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
 
 volumes:
   desafio26_postgres_data:

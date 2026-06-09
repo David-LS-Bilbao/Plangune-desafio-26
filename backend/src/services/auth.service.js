@@ -1,5 +1,4 @@
 import bcrypt from 'bcryptjs';
-
 import {
   findUserByEmail,
   findUserById,
@@ -109,4 +108,30 @@ export async function getCurrentUser(id) {
   return sanitizeUser(user);
 }
 
-export default { registerUser, loginUser, getCurrentUser, sanitizeUser, hashPassword, verifyPassword, PUBLIC_ROLES };
+export async function googleLoginUser({ credential, role }) {
+  let payload;
+  try {
+    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: { Authorization: `Bearer ${credential}` }
+    });
+    if (!response.ok) throw new Error('Invalid token');
+    payload = await response.json();
+  } catch (err) {
+    throw httpError(401, 'Token de Google inválido');
+  }
+
+  const normalizedEmail = payload.email.toLowerCase();
+  let user = await findUserByEmail(normalizedEmail);
+
+  if (!user) {
+    if (!PUBLIC_ROLES.includes(role)) {
+      throw httpError(422, 'Rol no permitido para nuevo registro');
+    }
+    const randomPassword = await hashPassword(Math.random().toString(36).slice(-16) + Date.now().toString());
+    user = await createUser({ email: normalizedEmail, password: randomPassword, role });
+  }
+
+  return sanitizeUser(user);
+}
+
+export default { registerUser, loginUser, googleLoginUser, getCurrentUser, sanitizeUser, hashPassword, verifyPassword, PUBLIC_ROLES };

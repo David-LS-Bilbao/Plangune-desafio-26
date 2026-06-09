@@ -38,16 +38,36 @@ function buildWhere(filters) {
     if (filters.fecha_hasta) where.fecha_inicio.lte = new Date(filters.fecha_hasta);
   }
 
+  if (filters.status) where.status = filters.status;
+
   return where;
 }
 
 /**
- * Devuelve todos los eventos que cumplen los filtros.
+ * Devuelve los eventos que cumplen los filtros.
+ *
+ * Paginación OPT-IN: si se pasa `{ skip, take }` se aplica límite + orden estable
+ * (para la API pública /api/events, que nunca debe devolver resultados ilimitados).
+ * Sin paginación devuelve TODOS — uso interno (p. ej. el recomendador, que necesita
+ * el conjunto completo para puntuar). Así no cambia el comportamiento de esos llamadores.
+ *
  * @param {object} [filters={}]
+ * @param {{ skip?: number, take?: number }} [pagination]
  * @returns {Promise<Array>}
  */
-export async function findEvents(filters = {}) {
-  return prisma.event.findMany({ where: buildWhere(filters) });
+export async function findEvents(filters = {}, pagination) {
+  const where = buildWhere(filters);
+
+  if (!pagination || pagination.take === undefined) {
+    return prisma.event.findMany({ where });
+  }
+
+  return prisma.event.findMany({
+    where,
+    orderBy: { id: 'asc' }, // orden estable: hace que skip/take sea determinista
+    skip: pagination.skip ?? 0,
+    take: pagination.take,
+  });
 }
 
 /**

@@ -29,6 +29,39 @@ export async function findUserById(id) {
  * @returns {Promise<object>} usuario creado (incluye `password`)
  */
 export async function createUser({ email, password, role }) {
+  const localPart = email.split('@')[0];
+  const defaultName = localPart.charAt(0).toUpperCase() + localPart.slice(1);
+
+  if (role === 'business') {
+    return prisma.user.create({
+      data: {
+        email,
+        password,
+        role,
+        business: {
+          create: {
+            name: defaultName,
+            status: 'pending'
+          }
+        }
+      }
+    });
+  } else if (role === 'family') {
+    return prisma.user.create({
+      data: {
+        email,
+        password,
+        role,
+        families: {
+          create: {
+            family_name: `Familia de ${defaultName}`
+          }
+        }
+      }
+    });
+  }
+
+  // Admin u otros
   return prisma.user.create({ data: { email, password, role } });
 }
 
