@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import PlanCard from "../components/common/PlanCard";
 import RecommendedPlans from "../components/recommendations/RecommendedPlans";
 import { fetchEvents } from "../services/eventsApi";
@@ -48,6 +49,7 @@ function isFreePlan(plan) {
 }
 
 function PlansSearch() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [territorio, setTerritorio] = useState("");
   const [territorioTodos, setTerritorioTodos] = useState(false);
@@ -126,16 +128,16 @@ function PlansSearch() {
 
   return (
     <main className="plans-user-main">
-      <h1 className="plans-user-title">Buscador de planes</h1>
+      <h1 className="plans-user-title">{t("plans_search.title")}</h1>
 
       <div className="search-form">
         <div className="search-form__group">
-          <label className="section-label">Municipio</label>
+          <label className="section-label">{t("plans_search.municipality")}</label>
           <div className="input-with-icon">
             <span className="material-symbols-outlined icon">search</span>
             <input
               type="text"
-              placeholder="Bilbao, Getxo, Donostia..."
+              placeholder={t("plans_search.municipality_placeholder")}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
@@ -143,13 +145,13 @@ function PlansSearch() {
         </div>
 
         <div className="search-form__group">
-          <span className="section-label">Territorio</span>
+          <span className="section-label">{t("plans_search.territory")}</span>
           <div className="search-form__pills">
             <span
               className={`search-pill${territorioTodos ? " active" : ""}`}
               onClick={() => { setTerritorio(""); setTerritorioTodos(true); }}
             >
-              Todos
+              {t("plans_search.all")}
             </span>
             {TERRITORIOS.map((t) => (
               <span
@@ -171,7 +173,7 @@ function PlansSearch() {
         </div>
 
         <div className="search-form__group">
-          <span className="section-label">Edad de los peques</span>
+          <span className="section-label">{t("plans_search.age_label")}</span>
           <div className="search-form__pills">
             {AGE_OPTIONS.map((age) => (
               <span
@@ -179,14 +181,14 @@ function PlansSearch() {
                 className={`search-pill${ageFilters.includes(age) ? " active" : ""}`}
                 onClick={() => toggle(ageFilters, setAgeFilters, age)}
               >
-                {age}
+                {t(`plans_search.age.${age}`, age)}
               </span>
             ))}
           </div>
         </div>
 
         <div className="search-form__group">
-          <span className="section-label">Sin sobresaltos</span>
+          <span className="section-label">{t("plans_search.features_label")}</span>
           <div className="search-form__pills">
             {FEATURE_OPTIONS.map((feature) => (
               <span
@@ -194,7 +196,7 @@ function PlansSearch() {
                 className={`search-pill${activeFeatures.includes(feature.label) ? " active" : ""}`}
                 onClick={() => toggle(activeFeatures, setActiveFeatures, feature.label)}
               >
-                {feature.label}
+                {t(`plans_search.feature.${feature.label}`, feature.label)}
               </span>
             ))}
           </div>
@@ -202,41 +204,44 @@ function PlansSearch() {
 
         {activeCount > 0 && (
           <div className="search-form__active-filters">
-            <span className="search-form__active-label">Filtros activos:</span>
+            <span className="search-form__active-label">{t("plans_search.active_filters")}</span>
             {territorio && <span className="search-form__active-tag">{territorio}</span>}
-            {territorioTodos && <span className="search-form__active-tag">Todos</span>}
-            {[...ageFilters, ...activeFeatures].map((f) => (
-              <span key={f} className="search-form__active-tag">{f}</span>
+            {territorioTodos && <span className="search-form__active-tag">{t("plans_search.all")}</span>}
+            {ageFilters.map((f) => (
+              <span key={f} className="search-form__active-tag">{t(`plans_search.age.${f}`, f)}</span>
+            ))}
+            {activeFeatures.map((f) => (
+              <span key={f} className="search-form__active-tag">{t(`plans_search.feature.${f}`, f)}</span>
             ))}
           </div>
         )}
 
         <button type="button" className="btn-primary search-form__submit" onClick={handleSearch} disabled={loading}>
           <span className="material-symbols-outlined">search</span>
-          {loading ? "Buscando..." : "Buscar"}
+          {loading ? t("plans_search.searching") : t("plans_search.search_btn")}
         </button>
       </div>
 
-      <RecommendedPlans context={recommendationContext} title="¿Has echado una ojeada a estos planes?" />
+      <RecommendedPlans context={recommendationContext} title={t("plans_search.recommended_title")} />
 
       {!searched && (
         <div className="planner-state">
           <span className="material-symbols-outlined planner-state__icon">explore</span>
-          <p className="planner-state__text">Ajusta los filtros y pulsa "Buscar" para ver planes.</p>
+          <p className="planner-state__text">{t("plans_search.hint")}</p>
         </div>
       )}
 
       {searched && loading && (
         <div className="planner-state">
-          <div className="planner-spinner" role="status" aria-label="Buscando planes" />
-          <p className="planner-state__text">Buscando planes...</p>
+          <div className="planner-spinner" role="status" aria-label={t("plans_search.searching")} />
+          <p className="planner-state__text">{t("plans_search.searching")}</p>
         </div>
       )}
 
       {searched && !loading && error && (
         <div className="planner-state">
           <span className="material-symbols-outlined planner-state__icon">cloud_off</span>
-          <p className="planner-state__text">No hemos podido buscar planes. Inténtalo de nuevo.</p>
+          <p className="planner-state__text">{t("plans_search.error")}</p>
         </div>
       )}
 
@@ -245,9 +250,9 @@ function PlansSearch() {
           <h2 className="search-form__results-title">
             {plans.length > 0
               ? plans.length === 1
-                ? "¡Encontramos el plan perfecto para tu familia!"
-                : `¡Encontramos ${plans.length} planes perfectos para tu familia!`
-              : "No encontramos nada... ¡pero hay muchos planes esperándote! Cambia los filtros."}
+                ? t("plans_search.result_one")
+                : t("plans_search.result_many", { count: plans.length })
+              : t("plans_search.result_none")}
           </h2>
 
           {plans.length > 0 && (

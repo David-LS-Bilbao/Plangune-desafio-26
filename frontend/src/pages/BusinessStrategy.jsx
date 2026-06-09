@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 
 function BusinessStrategy() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [strategyOptimized, setStrategyOptimized] = useState(false);
   const [selectedFeatures, setSelectedFeatures] = useState([]);
@@ -11,10 +13,10 @@ function BusinessStrategy() {
 
   const handleFeatureClick = (featureId) => {
     if (subscription === "Free") {
-      setUpgradeMessage("Mejora tu plan para activar estas funcionalidades. Haz click aquí.");
+      setUpgradeMessage(true);
       return;
     }
-    setUpgradeMessage("");
+    setUpgradeMessage(false);
     if (selectedFeatures.includes(featureId)) {
       setSelectedFeatures(selectedFeatures.filter(id => id !== featureId));
     } else {
@@ -32,15 +34,13 @@ function BusinessStrategy() {
   return (
     <main className="business-strategy-main">
       <div className="biz-dashboard-header">
-        <h1 className="page-title">Plan de visibilidad</h1>
+        <h1 className="page-title">{t("biz_strategy.title")}</h1>
         <div className="btn-back-wrapper">
           <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-            Volver atrás
+            {t("plan_detail.back")}
           </button>
         </div>
       </div>
-
-      
 
       {upgradeMessage && (
         <button
@@ -51,7 +51,7 @@ function BusinessStrategy() {
           onMouseLeave={e => { e.currentTarget.style.color = "var(--accent-color)"; e.currentTarget.style.borderColor = "var(--accent-color)"; e.currentTarget.style.backgroundColor = "transparent"; }}
         >
           <span className="material-symbols-outlined" style={{ verticalAlign: "middle", marginRight: "8px", fontSize: "1.5rem" }}>error</span>
-          Mejora tu plan para activar estas funcionalidades. <span style={{ textDecoration: "underline" }}>Haz click aquí.</span>
+          {t("biz_strategy.upgrade_message")} <span style={{ textDecoration: "underline" }}>{t("biz_strategy.upgrade_link")}</span>
         </button>
       )}
 
@@ -62,10 +62,8 @@ function BusinessStrategy() {
           style={{ textAlign: "left", width: "100%" }}
         >
           <span className="material-symbols-outlined feature-icon">star</span>
-          <h2 className="feature-title">Destacados</h2>
-          <p className="feature-text">
-            Aparece en secciones premium del buscador y recibe más impresiones.
-          </p>
+          <h2 className="feature-title">{t("biz_strategy.feature_highlighted_title")}</h2>
+          <p className="feature-text">{t("biz_strategy.feature_highlighted_desc")}</p>
         </button>
 
         <button
@@ -74,11 +72,8 @@ function BusinessStrategy() {
           style={{ textAlign: "left", width: "100%" }}
         >
           <span className="material-symbols-outlined feature-icon">mail</span>
-          <h2 className="feature-title">Mailing</h2>
-          <p className="feature-text">
-            Envía mensajes directos a familias interesadas con tus promociones
-            más relevantes.
-          </p>
+          <h2 className="feature-title">{t("biz_strategy.feature_mailing_title")}</h2>
+          <p className="feature-text">{t("biz_strategy.feature_mailing_desc")}</p>
         </button>
 
         <button
@@ -87,11 +82,8 @@ function BusinessStrategy() {
           style={{ textAlign: "left", width: "100%" }}
         >
           <span className="material-symbols-outlined feature-icon">map</span>
-          <h2 className="feature-title">Destacados en el mapa</h2>
-          <p className="feature-text">
-            Tu ubicación se resaltará para que las familias te encuentren
-            rápidamente.
-          </p>
+          <h2 className="feature-title">{t("biz_strategy.feature_map_title")}</h2>
+          <p className="feature-text">{t("biz_strategy.feature_map_desc")}</p>
         </button>
 
         <button
@@ -99,26 +91,18 @@ function BusinessStrategy() {
           onClick={() => handleFeatureClick("filtro")}
           style={{ textAlign: "left", width: "100%" }}
         >
-          <span className="material-symbols-outlined feature-icon">
-            filter_alt
-          </span>
-          <h2 className="feature-title">Filtro patrocinado</h2>
-          <p className="feature-text">
-            Aparece primero cuando las familias usan filtros avanzados en su
-            búsqueda.
-          </p>
+          <span className="material-symbols-outlined feature-icon">filter_alt</span>
+          <h2 className="feature-title">{t("biz_strategy.feature_filter_title")}</h2>
+          <p className="feature-text">{t("biz_strategy.feature_filter_desc")}</p>
         </button>
       </section>
 
       <section className="strategy-summary-card">
         <div>
-          <h2 className="section-title">Tu estrategia ahora</h2>
-          <p>
-            Aumenta tu visibilidad con las funciones seleccionadas y maximiza la
-            conversión de tus actividades.
-          </p>
+          <h2 className="section-title">{t("biz_strategy.summary_title")}</h2>
+          <p>{t("biz_strategy.summary_desc")}</p>
           {strategyOptimized && (
-            <p className="section-note">Estrategia optimizada correctamente.</p>
+            <p className="section-note">{t("biz_strategy.strategy_optimized")}</p>
           )}
         </div>
         <button
@@ -126,7 +110,7 @@ function BusinessStrategy() {
           type="button"
           onClick={handleOptimize}
         >
-          Optimizar estrategia
+          {t("biz_strategy.optimize_btn")}
         </button>
       </section>
     </main>

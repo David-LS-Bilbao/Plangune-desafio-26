@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import PlanCard from "../components/common/PlanCard";
 import { fetchEvents } from "../services/eventsApi";
 import { eventsToPlans } from "../mappers/eventMapper";
 
 function PlansList() {
+  const { t } = useTranslation();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -23,23 +25,21 @@ function PlansList() {
 
   return (
     <main className="plans-user-main">
-      <h1 className="plans-user-title">Planes para disfrutar en familia</h1>
+      <h1 className="plans-user-title">{t("plans_list.title")}</h1>
 
       {loading && (
         <div className="planner-state">
-          <div className="planner-spinner" role="status" aria-label="Cargando planes" />
-          <p className="planner-state__text">Cargando planes...</p>
+          <div className="planner-spinner" role="status" aria-label={t("plans_list.loading")} />
+          <p className="planner-state__text">{t("plans_list.loading")}</p>
         </div>
       )}
 
       {!loading && error && (
         <div className="planner-state">
           <span className="material-symbols-outlined planner-state__icon">cloud_off</span>
-          <p className="planner-state__text">
-            No hemos podido cargar los planes. Revisa tu conexión e inténtalo de nuevo.
-          </p>
+          <p className="planner-state__text">{t("plans_list.error")}</p>
           <button type="button" className="planner-retry" onClick={load}>
-            Reintentar
+            {t("plans_list.retry")}
           </button>
         </div>
       )}
@@ -54,9 +54,7 @@ function PlansList() {
         ) : (
           <div className="planner-state">
             <span className="material-symbols-outlined planner-state__icon">event_busy</span>
-            <p className="planner-state__text">
-              Aún no hay planes disponibles. Vuelve pronto para descubrir nuevas actividades.
-            </p>
+            <p className="planner-state__text">{t("plans_list.empty")}</p>
           </div>
         )
       )}

@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 
 const EMPTY_OFFER = {
@@ -17,6 +18,7 @@ const EMPTY_OFFER = {
 };
 
 function ManageOffers() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const addOffer = useBusinessStore((state) => state.addOffer);
   const updateOffer = useBusinessStore((state) => state.updateOffer);
@@ -84,7 +86,7 @@ function ManageOffers() {
   const formatDiscountValue = () => {
     const unit = offerTypeUnit[offerData.offerType];
     if (!unit || offerData.discountValue === "") return "";
-    return `${offerData.discountValue}${unit} de descuento`;
+    return `${offerData.discountValue}${unit}`;
   };
 
   const getFinalPrice = () => {
@@ -104,7 +106,7 @@ function ManageOffers() {
   const formatPriceSummary = () => {
     if (offerData.originalPrice === "") return "";
     const original = Number(offerData.originalPrice);
-    if (original === 0) return "Gratis";
+    if (original === 0) return t("plan_card.free");
     const final = getFinalPrice();
     if (final === null || final === original) return `${original}€`;
     return `${original}€ → ${final.toFixed(2).replace(/\.00$/, "")}€`;
@@ -113,7 +115,7 @@ function ManageOffers() {
   const formatMeta = () => {
     const parts = [formatPriceSummary(), formatDiscountValue()].filter(Boolean);
     if (parts.length > 0) return parts.join(" · ");
-    return offerData.promoCode ? `Código: ${offerData.promoCode}` : "Sin código";
+    return offerData.promoCode ? `${t("manage_offers.code_label")}: ${offerData.promoCode}` : t("manage_offers.no_code");
   };
 
   const handleSendReview = () => {
@@ -162,7 +164,7 @@ function ManageOffers() {
         status: "pending",
         previousVersion,
       });
-      setConfirmMessage("Oferta actualizada y enviada a revisión.");
+      setConfirmMessage(t("manage_offers.confirm_updated"));
     } else {
       addOffer({
         title: offerData.title,
@@ -181,7 +183,7 @@ function ManageOffers() {
         meta: formatMeta(),
         status: "pending",
       });
-      setConfirmMessage("Oferta enviada a revisión.");
+      setConfirmMessage(t("manage_offers.confirm_sent"));
     }
     setShowConfirm(true);
     setTimeout(() => setShowConfirm(false), 3000);
@@ -192,24 +194,24 @@ function ManageOffers() {
     <main className="biz-dashboard-main">
 
       <div className="biz-dashboard-header">
-        <h1 className="biz-dashboard-title">Gestionar oferta</h1>
+        <h1 className="biz-dashboard-title">{t("manage_offers.title")}</h1>
         <div className="btn-back-wrapper">
           <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-            Volver atrás
+            {t("plan_detail.back")}
           </button>
         </div>
       </div>
 
       <section className="biz-panel biz-panel--resumen">
-        <h2 className="biz-panel__title">Resumen</h2>
+        <h2 className="biz-panel__title">{t("biz_dashboard.summary")}</h2>
         <div className="biz-stat-btns biz-stat-btns--row">
           <button type="button" className="biz-stat-btn" onClick={() => { const el = document.getElementById("activas"); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: "smooth" }); }}>
             <span className="material-symbols-outlined">event_available</span>
-            Activas: <strong>{offers.filter(o => o.status === 'active').length}</strong>
+            {t("biz_dashboard.active")}: <strong>{offers.filter(o => o.status === 'active').length}</strong>
           </button>
           <button type="button" className="biz-stat-btn" onClick={() => { const el = document.getElementById("pendientes"); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: "smooth" }); }}>
             <span className="material-symbols-outlined">pending_actions</span>
-            Pendientes: <strong>{offers.filter(o => o.status === 'pending').length}</strong>
+            {t("biz_dashboard.pending")}: <strong>{offers.filter(o => o.status === 'pending').length}</strong>
           </button>
         </div>
       </section>
@@ -218,7 +220,7 @@ function ManageOffers() {
 
         {/* Columna izquierda: formulario */}
         <section className="biz-activity-form">
-          <h2 className="biz-panel__title">Crear / editar oferta</h2>
+          <h2 className="biz-panel__title">{editingId ? t("manage_offers.form_title_edit") : t("manage_offers.form_title_create")}</h2>
 
           <form className="create-family-form" onSubmit={(e) => e.preventDefault()}>
 
@@ -234,50 +236,50 @@ function ManageOffers() {
                 }}
               />
               {coverImage ? (
-                <img src={coverImage} alt="Portada" className="create-offer-upload__preview" />
+                <img src={coverImage} alt={t("biz_dashboard.cover_alt")} className="create-offer-upload__preview" />
               ) : (
                 <div className="create-offer-upload">
                   <span className="material-symbols-outlined create-offer-upload__icon">add_photo_alternate</span>
-                  <span className="create-offer-upload__primary">Subir imagen de portada</span>
-                  <span className="create-offer-upload__secondary">PNG, JPG o WEBP · Recomendado 16:9 · Máx. 5MB</span>
+                  <span className="create-offer-upload__primary">{t("biz_dashboard.upload_image")}</span>
+                  <span className="create-offer-upload__secondary">{t("biz_dashboard.upload_hint")}</span>
                 </div>
               )}
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="title">Título de la oferta</label>
+              <label className="section-label biz-label" htmlFor="title">{t("manage_offers.field_title")}</label>
               <input
                 type="text" id="title" className={`biz-input${isInvalid("title", offerData.title) ? " biz-input--error" : ""}`}
-                placeholder="Ej: 20% Dto en Taller de Cerámica Familiar"
+                placeholder={t("manage_offers.field_title_placeholder")}
                 value={offerData.title} onChange={handleChange} onBlur={() => touch("title")}
               />
-              {isInvalid("title", offerData.title) && <span className="biz-field-error">Añade un título a la oferta</span>}
+              {isInvalid("title", offerData.title) && <span className="biz-field-error">{t("manage_offers.error_title")}</span>}
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="description">Descripción</label>
+              <label className="section-label biz-label" htmlFor="description">{t("biz_dashboard.field_description")}</label>
               <textarea
                 id="description" className={`biz-input biz-textarea${isInvalid("description", offerData.description) ? " biz-input--error" : ""}`}
-                placeholder="Explica en qué consiste la oferta, qué incluye y por qué es genial para las familias..."
+                placeholder={t("manage_offers.field_description_placeholder")}
                 value={offerData.description} onChange={handleChange} onBlur={() => touch("description")}
               />
-              {isInvalid("description", offerData.description) && <span className="biz-field-error">Añade una descripción</span>}
+              {isInvalid("description", offerData.description) && <span className="biz-field-error">{t("biz_dashboard.error_description")}</span>}
             </div>
 
             <div className="create-family-form__group">
               <label className="section-label biz-label" htmlFor="conditions">
-                Condiciones del servicio
-                <span className="create-offer-optional">Opcional</span>
+                {t("manage_offers.field_conditions")}
+                <span className="create-offer-optional">{t("manage_offers.optional")}</span>
               </label>
               <textarea
                 id="conditions" className="biz-input biz-textarea"
-                placeholder="Restricciones de edad, necesidad de reserva previa, días excluidos..."
+                placeholder={t("manage_offers.field_conditions_placeholder")}
                 value={offerData.conditions} onChange={handleChange}
               />
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="associatedActivity">Actividad asociada</label>
+              <label className="section-label biz-label" htmlFor="associatedActivity">{t("manage_offers.field_activity")}</label>
               <select
                 id="associatedActivity"
                 className={`biz-input${isInvalid("associatedActivity", offerData.associatedActivity) ? " biz-input--error" : ""}`}
@@ -285,34 +287,34 @@ function ManageOffers() {
                 onChange={handleChange}
                 onBlur={() => touch("associatedActivity")}
               >
-                <option value="" disabled>Selecciona una actividad activa</option>
+                <option value="" disabled>{t("manage_offers.field_activity_placeholder")}</option>
                 {offers.filter((o) => o.status === "active" && !o.offerType).map((activity) => (
                   <option key={activity.id} value={activity.title}>{activity.title}</option>
                 ))}
               </select>
-              {isInvalid("associatedActivity", offerData.associatedActivity) && <span className="biz-field-error">Selecciona la actividad a la que aplica la oferta</span>}
+              {isInvalid("associatedActivity", offerData.associatedActivity) && <span className="biz-field-error">{t("manage_offers.error_activity")}</span>}
             </div>
 
             <div className="create-offer-group">
               <div className="create-family-form__group">
-                <label className="section-label biz-label" htmlFor="originalPrice">Precio original (€)</label>
+                <label className="section-label biz-label" htmlFor="originalPrice">{t("manage_offers.field_price")}</label>
                 <input
                   type="number" id="originalPrice"
                   className={`biz-input${isInvalid("originalPrice", offerData.originalPrice) ? " biz-input--error" : ""}`}
-                  placeholder="Ej: 0, 12, 25.50... (0 si es gratis)"
+                  placeholder={t("manage_offers.field_price_placeholder")}
                   min="0"
                   step="0.01"
                   value={offerData.originalPrice} onChange={handleChange}
                   onBlur={() => touch("originalPrice")}
                 />
-                {isInvalid("originalPrice", offerData.originalPrice) && <span className="biz-field-error">Indica el precio original (0 si es gratis)</span>}
+                {isInvalid("originalPrice", offerData.originalPrice) && <span className="biz-field-error">{t("manage_offers.error_price")}</span>}
                 {formatPriceSummary() && offerData.offerType !== "bogo" && offerData.offerType !== "gift" && (
-                  <span className="create-offer-price-preview">Precio con la oferta aplicada: <strong>{formatPriceSummary()}</strong></span>
+                  <span className="create-offer-price-preview">{t("manage_offers.price_preview")}: <strong>{formatPriceSummary()}</strong></span>
                 )}
               </div>
 
               <div className="create-family-form__group">
-                <label className="section-label biz-label" htmlFor="offerType">Tipo de oferta</label>
+                <label className="section-label biz-label" htmlFor="offerType">{t("manage_offers.field_offer_type")}</label>
                 <select
                   id="offerType"
                   className={`biz-input${isInvalid("offerType", offerData.offerType) ? " biz-input--error" : ""}`}
@@ -320,59 +322,59 @@ function ManageOffers() {
                   onChange={handleChange}
                   onBlur={() => touch("offerType")}
                 >
-                  <option value="" disabled>Elige una opción...</option>
-                  <option value="discount">Descuento (%)</option>
-                  <option value="fixed_amount">Importe fijo (€)</option>
-                  <option value="bogo">2x1</option>
-                  <option value="gift">Regalo con reserva</option>
+                  <option value="" disabled>{t("manage_offers.offer_type_placeholder")}</option>
+                  <option value="discount">{t("manage_offers.type_discount")}</option>
+                  <option value="fixed_amount">{t("manage_offers.type_fixed")}</option>
+                  <option value="bogo">{t("manage_offers.type_bogo")}</option>
+                  <option value="gift">{t("manage_offers.type_gift")}</option>
                 </select>
-                {isInvalid("offerType", offerData.offerType) && <span className="biz-field-error">Selecciona un tipo de oferta</span>}
+                {isInvalid("offerType", offerData.offerType) && <span className="biz-field-error">{t("manage_offers.error_offer_type")}</span>}
               </div>
 
               {requiresDiscountValue && (
                 <div className="create-family-form__group">
                   <label className="section-label biz-label" htmlFor="discountValue">
-                    Valor del descuento ({offerData.offerType === "discount" ? "%" : "€"})
+                    {t("manage_offers.field_discount_value", { unit: offerData.offerType === "discount" ? "%" : "€" })}
                   </label>
                   <input
                     type="number" id="discountValue"
                     className={`biz-input${isDiscountValueInvalid ? " biz-input--error" : ""}`}
-                    placeholder={offerData.offerType === "discount" ? "Ej: 20" : "Ej: 5"}
+                    placeholder={offerData.offerType === "discount" ? t("manage_offers.discount_placeholder_percent") : t("manage_offers.discount_placeholder_fixed")}
                     min="0"
                     step={offerData.offerType === "discount" ? "1" : "0.01"}
                     value={offerData.discountValue} onChange={handleChange}
                     onBlur={() => touch("discountValue")}
                   />
-                  {isDiscountValueInvalid && <span className="biz-field-error">Indica el valor del descuento</span>}
+                  {isDiscountValueInvalid && <span className="biz-field-error">{t("manage_offers.error_discount_value")}</span>}
                 </div>
               )}
 
               <div className="create-family-form__group">
                 <label className="section-label biz-label" htmlFor="usageLimit">
-                  Límite de usos
-                  <span className="create-offer-optional">Opcional</span>
+                  {t("manage_offers.field_usage_limit")}
+                  <span className="create-offer-optional">{t("manage_offers.optional")}</span>
                 </label>
                 <input
                   type="number" id="usageLimit" className="biz-input"
-                  placeholder="Ej: 50"
+                  placeholder={t("manage_offers.usage_limit_placeholder")}
                   min="0"
                   step="1"
                   value={offerData.usageLimit} onChange={handleChange}
                 />
-                <span className="create-offer-help">Número máximo de veces que se puede canjear esta oferta en total.</span>
+                <span className="create-offer-help">{t("manage_offers.usage_limit_help")}</span>
               </div>
 
               <div className="create-family-form__group">
                 <label className="section-label biz-label" htmlFor="promoCode">
-                  Código promocional
-                  <span className="create-offer-optional">Opcional</span>
+                  {t("manage_offers.field_promo_code")}
+                  <span className="create-offer-optional">{t("manage_offers.optional")}</span>
                 </label>
                 <input type="text" id="promoCode" className="biz-input" placeholder="TXIKI20" value={offerData.promoCode} onChange={handleChange} />
               </div>
 
               <div className="create-offer-dates">
                 <div className="create-family-form__group">
-                  <label className="section-label biz-label" htmlFor="startDate">Fecha inicio</label>
+                  <label className="section-label biz-label" htmlFor="startDate">{t("manage_offers.field_start_date")}</label>
                   <input
                     type="date"
                     id="startDate"
@@ -381,10 +383,10 @@ function ManageOffers() {
                     onChange={handleChange}
                     onBlur={() => touch("startDate")}
                   />
-                  {isInvalid("startDate", offerData.startDate) && <span className="biz-field-error">Indica la fecha de inicio</span>}
+                  {isInvalid("startDate", offerData.startDate) && <span className="biz-field-error">{t("manage_offers.error_start_date")}</span>}
                 </div>
                 <div className="create-family-form__group">
-                  <label className="section-label biz-label" htmlFor="endDate">Fecha fin</label>
+                  <label className="section-label biz-label" htmlFor="endDate">{t("manage_offers.field_end_date")}</label>
                   <input
                     type="date"
                     id="endDate"
@@ -393,27 +395,27 @@ function ManageOffers() {
                     onChange={handleChange}
                     onBlur={() => touch("endDate")}
                   />
-                  {isInvalid("endDate", offerData.endDate) && <span className="biz-field-error">Indica la fecha de fin</span>}
+                  {isInvalid("endDate", offerData.endDate) && <span className="biz-field-error">{t("manage_offers.error_end_date")}</span>}
                 </div>
               </div>
               {(touched.startDate || touched.endDate) && isDateRangeInvalid && (
-                <span className="biz-field-error">La fecha de inicio no puede ser posterior a la fecha de fin</span>
+                <span className="biz-field-error">{t("manage_offers.error_date_range")}</span>
               )}
             </div>
 
             <div className="biz-activity-form create-offer-notice">
               <span className="material-symbols-outlined fill" style={{ color: 'var(--accent-color)', fontSize: '1.5rem' }}>info</span>
-              <p>Las ofertas deben ser revisadas por el equipo de Plangune antes de publicarse.</p>
+              <p>{t("manage_offers.review_notice")}</p>
             </div>
 
             <div className="create-family-form__actions">
               <button type="button" className="btn-primary" onClick={handleSendReview}>
                 <span className="material-symbols-outlined">{editingId ? "save" : "send"}</span>
-                {editingId ? "Guardar cambios" : "Enviar a revisión"}
+                {editingId ? t("manage_offers.save_changes") : t("manage_offers.submit")}
               </button>
               <div className="btn-back-wrapper" style={{ width: "fit-content", margin: "0 auto", paddingRight: "0.2rem" }}>
                 <button type="button" className="btn-text-danger" onClick={resetForm}>
-                  {editingId ? "Cancelar edición" : "Limpiar formulario"}
+                  {editingId ? t("manage_offers.cancel_edit") : t("manage_offers.clear_form")}
                 </button>
               </div>
             </div>
@@ -424,9 +426,9 @@ function ManageOffers() {
         {/* Columna derecha: lista de ofertas */}
         <div className="biz-offers-column">
           <section id="activas" className="biz-panel biz-active-list">
-            <h2 className="biz-panel__title">Ofertas activas</h2>
+            <h2 className="biz-panel__title">{t("manage_offers.active_title")}</h2>
             {offers.filter(o => o.status === 'active').length === 0 ? (
-              <p className="biz-empty-state">Aún no tienes ofertas activas.</p>
+              <p className="biz-empty-state">{t("manage_offers.active_empty")}</p>
             ) : (
               <div className="biz-active-items">
                 {offers.filter(o => o.status === 'active').map((offer) => (
@@ -436,23 +438,23 @@ function ManageOffers() {
                       <div className="biz-active-item__meta">
                         {offer.activity && <span>{offer.activity}</span>}
                         {offer.meta && <span>{offer.meta}</span>}
-                        {offer.usageLimit && <span>Límite: {offer.usageLimit} usos</span>}
+                        {offer.usageLimit && <span>{t("manage_offers.usage_limit_label", { count: offer.usageLimit })}</span>}
                       </div>
                     </div>
                     <div className="biz-active-item__actions">
-                      <button type="button" className="biz-active-item__edit" title="Editar oferta" onClick={() => handleEdit(offer)}>
+                      <button type="button" className="biz-active-item__edit" title={t("manage_offers.edit_offer")} onClick={() => handleEdit(offer)}>
                         <span className="material-symbols-outlined">edit</span>
                       </button>
-                      <button type="button" className="biz-active-item__delete" title="Eliminar oferta" onClick={() => setConfirmDeleteId(offer.id)}>
+                      <button type="button" className="biz-active-item__delete" title={t("manage_offers.delete_offer")} onClick={() => setConfirmDeleteId(offer.id)}>
                         <span className="material-symbols-outlined">delete</span>
                       </button>
                     </div>
                     {confirmDeleteId === offer.id && (
                       <div className="biz-confirm-delete biz-confirm-delete--neutral">
-                        <span>¿Seguro que quieres eliminar esta oferta?</span>
+                        <span>{t("manage_offers.confirm_delete")}</span>
                         <div className="biz-confirm-delete__actions">
-                          <button type="button" className="biz-confirm-delete__yes" onClick={() => { deleteOffer(offer.id); setConfirmDeleteId(null); }}>Eliminar</button>
-                          <button type="button" className="biz-confirm-delete__no" onClick={() => setConfirmDeleteId(null)}>Cancelar</button>
+                          <button type="button" className="biz-confirm-delete__yes" onClick={() => { deleteOffer(offer.id); setConfirmDeleteId(null); }}>{t("manage_offers.delete_btn")}</button>
+                          <button type="button" className="biz-confirm-delete__no" onClick={() => setConfirmDeleteId(null)}>{t("manage_offers.cancel_btn")}</button>
                         </div>
                       </div>
                     )}
@@ -463,9 +465,9 @@ function ManageOffers() {
           </section>
 
           <section id="pendientes" className="biz-panel biz-active-list">
-            <h2 className="biz-panel__title">Pendientes de revisión</h2>
+            <h2 className="biz-panel__title">{t("manage_offers.pending_title")}</h2>
             {offers.filter(o => o.status === 'pending').length === 0 ? (
-              <p className="biz-empty-state">No tienes ofertas pendientes.</p>
+              <p className="biz-empty-state">{t("manage_offers.pending_empty")}</p>
             ) : (
               <div className="biz-active-items">
                 {offers.filter(o => o.status === 'pending').map((offer) => (
@@ -475,14 +477,14 @@ function ManageOffers() {
                       <div className="biz-active-item__meta">
                         {offer.activity && <span>{offer.activity}</span>}
                         {offer.meta && <span>{offer.meta}</span>}
-                        {offer.usageLimit && <span>Límite: {offer.usageLimit} usos</span>}
+                        {offer.usageLimit && <span>{t("manage_offers.usage_limit_label", { count: offer.usageLimit })}</span>}
                       </div>
                     </div>
                     <div className="biz-active-item__actions">
-                      <button type="button" className="biz-active-item__edit" title="Editar oferta" onClick={() => handleEdit(offer)}>
+                      <button type="button" className="biz-active-item__edit" title={t("manage_offers.edit_offer")} onClick={() => handleEdit(offer)}>
                         <span className="material-symbols-outlined">edit</span>
                       </button>
-                      <button type="button" className="biz-active-item__delete" title="Retirar oferta" onClick={() => setConfirmDeleteId(offer.id)}>
+                      <button type="button" className="biz-active-item__delete" title={t("manage_offers.withdraw_offer")} onClick={() => setConfirmDeleteId(offer.id)}>
                         <span className="material-symbols-outlined">delete</span>
                       </button>
                     </div>
@@ -490,8 +492,8 @@ function ManageOffers() {
                       <div className={`biz-confirm-delete${offer.previousVersion ? " biz-confirm-delete--stacked" : ""}`}>
                         <span>
                           {offer.previousVersion
-                            ? "¿Seguro que quieres deshacer estos cambios? La oferta volverá a estar activa con su versión anterior."
-                            : "¿Seguro que quieres retirar esta oferta?"}
+                            ? t("manage_offers.confirm_undo")
+                            : t("manage_offers.confirm_withdraw")}
                         </span>
                         <div className="biz-confirm-delete__actions">
                           <button
@@ -506,9 +508,9 @@ function ManageOffers() {
                               setConfirmDeleteId(null);
                             }}
                           >
-                            {offer.previousVersion ? "Deshacer cambios" : "Retirar"}
+                            {offer.previousVersion ? t("manage_offers.undo_btn") : t("manage_offers.withdraw_btn")}
                           </button>
-                          <button type="button" className="biz-confirm-delete__no" onClick={() => setConfirmDeleteId(null)}>Cancelar</button>
+                          <button type="button" className="biz-confirm-delete__no" onClick={() => setConfirmDeleteId(null)}>{t("manage_offers.cancel_btn")}</button>
                         </div>
                       </div>
                     )}

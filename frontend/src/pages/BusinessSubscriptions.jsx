@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 
 /**
@@ -14,71 +15,73 @@ const FREE_PLAN = "Landa";
 const storeToDisplay = (sub) => (!sub || sub === "Free" ? FREE_PLAN : sub);
 const displayToStore = (name) => (name === FREE_PLAN ? "Free" : name);
 
-const PLANS = [
-  {
-    name: "Landa",
-    price: "0€",
-    period: "/mes",
-    cta: "Obtener gratis",
-    free: true,
-    features: [
-      "Ficha de negocio con foto",
-      "Descripción básica (200 caracteres)",
-      "Datos de contacto",
-      "Directorio por provincia (Visualización en mapa)",
-      "Recibir Valoraciones y Reseñas",
-      "Crear ofertas promocionales",
-    ],
-  },
-  {
-    name: "Mendi",
-    price: "39€",
-    period: "/mes",
-    annual: "374€/año (20% descuento)",
-    cta: "Obtener Mendi",
-    featured: true,
-    features: [
-      "Ficha mejorada con 6 fotos",
-      "Descripción avanzada (500 caracteres)",
-      "Destacado TOP RESULTADOS (2 veces/mes)",
-      "Pin destacado en mapa",
-      {
-        text: "Acceso a ACTIVIDAD:",
-        sub: ["Panel de negocio", "Plan de visibilidad", "1 filtro personalizado"],
-      },
-      "Newsletter (1 vez/mes)",
-      "Menciones en nuestras RRSS",
-      "Soporte 24h + reportes mensuales",
-    ],
-  },
-  {
-    name: "Gailur",
-    price: "119€",
-    period: "/mes",
-    annual: "1.071€/año (25% descuento)",
-    cta: "Obtener Gailur",
-    top: true,
-    features: [
-      "Ficha premium con fotos ilimitadas",
-      "Descripción avanzada (1000 caracteres)",
-      "Destacado SIEMPRE EN TOP",
-      "Pin permanente en mapa + Banner Hero",
-      "Panel de negocio avanzado",
-      "Plan de visibilidad avanzado",
-      "1 filtro PATROCINADO GLOBAL (2 días/mes)",
-      "Newsletter (2 vez/mes)",
-      "Menciones prioritarias en nuestras RRSS",
-      "Asesor dedicado",
-      "Reportes semanales avanzados",
-    ],
-  },
-];
-
 function BusinessSubscriptions() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { subscription, setSubscription } = useBusinessStore();
   const [selectedPlan, setSelectedPlan] = useState(storeToDisplay(subscription));
   const [toastMsg, setToastMsg] = useState("");
+
+  const PLANS = [
+    {
+      name: "Landa",
+      price: "0€",
+      cta: t("biz_subscriptions.plan_landa_cta"),
+      free: true,
+      features: [
+        t("biz_subscriptions.plan_landa_f1"),
+        t("biz_subscriptions.plan_landa_f2"),
+        t("biz_subscriptions.plan_landa_f3"),
+        t("biz_subscriptions.plan_landa_f4"),
+        t("biz_subscriptions.plan_landa_f5"),
+        t("biz_subscriptions.plan_landa_f6"),
+      ],
+    },
+    {
+      name: "Mendi",
+      price: "39€",
+      annual: t("biz_subscriptions.plan_mendi_annual"),
+      cta: t("biz_subscriptions.plan_mendi_cta"),
+      featured: true,
+      features: [
+        t("biz_subscriptions.plan_mendi_f1"),
+        t("biz_subscriptions.plan_mendi_f2"),
+        t("biz_subscriptions.plan_mendi_f3"),
+        t("biz_subscriptions.plan_mendi_f4"),
+        {
+          text: t("biz_subscriptions.plan_mendi_f5"),
+          sub: [
+            t("biz_subscriptions.plan_mendi_f5_s1"),
+            t("biz_subscriptions.plan_mendi_f5_s2"),
+            t("biz_subscriptions.plan_mendi_f5_s3"),
+          ],
+        },
+        t("biz_subscriptions.plan_mendi_f6"),
+        t("biz_subscriptions.plan_mendi_f7"),
+        t("biz_subscriptions.plan_mendi_f8"),
+      ],
+    },
+    {
+      name: "Gailur",
+      price: "119€",
+      annual: t("biz_subscriptions.plan_gailur_annual"),
+      cta: t("biz_subscriptions.plan_gailur_cta"),
+      top: true,
+      features: [
+        t("biz_subscriptions.plan_gailur_f1"),
+        t("biz_subscriptions.plan_gailur_f2"),
+        t("biz_subscriptions.plan_gailur_f3"),
+        t("biz_subscriptions.plan_gailur_f4"),
+        t("biz_subscriptions.plan_gailur_f5"),
+        t("biz_subscriptions.plan_gailur_f6"),
+        t("biz_subscriptions.plan_gailur_f7"),
+        t("biz_subscriptions.plan_gailur_f8"),
+        t("biz_subscriptions.plan_gailur_f9"),
+        t("biz_subscriptions.plan_gailur_f10"),
+        t("biz_subscriptions.plan_gailur_f11"),
+      ],
+    },
+  ];
 
   const handleSelectPlan = (planName) => {
     if (planName === selectedPlan) return;
@@ -86,8 +89,8 @@ function BusinessSubscriptions() {
     setSubscription(displayToStore(planName));
     setToastMsg(
       planName === FREE_PLAN
-        ? "✓ Plan Landa activado. Solicitud registrada para demo."
-        : `✓ Solicitud de ${planName} registrada para demo. Nuestro equipo contactará contigo.`,
+        ? t("biz_subscriptions.toast_free")
+        : t("biz_subscriptions.toast_paid", { plan: planName }),
     );
     setTimeout(() => setToastMsg(""), 3500);
   };
@@ -95,13 +98,12 @@ function BusinessSubscriptions() {
   const handleCancelPlan = () => {
     setSelectedPlan(FREE_PLAN);
     setSubscription("Free");
-    setToastMsg("✓ Plan cancelado. Vuelves al plan Landa (gratis).");
+    setToastMsg(t("biz_subscriptions.toast_cancelled"));
     setTimeout(() => setToastMsg(""), 3500);
   };
 
   return (
     <main className="business-subscriptions-main">
-      {/* Toast */}
       {toastMsg && (
         <div className="subscription-toast">
           <span className="material-symbols-outlined">check_circle</span>
@@ -110,27 +112,25 @@ function BusinessSubscriptions() {
       )}
 
       <div className="biz-dashboard-header">
-        <h1 className="page-title">Planes de pago</h1>
+        <h1 className="page-title">{t("biz_subscriptions.title")}</h1>
         <div className="btn-back-wrapper">
           <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-            Volver atrás
+            {t("plan_detail.back")}
           </button>
         </div>
       </div>
 
       <div className="subscription-active-banner">
         <span className="material-symbols-outlined fill">workspace_premium</span>
-        <span>Plan actual: <strong>{selectedPlan}</strong></span>
+        <span>{t("biz_subscriptions.current_plan")}: <strong>{selectedPlan}</strong></span>
         {selectedPlan !== FREE_PLAN && (
           <button type="button" className="subscription-cancel-btn" onClick={handleCancelPlan}>
-            Cancelar plan
+            {t("biz_subscriptions.cancel_plan")}
           </button>
         )}
       </div>
 
-      <p className="subscriptions-note">
-        Pantalla demostrativa de propuesta comercial: la contratación no procesa pagos reales.
-      </p>
+      <p className="subscriptions-note">{t("biz_subscriptions.demo_note")}</p>
 
       <section className="subscriptions-grid">
         {PLANS.map((plan) => {
@@ -143,22 +143,22 @@ function BusinessSubscriptions() {
               {isActive ? (
                 <div className="subscription-active-badge">
                   <span className="material-symbols-outlined fill" style={{ fontSize: "1rem" }}>check_circle</span>
-                  Plan actual
+                  {t("biz_subscriptions.active_badge")}
                 </div>
               ) : plan.featured ? (
                 <div className="subscription-recommended-badge">
                   <span className="material-symbols-outlined fill" style={{ fontSize: "1rem" }}>star</span>
-                  Recomendado
+                  {t("biz_subscriptions.recommended_badge")}
                 </div>
               ) : plan.top ? (
                 <div className="subscription-top-badge">
                   <span className="material-symbols-outlined fill" style={{ fontSize: "1rem" }}>military_tech</span>
-                  Plan TOP
+                  {t("biz_subscriptions.top_badge")}
                 </div>
               ) : plan.free ? (
                 <div className="subscription-free-badge">
                   <span className="material-symbols-outlined fill" style={{ fontSize: "1rem" }}>sell</span>
-                  Plan gratuito
+                  {t("biz_subscriptions.free_badge")}
                 </div>
               ) : null}
 
@@ -166,7 +166,7 @@ function BusinessSubscriptions() {
                 <span className="subscription-name">{plan.name}</span>
                 <span className="subscription-price">
                   {plan.price}
-                  <span className="subscription-period">{plan.period}</span>
+                  <span className="subscription-period">{t("biz_subscriptions.period")}</span>
                 </span>
               </div>
 
@@ -176,12 +176,12 @@ function BusinessSubscriptions() {
                 disabled={isActive}
                 onClick={() => handleSelectPlan(plan.name)}
               >
-                {isActive ? "Plan actual" : plan.cta}
+                {isActive ? t("biz_subscriptions.active_badge") : plan.cta}
               </button>
 
               {plan.annual && (
                 <div className="subscription-annual">
-                  <span className="subscription-annual__label">Oferta especial</span>
+                  <span className="subscription-annual__label">{t("biz_subscriptions.annual_label")}</span>
                   <span className="subscription-annual__value">{plan.annual}</span>
                 </div>
               )}
@@ -209,26 +209,10 @@ function BusinessSubscriptions() {
       </section>
 
       <section className="subscriptions-pitch">
-        <h2 className="subscriptions-pitch__title">Haz que tu negocio sea El Plan.</h2>
-        <p className="subscriptions-pitch__lead">
-          El lugar donde las familias de Euskadi eligen estar
-        </p>
-        <p>
-          Tienes un local increíble, instalaciones adaptadas y una gran oferta. Sin embargo,
-          llega el fin de semana y sientes que tu inversión en publicidad se pierde en el
-          ruido de las redes sociales. Las familias que buscan desesperadamente tiempo de
-          calidad cerca de ti no te ven en el momento decisivo: cuando están decidiendo
-          adónde ir.
-        </p>
-        <p>
-          PlanGune es el canal de conexión definitivo. No vendemos likes; te conectamos con
-          familias que están en tu zona, buscando exactamente lo que tú ofreces. Destacarás
-          en su pantalla justo cuando filtren buscando un local "A cubierto", con
-          "Cambiador" o "Gratis". Además, tus ofertas tendrán un escaparate brutal,
-          impactando en tiempo real incluso a los miles de usuarios que navegan por la app
-          sin estar registrados. Deja de disparar al aire. Tú pon la experiencia; nosotros
-          llevamos a las familias hasta tu puerta.
-        </p>
+        <h2 className="subscriptions-pitch__title">{t("biz_subscriptions.pitch_title")}</h2>
+        <p className="subscriptions-pitch__lead">{t("biz_subscriptions.pitch_lead")}</p>
+        <p>{t("biz_subscriptions.pitch_p1")}</p>
+        <p>{t("biz_subscriptions.pitch_p2")}</p>
       </section>
     </main>
   );

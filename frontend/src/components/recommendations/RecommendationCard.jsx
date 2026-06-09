@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { useFavorites } from "../../context/FavoritesContext";
 import "./RecommendedPlans.css";
@@ -14,6 +15,7 @@ import "./RecommendedPlans.css";
  * detalle y el botón de favorito (no existe `/planes/:id` ni se puede favoritar).
  */
 function RecommendationCard({ card }) {
+  const { t } = useTranslation();
   const { isFavorite, toggleFavorite } = useFavorites();
   const favorite = card.hasDetail && isFavorite(card.id);
 
@@ -22,13 +24,13 @@ function RecommendationCard({ card }) {
       <div className="rec-card__head">
         <span className="rec-chip">
           <span className="material-symbols-outlined fill">auto_awesome</span>
-          {card.scoreLabel}
+          {t(`rec_card.score.${card.scoreLabel}`, card.scoreLabel)}
         </span>
         {card.hasDetail && (
           <button
             type="button"
             className={`rec-fav${favorite ? " rec-fav--active" : ""}`}
-            aria-label={favorite ? "Quitar de favoritos" : "Añadir a favoritos"}
+            aria-label={favorite ? t("plan_card.remove_favorite") : t("plan_card.add_favorite")}
             aria-pressed={favorite}
             onClick={() => toggleFavorite(card.id)}
           >
@@ -59,7 +61,7 @@ function RecommendationCard({ card }) {
 
       {card.hasDetail && (
         <Link className="rec-card__cta" to={`/planes/${card.id}`}>
-          Ver plan
+          {t("plan_card.view_plan")}
         </Link>
       )}
     </article>

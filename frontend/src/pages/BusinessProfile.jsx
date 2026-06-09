@@ -1,18 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuthStore } from "../store";
 
-const DAYS = [
-  { key: "lun", label: "Lunes" },
-  { key: "mar", label: "Martes" },
-  { key: "mie", label: "Miércoles" },
-  { key: "jue", label: "Jueves" },
-  { key: "vie", label: "Viernes" },
-  { key: "sab", label: "Sábado" },
-  { key: "dom", label: "Domingo" },
-];
-
-const DAY_ORDER = Object.fromEntries(DAYS.map(({ key }, i) => [key, i]));
+const DAY_KEYS = ["lun", "mar", "mie", "jue", "vie", "sab", "dom"];
+const DAY_ORDER = Object.fromEntries(DAY_KEYS.map((key, i) => [key, i]));
 
 const HOURS = Array.from({ length: 24 }, (_, i) => {
   const h = String(i).padStart(2, "0");
@@ -22,9 +14,12 @@ const HOURS = Array.from({ length: 24 }, (_, i) => {
 const EMPTY_SLOT = { day: "", m_from: "", m_to: "", a_from: "", a_to: "", continuous: false };
 
 function BusinessProfile() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const updateUser = useAuthStore((state) => state.updateUser);
+
+  const DAYS = DAY_KEYS.map((key) => ({ key, label: t(`biz_profile.day_${key}`) }));
 
   const [profile, setProfile] = useState({
     name: user?.name || "",
@@ -61,13 +56,13 @@ function BusinessProfile() {
   };
 
   const validateField = (name, value) => {
-    if (name === "name" && !value.trim()) return "El nombre del negocio es obligatorio.";
-    if (name === "nif" && !value.trim()) return "El NIF es obligatorio.";
-    if (name === "address" && !value.trim()) return "La dirección es obligatoria.";
-    if (name === "phone" && !value.trim()) return "El teléfono de contacto es obligatorio.";
+    if (name === "name" && !value.trim()) return t("biz_profile.error_name");
+    if (name === "nif" && !value.trim()) return t("biz_profile.error_nif");
+    if (name === "address" && !value.trim()) return t("biz_profile.error_address");
+    if (name === "phone" && !value.trim()) return t("biz_profile.error_phone");
     if (name === "email") {
-      if (!value.trim()) return "El correo electrónico es obligatorio.";
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Introduce un correo válido.";
+      if (!value.trim()) return t("biz_profile.error_email_required");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return t("biz_profile.error_email_invalid");
     }
     return "";
   };
@@ -80,12 +75,12 @@ function BusinessProfile() {
 
   const validate = () => {
     const newErrors = {};
-    if (!profile.name.trim()) newErrors.name = "El nombre del negocio es obligatorio.";
-    if (!profile.nif.trim()) newErrors.nif = "El NIF es obligatorio.";
-    if (!profile.address.trim()) newErrors.address = "La dirección es obligatoria.";
-    if (!profile.phone.trim()) newErrors.phone = "El teléfono de contacto es obligatorio.";
-    if (!profile.email.trim()) newErrors.email = "El correo electrónico es obligatorio.";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) newErrors.email = "Introduce un correo válido.";
+    if (!profile.name.trim()) newErrors.name = t("biz_profile.error_name");
+    if (!profile.nif.trim()) newErrors.nif = t("biz_profile.error_nif");
+    if (!profile.address.trim()) newErrors.address = t("biz_profile.error_address");
+    if (!profile.phone.trim()) newErrors.phone = t("biz_profile.error_phone");
+    if (!profile.email.trim()) newErrors.email = t("biz_profile.error_email_required");
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(profile.email)) newErrors.email = t("biz_profile.error_email_invalid");
     return newErrors;
   };
 
@@ -99,15 +94,15 @@ function BusinessProfile() {
     if (!slot.day || !slot.m_from || !slot.m_to) return;
 
     if (slot.m_to <= slot.m_from) {
-      setScheduleError("La hora de fin de mañana debe ser posterior a la de inicio.");
+      setScheduleError(t("biz_profile.schedule_error_morning"));
       return;
     }
     if (slot.a_from && slot.a_from < slot.m_to) {
-      setScheduleError("El turno de tarde debe empezar después de que acabe el de mañana.");
+      setScheduleError(t("biz_profile.schedule_error_afternoon_start"));
       return;
     }
     if (slot.a_from && slot.a_to && slot.a_to <= slot.a_from) {
-      setScheduleError("La hora de fin de tarde debe ser posterior a la de inicio.");
+      setScheduleError(t("biz_profile.schedule_error_afternoon_end"));
       return;
     }
 
@@ -135,7 +130,7 @@ function BusinessProfile() {
   };
 
   const formatSlot = (s) => {
-    if (s.continuous) return `${s.m_from} – ${s.a_to} (continuo)`;
+    if (s.continuous) return t("biz_profile.schedule_continuous_format", { from: s.m_from, to: s.a_to });
     const morning = `${s.m_from} – ${s.m_to}`;
     const afternoon = s.a_from && s.a_to ? ` / ${s.a_from} – ${s.a_to}` : "";
     return morning + afternoon;
@@ -146,10 +141,10 @@ function BusinessProfile() {
   return (
     <main className="biz-dashboard-main">
       <div className="biz-dashboard-header">
-        <h1 className="page-title">Editar perfil</h1>
+        <h1 className="page-title">{t("biz_profile.title")}</h1>
         <div className="btn-back-wrapper">
           <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-            Volver atrás
+            {t("plan_detail.back")}
           </button>
         </div>
       </div>
@@ -158,65 +153,65 @@ function BusinessProfile() {
         <form className="create-family-form" onSubmit={handleSave}>
 
           <div className="create-family-form__group">
-            <label className="section-label biz-label" htmlFor="name">Nombre del negocio</label>
+            <label className="section-label biz-label" htmlFor="name">{t("biz_profile.field_name")}</label>
             <input
               id="name" name="name" type="text"
               className={`biz-input${errors.name ? ' biz-input--error' : ''}`}
-              placeholder="Ej: Txikipark Aventuras"
+              placeholder={t("biz_profile.field_name_placeholder")}
               value={profile.name} onChange={handleChange} onBlur={handleBlur}
             />
             {errors.name && <span className="biz-field-error">{errors.name}</span>}
           </div>
 
           <div className="create-family-form__group">
-            <label className="section-label biz-label" htmlFor="nif">NIF</label>
+            <label className="section-label biz-label" htmlFor="nif">{t("biz_profile.field_nif")}</label>
             <input
               id="nif" name="nif" type="text"
               className={`biz-input${errors.nif ? ' biz-input--error' : ''}`}
-              placeholder="Ej: B12345678"
+              placeholder={t("biz_profile.field_nif_placeholder")}
               value={profile.nif} onChange={handleChange} onBlur={handleBlur}
             />
             {errors.nif && <span className="biz-field-error">{errors.nif}</span>}
           </div>
 
           <div className="create-family-form__group">
-            <label className="section-label biz-label" htmlFor="description">Descripción</label>
+            <label className="section-label biz-label" htmlFor="description">{t("biz_dashboard.field_description")}</label>
             <textarea
               id="description" name="description" className="biz-input"
-              placeholder="Ej: Ofrecemos actividades de aventura para niños de 3 a 12 años..."
+              placeholder={t("biz_profile.field_description_placeholder")}
               value={profile.description} onChange={handleChange}
               style={{ height: '9rem', padding: '0.75rem 1rem', resize: 'vertical' }}
             />
           </div>
 
           <div className="create-family-form__group">
-            <label className="section-label biz-label" htmlFor="address">Dirección</label>
+            <label className="section-label biz-label" htmlFor="address">{t("biz_profile.field_address")}</label>
             <input
               id="address" name="address" type="text"
               className={`biz-input${errors.address ? ' biz-input--error' : ''}`}
-              placeholder="Ej: Calle Gran Vía 12, 48001 Bilbao"
+              placeholder={t("biz_profile.field_address_placeholder")}
               value={profile.address} onChange={handleChange} onBlur={handleBlur}
             />
             {errors.address && <span className="biz-field-error">{errors.address}</span>}
           </div>
 
           <div className="create-family-form__group">
-            <label className="section-label biz-label" htmlFor="phone">Teléfono de contacto</label>
+            <label className="section-label biz-label" htmlFor="phone">{t("biz_profile.field_phone")}</label>
             <input
               id="phone" name="phone" type="tel"
               className={`biz-input${errors.phone ? ' biz-input--error' : ''}`}
-              placeholder="Ej: 944 123 456"
+              placeholder={t("biz_profile.field_phone_placeholder")}
               value={profile.phone} onChange={handleChange} onBlur={handleBlur}
             />
             {errors.phone && <span className="biz-field-error">{errors.phone}</span>}
           </div>
 
           <div className="create-family-form__group">
-            <label className="section-label biz-label" htmlFor="email">Correo electrónico</label>
+            <label className="section-label biz-label" htmlFor="email">{t("biz_profile.field_email")}</label>
             <input
               id="email" name="email" type="email"
               className={`biz-input${errors.email ? ' biz-input--error' : ''}`}
-              placeholder="Ej: contacto@tunegocio.com"
+              placeholder={t("biz_profile.field_email_placeholder")}
               value={profile.email} onChange={handleChange} onBlur={handleBlur}
             />
             {errors.email && <span className="biz-field-error">{errors.email}</span>}
@@ -224,7 +219,7 @@ function BusinessProfile() {
 
           {/* ── Horario ── */}
           <div className="create-family-form__group">
-            <label className="section-label biz-label">Horario</label>
+            <label className="section-label biz-label">{t("biz_profile.field_schedule")}</label>
 
             <div className="schedule-builder">
               <select
@@ -232,21 +227,21 @@ function BusinessProfile() {
                 value={slot.day}
                 onChange={(e) => handleSlotChange("day", e.target.value)}
               >
-                <option value="">Día</option>
+                <option value="">{t("biz_profile.schedule_day_placeholder")}</option>
                 {DAYS.filter(({ key }) => !usedDays.has(key)).map(({ key, label }) => (
                   <option key={key} value={key}>{label}</option>
                 ))}
               </select>
 
               <div className="schedule-shift">
-                <span className="schedule-shift-label">De / Hasta</span>
+                <span className="schedule-shift-label">{t("biz_profile.schedule_from_to")}</span>
                 <div className="schedule-shift-times">
                   <select
                     className="biz-input schedule-time-select"
                     value={slot.m_from}
                     onChange={(e) => handleSlotChange("m_from", e.target.value)}
                   >
-                    <option value="">Inicio</option>
+                    <option value="">{t("biz_profile.schedule_start")}</option>
                     {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
                   </select>
                   <span className="schedule-separator">—</span>
@@ -255,7 +250,7 @@ function BusinessProfile() {
                     value={slot.m_to}
                     onChange={(e) => handleSlotChange("m_to", e.target.value)}
                   >
-                    <option value="">Fin</option>
+                    <option value="">{t("biz_profile.schedule_end")}</option>
                     {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
                   </select>
                 </div>
@@ -267,7 +262,7 @@ function BusinessProfile() {
                   checked={slot.continuous}
                   onChange={(e) => handleSlotChange("continuous", e.target.checked)}
                 />
-                <span>Turno continuo</span>
+                <span>{t("biz_profile.schedule_continuous")}</span>
               </label>
 
               {!slot.continuous && (
@@ -276,14 +271,16 @@ function BusinessProfile() {
 
               {!slot.continuous && (
                 <div className="schedule-shift">
-                  <span className="schedule-shift-label">De / Hasta <span className="schedule-optional">(opcional)</span></span>
+                  <span className="schedule-shift-label">
+                    {t("biz_profile.schedule_from_to_optional")} <span className="schedule-optional">{t("biz_profile.schedule_optional")}</span>
+                  </span>
                   <div className="schedule-shift-times">
                     <select
                       className="biz-input schedule-time-select"
                       value={slot.a_from}
                       onChange={(e) => handleSlotChange("a_from", e.target.value)}
                     >
-                      <option value="">Inicio</option>
+                      <option value="">{t("biz_profile.schedule_start")}</option>
                       {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
                     </select>
                     <span className="schedule-separator">—</span>
@@ -292,7 +289,7 @@ function BusinessProfile() {
                       value={slot.a_to}
                       onChange={(e) => handleSlotChange("a_to", e.target.value)}
                     >
-                      <option value="">Fin</option>
+                      <option value="">{t("biz_profile.schedule_end")}</option>
                       {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
                     </select>
                   </div>
@@ -310,7 +307,7 @@ function BusinessProfile() {
                 disabled={!slot.day || !slot.m_from || !slot.m_to}
               >
                 <span className="material-symbols-outlined">add</span>
-                Añadir
+                {t("biz_profile.schedule_add")}
               </button>
 
               {scheduleList.length > 0 && (
@@ -327,7 +324,7 @@ function BusinessProfile() {
                           type="button"
                           className="schedule-list-remove"
                           onClick={() => handleRemoveSlot(s.day)}
-                          aria-label="Eliminar"
+                          aria-label={t("biz_profile.schedule_remove")}
                         >
                           <span className="material-symbols-outlined">close</span>
                         </button>
@@ -342,11 +339,11 @@ function BusinessProfile() {
           <div className="create-family-form__actions">
             <button type="submit" className="btn-primary">
               <span className="material-symbols-outlined">save</span>
-              Guardar cambios
+              {t("biz_profile.save")}
             </button>
             <span className="btn-reset-wrapper">
               <button type="button" className="btn-reset" onClick={handleReset}>
-                Restablecer
+                {t("biz_profile.reset")}
               </button>
             </span>
           </div>
@@ -357,7 +354,7 @@ function BusinessProfile() {
         <div className="save-confirm-overlay" onClick={() => setShowConfirm(false)}>
           <div className="save-confirm-modal" onClick={(e) => e.stopPropagation()}>
             <span className="material-symbols-outlined save-confirm-icon">check_circle</span>
-            <p className="save-confirm-text">Cambios guardados correctamente</p>
+            <p className="save-confirm-text">{t("biz_profile.saved_ok")}</p>
           </div>
         </div>
       )}

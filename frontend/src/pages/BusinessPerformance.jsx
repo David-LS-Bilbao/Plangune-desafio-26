@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function BusinessPerformance() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [showFullReport, setShowFullReport] = useState(false);
 
   return (
     <main className="business-performance-main">
       <div className="performance-header">
-        <h2 className="performance-title">Informe de rendimiento</h2>
+        <h2 className="performance-title">{t("biz_performance.title")}</h2>
         <div className="btn-back-wrapper">
           <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-            Volver atrás
+            {t("plan_detail.back")}
           </button>
         </div>
       </div>
@@ -21,18 +23,14 @@ function BusinessPerformance() {
         {/* KPI 1: Visualizaciones */}
         <div className="metric-card">
           <div className="metric-header">
-            <span className="material-symbols-outlined icon-secondary">
-              visibility
-            </span>
+            <span className="material-symbols-outlined icon-secondary">visibility</span>
             <div className="trend-badge positive">
-              <span className="material-symbols-outlined text-sm">
-                trending_up
-              </span>
+              <span className="material-symbols-outlined text-sm">trending_up</span>
               <span>+12%</span>
             </div>
           </div>
           <div className="metric-content">
-            <h3 className="metric-label">Visualizaciones</h3>
+            <h3 className="metric-label">{t("biz_performance.kpi_views")}</h3>
             <p className="metric-value">1,245</p>
           </div>
         </div>
@@ -40,18 +38,14 @@ function BusinessPerformance() {
         {/* KPI 2: Clics */}
         <div className="metric-card">
           <div className="metric-header">
-            <span className="material-symbols-outlined icon-primary">
-              ads_click
-            </span>
+            <span className="material-symbols-outlined icon-primary">ads_click</span>
             <div className="trend-badge positive">
-              <span className="material-symbols-outlined text-sm">
-                trending_up
-              </span>
+              <span className="material-symbols-outlined text-sm">trending_up</span>
               <span>+8%</span>
             </div>
           </div>
           <div className="metric-content">
-            <h3 className="metric-label">Clics en Ofertas</h3>
+            <h3 className="metric-label">{t("biz_performance.kpi_clicks")}</h3>
             <p className="metric-value">342</p>
           </div>
         </div>
@@ -59,18 +53,14 @@ function BusinessPerformance() {
         {/* KPI 3: Guardadas */}
         <div className="metric-card">
           <div className="metric-header">
-            <span className="material-symbols-outlined icon-tertiary">
-              bookmark
-            </span>
+            <span className="material-symbols-outlined icon-tertiary">bookmark</span>
             <div className="trend-badge positive">
-              <span className="material-symbols-outlined text-sm">
-                trending_up
-              </span>
+              <span className="material-symbols-outlined text-sm">trending_up</span>
               <span>+15%</span>
             </div>
           </div>
           <div className="metric-content">
-            <h3 className="metric-label">Ofertas Guardadas</h3>
+            <h3 className="metric-label">{t("biz_performance.kpi_saved")}</h3>
             <p className="metric-value">89</p>
           </div>
         </div>
@@ -78,13 +68,11 @@ function BusinessPerformance() {
         {/* KPI 4: Valoración */}
         <div className="metric-card">
           <div className="metric-header">
-            <span className="material-symbols-outlined icon-star fill">
-              star
-            </span>
-            <span className="badge-neutral">Media Global</span>
+            <span className="material-symbols-outlined icon-star fill">star</span>
+            <span className="badge-neutral">{t("biz_performance.kpi_rating_badge")}</span>
           </div>
           <div className="metric-content">
-            <h3 className="metric-label">Valoración Media</h3>
+            <h3 className="metric-label">{t("biz_performance.kpi_rating")}</h3>
             <div className="rating-value">
               <p className="metric-value">4.8</p>
               <p className="rating-max">/ 5</p>
@@ -98,77 +86,60 @@ function BusinessPerformance() {
         {/* Chart Area */}
         <div className="chart-section col-span-2">
           <div className="chart-header">
-            <h3 className="chart-title">Interacción Semanal</h3>
+            <h3 className="chart-title">{t("biz_performance.chart_title")}</h3>
             <button
               className="btn-link-sm"
               type="button"
               onClick={() => setShowFullReport(true)}
             >
-              Reporte completo
+              {t("biz_performance.chart_full_report")}
             </button>
           </div>
           {showFullReport && (
             <div className="report-note">
-              <p>
-                Mostrando datos extendidos y recomendaciones de optimización.
-              </p>
+              <p>{t("biz_performance.chart_report_note")}</p>
             </div>
           )}
 
           {/* CSS Bar Chart Representation */}
           <div className="bar-chart-container">
             <div className="chart-bar-group">
-              <div className="bar bg-variant h-40">
-                <div className="tooltip">120</div>
-              </div>
-              <span className="bar-label">Lun</span>
+              <div className="bar bg-variant h-40"><div className="tooltip">120</div></div>
+              <span className="bar-label">{t("biz_performance.day_lun")}</span>
             </div>
             <div className="chart-bar-group">
-              <div className="bar bg-variant h-60">
-                <div className="tooltip">180</div>
-              </div>
-              <span className="bar-label">Mar</span>
+              <div className="bar bg-variant h-60"><div className="tooltip">180</div></div>
+              <span className="bar-label">{t("biz_performance.day_mar")}</span>
             </div>
             <div className="chart-bar-group">
-              <div className="bar bg-variant h-45">
-                <div className="tooltip">135</div>
-              </div>
-              <span className="bar-label">Mié</span>
+              <div className="bar bg-variant h-45"><div className="tooltip">135</div></div>
+              <span className="bar-label">{t("biz_performance.day_mie")}</span>
             </div>
             <div className="chart-bar-group">
-              <div className="bar bg-variant h-80">
-                <div className="tooltip">240</div>
-              </div>
-              <span className="bar-label">Jue</span>
+              <div className="bar bg-variant h-80"><div className="tooltip">240</div></div>
+              <span className="bar-label">{t("biz_performance.day_jue")}</span>
             </div>
             <div className="chart-bar-group">
-              <div className="bar bg-primary h-95 shadow-glow">
-                <div className="tooltip active">285</div>
-              </div>
-              <span className="bar-label primary-bold">Vie</span>
+              <div className="bar bg-primary h-95 shadow-glow"><div className="tooltip active">285</div></div>
+              <span className="bar-label primary-bold">{t("biz_performance.day_vie")}</span>
             </div>
             <div className="chart-bar-group">
-              <div className="bar bg-variant h-70">
-                <div className="tooltip">210</div>
-              </div>
-              <span className="bar-label">Sáb</span>
+              <div className="bar bg-variant h-70"><div className="tooltip">210</div></div>
+              <span className="bar-label">{t("biz_performance.day_sab")}</span>
             </div>
             <div className="chart-bar-group">
-              <div className="bar bg-variant h-50">
-                <div className="tooltip">150</div>
-              </div>
-              <span className="bar-label">Dom</span>
+              <div className="bar bg-variant h-50"><div className="tooltip">150</div></div>
+              <span className="bar-label">{t("biz_performance.day_dom")}</span>
             </div>
           </div>
         </div>
 
-        {/* Recent Reviews */}
+        {/* Recent Reviews — texto de las reseñas sin traducir */}
         <div className="reviews-section-small">
           <div className="reviews-header">
-            <h3 className="reviews-title">Reseñas Recientes</h3>
+            <h3 className="reviews-title">{t("biz_performance.reviews_title")}</h3>
           </div>
           <div className="reviews-list">
-            {/* Review 1 */}
             <div className="review-item">
               <div className="review-author-row">
                 <div className="author-avatar bg-secondary-container">M</div>
@@ -185,12 +156,10 @@ function BusinessPerformance() {
                 </div>
               </div>
               <p className="review-text">
-                "El taller de cerámica fue increíble, los niños se lo pasaron
-                genial. Muy bien organizado."
+                "El taller de cerámica fue increíble, los niños se lo pasaron genial. Muy bien organizado."
               </p>
             </div>
 
-            {/* Review 2 */}
             <div className="review-item">
               <div className="review-author-row">
                 <div className="author-avatar bg-primary-container">J</div>
@@ -207,12 +176,10 @@ function BusinessPerformance() {
                 </div>
               </div>
               <p className="review-text">
-                "Buen precio usando la oferta de la app. El local estaba un poco
-                lleno, pero la atención fue rápida."
+                "Buen precio usando la oferta de la app. El local estaba un poco lleno, pero la atención fue rápida."
               </p>
             </div>
 
-            {/* Review 3 */}
             <div className="review-item border-none">
               <div className="review-author-row">
                 <div className="author-avatar bg-surface-dim">A</div>
@@ -229,8 +196,7 @@ function BusinessPerformance() {
                 </div>
               </div>
               <p className="review-text">
-                "Instalaciones muy limpias y adaptadas para carritos. Volveremos
-                seguro el próximo fin de semana."
+                "Instalaciones muy limpias y adaptadas para carritos. Volveremos seguro el próximo fin de semana."
               </p>
             </div>
           </div>
@@ -240,7 +206,7 @@ function BusinessPerformance() {
             className="reviews-see-more"
             onClick={() => navigate("/negocio/resenas")}
           >
-            Ver más reseñas
+            {t("biz_performance.reviews_see_more")}
           </button>
         </div>
       </div>

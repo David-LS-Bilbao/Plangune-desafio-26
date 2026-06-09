@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
 
 const SUGGESTED_SERVICES = [
@@ -12,6 +13,7 @@ const SUGGESTED_SERVICES = [
 ];
 
 function BusinessDashboard() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [activityName, setActivityName] = useState("");
   const [category, setCategory] = useState("");
@@ -104,10 +106,10 @@ function BusinessDashboard() {
           ? { ...editedOffer, previousVersion: undefined }
           : editedOffer?.previousVersion;
       updateOffer(editingId, { title: activityName, category, age, zone, tags: services, price, location: zone, description, image: coverImage, status: 'pending', previousVersion });
-      setConfirmMessage("Actividad actualizada y enviada a revisión.");
+      setConfirmMessage(t("biz_dashboard.confirm_updated"));
     } else {
       addOffer({ title: activityName, category, age, zone, tags: services, price, location: zone, description, image: coverImage, status: 'pending' });
-      setConfirmMessage("Tu actividad se ha enviado a revisión.");
+      setConfirmMessage(t("biz_dashboard.confirm_sent"));
     }
     setShowConfirm(true);
     setTimeout(() => setShowConfirm(false), 3000);
@@ -118,25 +120,25 @@ function BusinessDashboard() {
     <main className="biz-dashboard-main">
 
       <div className="biz-dashboard-header">
-        <h1 className="biz-dashboard-title">Gestionar actividad</h1>
+        <h1 className="biz-dashboard-title">{t("biz_dashboard.title")}</h1>
         <div className="btn-back-wrapper">
           <button type="button" className="btn-text-danger" onClick={() => navigate(-1)}>
-            Volver atrás
+            {t("plan_detail.back")}
           </button>
         </div>
       </div>
 
       <section className="biz-panel biz-panel--resumen">
-        <h2 className="biz-panel__title">Resumen</h2>
+        <h2 className="biz-panel__title">{t("biz_dashboard.summary")}</h2>
 
         <div className="biz-stat-btns biz-stat-btns--row">
           <button type="button" className="biz-stat-btn" onClick={() => { const el = document.getElementById("activas"); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: "smooth" }); }}>
             <span className="material-symbols-outlined">event_available</span>
-            Activas: <strong>{offers.filter(o => o.status === 'active').length}</strong>
+            {t("biz_dashboard.active")}: <strong>{offers.filter(o => o.status === 'active').length}</strong>
           </button>
           <button type="button" className="biz-stat-btn" onClick={() => { const el = document.getElementById("pendientes"); if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 96, behavior: "smooth" }); }}>
             <span className="material-symbols-outlined">pending_actions</span>
-            Pendientes: <strong>{offers.filter(o => o.status === 'pending').length}</strong>
+            {t("biz_dashboard.pending")}: <strong>{offers.filter(o => o.status === 'pending').length}</strong>
           </button>
         </div>
 
@@ -147,7 +149,7 @@ function BusinessDashboard() {
 
         {/* Columna derecha: nueva actividad */}
         <section className="biz-activity-form biz-activity-form--fixed-width">
-          <h2 className="biz-panel__title">{editingId ? "Modificar actividad" : "Crear / editar actividad"}</h2>
+          <h2 className="biz-panel__title">{editingId ? t("biz_dashboard.form_title_edit") : t("biz_dashboard.form_title_create")}</h2>
 
           <form className="create-family-form" onSubmit={handleSubmit}>
 
@@ -156,12 +158,12 @@ function BusinessDashboard() {
               onClick={() => fileInputRef.current.click()}
             >
               {coverImage ? (
-                <img src={coverImage} alt="Portada de la actividad" className="create-offer-upload__preview" />
+                <img src={coverImage} alt={t("biz_dashboard.cover_alt")} className="create-offer-upload__preview" />
               ) : (
                 <div className="create-offer-upload">
                   <span className="material-symbols-outlined create-offer-upload__icon">add_photo_alternate</span>
-                  <span className="create-offer-upload__primary">Subir imagen de portada</span>
-                  <span className="create-offer-upload__secondary">PNG, JPG o WEBP · Recomendado 16:9 · Máx. 5MB</span>
+                  <span className="create-offer-upload__primary">{t("biz_dashboard.upload_image")}</span>
+                  <span className="create-offer-upload__secondary">{t("biz_dashboard.upload_hint")}</span>
                 </div>
               )}
               <input
@@ -177,36 +179,36 @@ function BusinessDashboard() {
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="nombre">Nombre actividad</label>
+              <label className="section-label biz-label" htmlFor="nombre">{t("biz_dashboard.field_name")}</label>
               <input
                 type="text"
                 id="nombre"
                 className={`biz-input${isInvalid("activityName", activityName) ? " biz-input--error" : ""}`}
-                placeholder="Ej: Taller de cuentos"
+                placeholder={t("biz_dashboard.field_name_placeholder")}
                 value={activityName}
                 onChange={(e) => setActivityName(e.target.value)}
                 onBlur={() => touch("activityName")}
                 required
               />
-              {isInvalid("activityName", activityName) && <span className="biz-field-error">Ponle un nombre a tu actividad</span>}
+              {isInvalid("activityName", activityName) && <span className="biz-field-error">{t("biz_dashboard.error_name")}</span>}
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="descripcion">Descripción</label>
+              <label className="section-label biz-label" htmlFor="descripcion">{t("biz_dashboard.field_description")}</label>
               <textarea
                 id="descripcion"
                 className={`biz-input biz-textarea${isInvalid("description", description) ? " biz-input--error" : ""}`}
-                placeholder="Describe tu actividad: qué se hace, qué incluye, qué necesitan traer..."
+                placeholder={t("biz_dashboard.field_description_placeholder")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 onBlur={() => touch("description")}
                 required
               />
-              {isInvalid("description", description) && <span className="biz-field-error">Añade una descripción de la actividad</span>}
+              {isInvalid("description", description) && <span className="biz-field-error">{t("biz_dashboard.error_description")}</span>}
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="categoria">Categoría</label>
+              <label className="section-label biz-label" htmlFor="categoria">{t("biz_dashboard.field_category")}</label>
               <select
                 id="categoria"
                 className={`biz-input${isInvalid("category", category) ? " biz-input--error" : ""}`}
@@ -215,18 +217,18 @@ function BusinessDashboard() {
                 onBlur={() => touch("category")}
                 required
               >
-                <option value="" disabled>Selecciona una categoría...</option>
-                <option value="Interior">Interior</option>
-                <option value="Exterior">Exterior</option>
-                <option value="Museo">Museo</option>
-                <option value="Taller">Taller</option>
-                <option value="Deporte">Deporte</option>
+                <option value="" disabled>{t("biz_dashboard.category_placeholder")}</option>
+                <option value="Interior">{t("biz_dashboard.cat_indoor")}</option>
+                <option value="Exterior">{t("biz_dashboard.cat_outdoor")}</option>
+                <option value="Museo">{t("biz_dashboard.cat_museum")}</option>
+                <option value="Taller">{t("biz_dashboard.cat_workshop")}</option>
+                <option value="Deporte">{t("biz_dashboard.cat_sport")}</option>
               </select>
-              {isInvalid("category", category) && <span className="biz-field-error">Selecciona una categoría</span>}
+              {isInvalid("category", category) && <span className="biz-field-error">{t("biz_dashboard.error_category")}</span>}
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="edad">Edad</label>
+              <label className="section-label biz-label" htmlFor="edad">{t("biz_dashboard.field_age")}</label>
               <select
                 id="edad"
                 className={`biz-input${isInvalid("age", age) ? " biz-input--error" : ""}`}
@@ -235,37 +237,37 @@ function BusinessDashboard() {
                 onBlur={() => touch("age")}
                 required
               >
-                <option value="" disabled>Selecciona una edad...</option>
-                <option value="0-3 años">0-3 años</option>
-                <option value="3-6 años">3-6 años</option>
-                <option value="6-12 años">6-12 años</option>
-                <option value="Todas las edades">Todas las edades</option>
+                <option value="" disabled>{t("biz_dashboard.age_placeholder")}</option>
+                <option value="0-3 años">0-3 {t("family_profile.years")}</option>
+                <option value="3-6 años">3-6 {t("family_profile.years")}</option>
+                <option value="6-12 años">6-12 {t("family_profile.years")}</option>
+                <option value="Todas las edades">{t("biz_dashboard.age_all")}</option>
               </select>
-              {isInvalid("age", age) && <span className="biz-field-error">Indica el rango de edad</span>}
+              {isInvalid("age", age) && <span className="biz-field-error">{t("biz_dashboard.error_age")}</span>}
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="zona">Zona</label>
+              <label className="section-label biz-label" htmlFor="zona">{t("biz_dashboard.field_zone")}</label>
               <input
                 type="text"
                 id="zona"
                 className={`biz-input${isInvalid("zone", zone) ? " biz-input--error" : ""}`}
-                placeholder="Ej: Bilbao, Getxo, Barakaldo..."
+                placeholder={t("biz_dashboard.field_zone_placeholder")}
                 value={zone}
                 onChange={(e) => setZone(e.target.value)}
                 onBlur={() => touch("zone")}
                 required
               />
-              {isInvalid("zone", zone) && <span className="biz-field-error">¿Dónde se realiza la actividad?</span>}
+              {isInvalid("zone", zone) && <span className="biz-field-error">{t("biz_dashboard.error_zone")}</span>}
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="precio">Precio (€)</label>
+              <label className="section-label biz-label" htmlFor="precio">{t("biz_dashboard.field_price")}</label>
               <input
                 type="number"
                 id="precio"
                 className={`biz-input${isPriceInvalid ? " biz-input--error" : ""}`}
-                placeholder="Ej: 0, 5.50, 12..."
+                placeholder={t("biz_dashboard.field_price_placeholder")}
                 min="0"
                 step="0.01"
                 value={price}
@@ -273,18 +275,18 @@ function BusinessDashboard() {
                 onBlur={() => touch("price")}
                 required
               />
-              {isPriceInvalid && <span className="biz-field-error">{Number(price) < 0 ? "El precio no puede ser negativo" : "Indica el precio (0 si es gratis)"}</span>}
+              {isPriceInvalid && <span className="biz-field-error">{Number(price) < 0 ? t("biz_dashboard.error_price_negative") : t("biz_dashboard.error_price_required")}</span>}
             </div>
 
             <div className="create-family-form__group">
-              <label className="section-label biz-label" htmlFor="servicios">Servicios</label>
+              <label className="section-label biz-label" htmlFor="servicios">{t("biz_dashboard.field_services")}</label>
               <div className={`biz-tags-field${isServicesInvalid ? " biz-input--error" : ""}`}>
                 <div className="biz-tags-row">
                   <input
                     className="biz-tags-input"
                     type="text"
                     id="servicios"
-                    placeholder="Ej: menú infantil, carrito..."
+                    placeholder={t("biz_dashboard.field_services_placeholder")}
                     value={newService}
                     onChange={(e) => setNewService(e.target.value)}
                     onKeyDown={handleServiceKeyDown}
@@ -308,11 +310,11 @@ function BusinessDashboard() {
                   </div>
                 )}
               </div>
-              {isServicesInvalid && <span className="biz-field-error">Añade al menos un servicio</span>}
+              {isServicesInvalid && <span className="biz-field-error">{t("biz_dashboard.error_services")}</span>}
 
               {SUGGESTED_SERVICES.some((s) => !services.includes(s)) && (
                 <div className="biz-suggestions">
-                  <span className="biz-suggestions__label">Sugerencias:</span>
+                  <span className="biz-suggestions__label">{t("biz_dashboard.suggestions")}:</span>
                   <div className="biz-tags-list">
                     {SUGGESTED_SERVICES.filter((s) => !services.includes(s)).map((suggestion) => (
                       <button
@@ -332,13 +334,13 @@ function BusinessDashboard() {
 
             <div className="biz-activity-form create-offer-notice">
               <span className="material-symbols-outlined fill" style={{ color: 'var(--accent-color)', fontSize: '1.5rem' }}>info</span>
-              <p>Las actividades deben ser revisadas por el equipo de Plangune antes de publicarse.</p>
+              <p>{t("biz_dashboard.review_notice")}</p>
             </div>
 
             <div className="create-family-form__actions">
               <button type="submit" className="btn-primary">
                 <span className="material-symbols-outlined">{editingId ? "save" : "send"}</span>
-                {editingId ? "Guardar cambios" : "Enviar a revisión"}
+                {editingId ? t("biz_dashboard.save_changes") : t("biz_dashboard.submit")}
               </button>
               <div className="btn-back-wrapper" style={{ width: "fit-content", margin: "0 auto", paddingRight: "0.2rem" }}>
                 <button
@@ -346,7 +348,7 @@ function BusinessDashboard() {
                   className="btn-text-danger"
                   onClick={resetForm}
                 >
-                  {editingId ? "Cancelar edición" : "Limpiar formulario"}
+                  {editingId ? t("biz_dashboard.cancel_edit") : t("biz_dashboard.clear_form")}
                 </button>
               </div>
             </div>
@@ -357,10 +359,10 @@ function BusinessDashboard() {
         {/* Columna derecha: actividades */}
         <div className="biz-offers-column">
           <section id="activas" className="biz-panel biz-active-list">
-            <h2 className="biz-panel__title">Actividades publicadas</h2>
+            <h2 className="biz-panel__title">{t("biz_dashboard.published_title")}</h2>
 
             {offers.filter(o => o.status === 'active').length === 0 ? (
-              <p className="biz-empty-state">Aún no tienes actividades activas.</p>
+              <p className="biz-empty-state">{t("biz_dashboard.published_empty")}</p>
             ) : (
               <div className="biz-active-items">
                 {offers.filter(o => o.status === 'active').map((offer) => (
@@ -370,14 +372,14 @@ function BusinessDashboard() {
                       <div className="biz-active-item__meta">
                         {offer.category && <span>{offer.category}</span>}
                         {offer.zone && <span>{offer.zone}</span>}
-                        {offer.price !== undefined && <span>{offer.price === "0" || offer.price === 0 ? "Gratis" : `${offer.price}€`}</span>}
+                        {offer.price !== undefined && <span>{offer.price === "0" || offer.price === 0 ? t("plan_card.free") : `${offer.price}€`}</span>}
                       </div>
                     </div>
                     <div className="biz-active-item__actions">
                       <button
                         type="button"
                         className="biz-active-item__edit"
-                        title="Editar actividad"
+                        title={t("biz_dashboard.edit_activity")}
                         onClick={() => handleEdit(offer)}
                       >
                         <span className="material-symbols-outlined">edit</span>
@@ -386,17 +388,17 @@ function BusinessDashboard() {
                         type="button"
                         className="biz-active-item__delete"
                         onClick={() => setConfirmDeleteId(offer.id)}
-                        title="Eliminar actividad"
+                        title={t("biz_dashboard.delete_activity")}
                       >
                         <span className="material-symbols-outlined">delete</span>
                       </button>
                     </div>
                     {confirmDeleteId === offer.id && (
                       <div className="biz-confirm-delete">
-                        <span>¿Seguro que quieres eliminar esta actividad?</span>
+                        <span>{t("biz_dashboard.confirm_delete")}</span>
                         <div className="biz-confirm-delete__actions">
-                          <button type="button" className="biz-confirm-delete__yes" onClick={() => { deleteOffer(offer.id); setConfirmDeleteId(null); }}>Eliminar</button>
-                          <button type="button" className="biz-confirm-delete__no" onClick={() => setConfirmDeleteId(null)}>Cancelar</button>
+                          <button type="button" className="biz-confirm-delete__yes" onClick={() => { deleteOffer(offer.id); setConfirmDeleteId(null); }}>{t("biz_dashboard.delete_btn")}</button>
+                          <button type="button" className="biz-confirm-delete__no" onClick={() => setConfirmDeleteId(null)}>{t("biz_dashboard.cancel_btn")}</button>
                         </div>
                       </div>
                     )}
@@ -407,10 +409,10 @@ function BusinessDashboard() {
           </section>
 
           <section id="pendientes" className="biz-panel biz-active-list">
-            <h2 className="biz-panel__title">Pendientes de revisión</h2>
+            <h2 className="biz-panel__title">{t("biz_dashboard.pending_title")}</h2>
 
             {offers.filter(o => o.status === 'pending').length === 0 ? (
-              <p className="biz-empty-state">No tienes actividades pendientes.</p>
+              <p className="biz-empty-state">{t("biz_dashboard.pending_empty")}</p>
             ) : (
               <div className="biz-active-items">
                 {offers.filter(o => o.status === 'pending').map((offer) => (
@@ -420,14 +422,14 @@ function BusinessDashboard() {
                       <div className="biz-active-item__meta">
                         {offer.category && <span>{offer.category}</span>}
                         {offer.zone && <span>{offer.zone}</span>}
-                        {offer.price !== undefined && <span>{offer.price === "0" || offer.price === 0 ? "Gratis" : `${offer.price}€`}</span>}
+                        {offer.price !== undefined && <span>{offer.price === "0" || offer.price === 0 ? t("plan_card.free") : `${offer.price}€`}</span>}
                       </div>
                     </div>
                     <div className="biz-active-item__actions">
                       <button
                         type="button"
                         className="biz-active-item__edit"
-                        title="Editar actividad"
+                        title={t("biz_dashboard.edit_activity")}
                         onClick={() => handleEdit(offer)}
                       >
                         <span className="material-symbols-outlined">edit</span>
@@ -436,7 +438,7 @@ function BusinessDashboard() {
                         type="button"
                         className="biz-active-item__delete"
                         onClick={() => setConfirmDeleteId(offer.id)}
-                        title="Retirar actividad"
+                        title={t("biz_dashboard.withdraw_activity")}
                       >
                         <span className="material-symbols-outlined">delete</span>
                       </button>
@@ -445,8 +447,8 @@ function BusinessDashboard() {
                       <div className={`biz-confirm-delete${offer.previousVersion ? " biz-confirm-delete--stacked" : ""}`}>
                         <span>
                           {offer.previousVersion
-                            ? "¿Seguro que quieres deshacer estos cambios? La actividad volverá a estar activa con su versión anterior."
-                            : "¿Seguro que quieres retirar esta actividad?"}
+                            ? t("biz_dashboard.confirm_undo")
+                            : t("biz_dashboard.confirm_withdraw")}
                         </span>
                         <div className="biz-confirm-delete__actions">
                           <button
@@ -461,9 +463,9 @@ function BusinessDashboard() {
                               setConfirmDeleteId(null);
                             }}
                           >
-                            {offer.previousVersion ? "Deshacer cambios" : "Retirar"}
+                            {offer.previousVersion ? t("biz_dashboard.undo_btn") : t("biz_dashboard.withdraw_btn")}
                           </button>
-                          <button type="button" className="biz-confirm-delete__no" onClick={() => setConfirmDeleteId(null)}>Cancelar</button>
+                          <button type="button" className="biz-confirm-delete__no" onClick={() => setConfirmDeleteId(null)}>{t("biz_dashboard.cancel_btn")}</button>
                         </div>
                       </div>
                     )}
