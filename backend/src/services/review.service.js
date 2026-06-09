@@ -1,36 +1,54 @@
-import { randomUUID } from 'node:crypto';
-
-import { activityExists } from './activity.service.js';
-
-/** Almacén en memoria de reseñas (MVP). Se reinicia al reiniciar el proceso. */
-const reviews = [];
+import prisma from '../config/prisma.js';
 
 /**
- * Crea una reseña en estado `pending`.
- * Lanza un error 404 (con `.status`) si la actividad no existe, para que lo
- * capture el errorHandler central.
+ * Crea una reseña persistiendo en la base de datos PostgreSQL.
+ * Lanza un error 404 si la actividad no existe.
  */
-export function createReview({ activityId, rating, comment }) {
-  if (!activityExists(activityId)) {
-    const error = new Error('Actividad no encontrada');
+export async function createReview({ activityId, rating, comment, userId }) {
+  const parsedId = parseInt(activityId, 10);
+  
+  if (isNaN(parsedId)) {
+    const error = new Error('Actividad/Evento no encontrado');
     error.status = 404;
     throw error;
   }
 
-  const review = {
-    id: randomUUID(),
-    activityId,
-    rating,
-    comment: comment ?? null,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-  };
+  const event = await prisma.event.findUnique({
+    where: { id: parsedId }
+  });
 
-  reviews.push(review);
+  if (!event) {
+    const error = new Error('Actividad/Evento no encontrado');
+    error.status = 404;
+    throw error;
+  }
+
+  // En la base de datos real el user_id es obligatorio (no nulo) y asocia
+  // la reseña al usuario que la está publicando.
+  const review = await prisma.review.create({
+    data: {
+      event_id: parsedId,
+      user_id: userId, // Requerido por la BD real (init.sql)
+      rating: parseInt(rating, 10),
+      comment: comment ?? null,
+    }
+  });
+
   return review;
 }
 
-/** Devuelve todas las reseñas (uso interno / futuro panel de moderación). */
-export function getAllReviews() {
-  return reviews;
+/** Devuelve todas las reseñas o por actividad. */
+export async function getAllReviews(eventId = null) {
+  if (eventId) {
+    return prisma.review.findMany({
+      where: { event_id: parseInt(eventId, 10) },
+      orderBy: { created_at: 'desc' },
+      include: { user: { select: { email: true } } }
+    });
+  }
+  
+  return prisma.review.findMany({
+    orderBy: { created_at: 'desc' },
+    include: { user: { select: { email: true } } }
+  });
 }

@@ -25,7 +25,7 @@ const PLACEHOLDER_JWT_SECRETS = new Set([
 ]);
 
 // Variables obligatorias en producción.
-const REQUIRED_IN_PRODUCTION = ['DATABASE_URL', 'JWT_SECRET', 'CLIENT_URL'];
+const REQUIRED_IN_PRODUCTION = ['DATABASE_URL', 'JWT_SECRET', 'CLIENT_URL', 'GOOGLE_CLIENT_ID'];
 
 /**
  * Valida el entorno. En producción lanza si la configuración es insegura.

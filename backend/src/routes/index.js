@@ -10,6 +10,7 @@ import incidentRoutes from './incident.routes.js';
 import readyRoutes from './ready.routes.js';
 import recommendationRoutes from './recommendation.routes.js';
 import reviewRoutes from './review.routes.js';
+import uploadRoutes from './upload.routes.js';
 
 const router = Router();
 
@@ -23,7 +24,11 @@ router.use('/favorites', favoriteRoutes);
 router.use('/incidents', incidentRoutes);
 router.use('/recommendations', recommendationRoutes);
 router.use('/reviews', reviewRoutes);
+router.use('/upload', uploadRoutes);
 
-// Futuras rutas: /business, /admin...
+import adminRoutes from './admin.routes.js';
+
+// Futuras rutas: /business
+router.use('/admin', adminRoutes);
 
 export default router;

@@ -2,13 +2,16 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 
 import { validate } from '../middlewares/validate.js';
-import { createReviewHandler } from '../controllers/review.controller.js';
+import { requireAuth } from '../middlewares/auth.middleware.js';
+import { createReviewHandler, getReviewsHandler } from '../controllers/review.controller.js';
 
 const router = Router();
 
 // Montado bajo /api/reviews desde routes/index.js
+router.get('/', getReviewsHandler);
 router.post(
   '/',
+  requireAuth,
   // Validaciones de contrato: reseña vinculada a actividad y rating acotado.
   [
     body('activityId').notEmpty().withMessage('activityId es obligatorio'),

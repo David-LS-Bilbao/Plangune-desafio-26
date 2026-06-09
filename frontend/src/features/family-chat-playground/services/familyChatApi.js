@@ -1,4 +1,4 @@
-import axios from "axios";
+import apiClient from "../../../services/apiClient";
 
 /**
  * Service del playground de chat familiar.
@@ -8,8 +8,6 @@ import axios from "axios";
  *
  * Nunca accede a Data ni a ninguna otra fuente directamente.
  */
-
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
 
 /**
  * Construye el payload del asistente a partir del mensaje del usuario
@@ -52,10 +50,7 @@ export function buildFamilyPlanPayload(message, familyProfile = {}) {
 export async function sendFamilyPlanMessage({ message, familyProfile }) {
   const payload = buildFamilyPlanPayload(message, familyProfile);
 
-  const { data } = await axios.post(
-    `${API_BASE}/assistant/family-plan`,
-    payload,
-  );
+  const { data } = await apiClient.post("/assistant/family-plan", payload);
 
   return data;
 }

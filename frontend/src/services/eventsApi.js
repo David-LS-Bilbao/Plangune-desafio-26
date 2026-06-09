@@ -41,4 +41,27 @@ export async function fetchEventById(id) {
   return data;
 }
 
-export default { fetchEvents, fetchEventById };
+export async function createEvent(eventData) {
+  const { data } = await apiClient.post("/events", eventData);
+  return data.event;
+}
+
+export async function fetchBusinessEvents() {
+  const { data } = await apiClient.get("/events/business/mine");
+  return data;
+}
+
+/**
+ * Sube una imagen al servidor real usando multipart/form-data.
+ * @param {File} file Archivo a subir
+ * @returns {Promise<string>} URL devuelta por el servidor
+ */
+export async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+  
+  const { data } = await apiClient.post("/upload", formData);
+  return data.url;
+}
+
+export default { fetchEvents, fetchEventById, createEvent, fetchBusinessEvents, uploadImage };

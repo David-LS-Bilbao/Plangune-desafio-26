@@ -42,6 +42,7 @@ function httpError(status, message) {
  * @returns {Promise<Array>}
  */
 export async function getEvents(filters = {}, pagination) {
+  filters.status = 'approved';
   const events = await findEvents(filters, pagination);
   return events.map(serializeEvent);
 }

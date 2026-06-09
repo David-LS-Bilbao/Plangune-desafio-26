@@ -84,6 +84,7 @@ describe('POST /api/auth/register', () => {
   });
 
   it('rechaza rol admin por registro público con 422', async () => {
+    findUserByEmail.mockResolvedValue(null); // No hay usuario previo, el rechazo debe ser por rol
     const res = await request(app)
       .post('/api/auth/register')
       .send({ email: 'hacker@demo.com', password: DEMO_PASSWORD, role: 'admin' });

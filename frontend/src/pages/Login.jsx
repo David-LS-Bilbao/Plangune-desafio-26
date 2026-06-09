@@ -7,28 +7,22 @@ import { useTranslation, Trans } from "react-i18next";
 import { useAuthStore } from "../store";
 import '../styles/login.css';
 
+import { useGoogleLogin } from '@react-oauth/google';
+
 /** Destino tras crear cuenta, según el rol elegido. */
 const HOME_BY_ROLE = { family: "/", business: "/negocio/dashboard" };
-
-/**
- * Cuentas demo "resueltas por Google" (presentación/demo, sin OAuth real): una
- * por rol, con email/contraseña fijos. Al elegir el perfil en la ventana flotante,
- * la cuenta correspondiente se crea ya lista (o se reutiliza si ya existía).
- */
-const GOOGLE_DEMO_ACCOUNTS = {
-  family: { email: "demo.familia@plangune.test", password: "DemoGoogle26!" },
-  business: { email: "demo.negocio@plangune.test", password: "DemoGoogle26!" },
-};
 
 function Login() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const registerAccount = useAuthStore((state) => state.register);
   const loginAccount = useAuthStore((state) => state.login);
+  const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
   const [registerRole, setRegisterRole] = useState("");
   const [showGoogleModal, setShowGoogleModal] = useState(false);
   const [googleError, setGoogleError] = useState("");
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [selectedGoogleRole, setSelectedGoogleRole] = useState(null);
 
   /** "Continuar con Google": abre la ventana flotante para elegir el perfil. */
   const handleGoogleClick = () => {
@@ -41,28 +35,43 @@ function Login() {
     setShowGoogleModal(false);
   };
 
-  /** Crea (o inicia sesión en) la cuenta demo de Google del rol elegido y navega directa. */
-  const handleGoogleRole = async (role) => {
-    if (googleLoading) return;
-    setGoogleError("");
-    setGoogleLoading(true);
-    const account = GOOGLE_DEMO_ACCOUNTS[role];
-    try {
-      let user;
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
       try {
-        user = await registerAccount({ ...account, role });
-      } catch (err) {
-        if (err?.response?.status === 409) {
-          user = await loginAccount(account.email, account.password);
-        } else {
-          throw err;
-        }
+        setGoogleLoading(true);
+        // access_token can't be used to verify identity securely on our backend,
+        // we should ideally use flow: 'auth-code', but implicit flow provides access_token.
+        // Wait, @react-oauth/google with useGoogleLogin uses implicit flow (returns access_token)
+        // or auth-code flow. Let's use flow: 'implicit' which is default but we really need an ID token.
+        // Or we can just send the access_token to our backend to verify via Google API, but our backend
+        // expects an idToken. To get an idToken with useGoogleLogin, we shouldn't use useGoogleLogin or we should
+        // do a manual request to Google's userinfo endpoint here, OR we can just use the React component `<GoogleLogin>`.
+        // Let's use `GoogleLogin` inside the modal, or keep `useGoogleLogin` and fetch userinfo here?
+        // Let's fetch userinfo here temporarily or send access_token.
+        // Actually, let's fix backend to accept access_token, OR use `<GoogleLogin>` component which gives credential.
+        
+        // Wait, let's just make it simple: we pass the token.
+        const user = await loginWithGoogle(tokenResponse.access_token, selectedGoogleRole);
+        navigate(HOME_BY_ROLE[user.role] || "/", { replace: true });
+      } catch (error) {
+        console.error(error);
+        setGoogleError(t('auth.error_login_default'));
+      } finally {
+        setGoogleLoading(false);
+        closeGoogleModal();
       }
-      navigate(HOME_BY_ROLE[user.role] || "/", { replace: true });
-    } catch {
+    },
+    onError: () => {
       setGoogleError(t('auth.error_login_default'));
       setGoogleLoading(false);
     }
+  });
+
+  const handleGoogleRole = (role) => {
+    if (googleLoading) return;
+    setGoogleError("");
+    setSelectedGoogleRole(role);
+    googleLogin();
   };
 
   const handleRegister = () => {

@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
+import { uploadImage } from "../services/eventsApi";
 
 const SUGGESTED_SERVICES = [
   "Apto Carrito",
@@ -32,6 +33,9 @@ function BusinessDashboard() {
   const [editingId, setEditingId] = useState(null);
   const fileInputRef = useRef(null);
 
+  const [coverFile, setCoverFile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const touch = (field) => setTouched((prev) => ({ ...prev, [field]: true }));
   const isInvalid = (field, value) => touched[field] && !value;
   const isPriceInvalid = touched["price"] && (price === "" || Number(price) < 0);
@@ -52,6 +56,7 @@ function BusinessDashboard() {
     setDescription(offer.description || "");
     setServices(offer.tags || []);
     setCoverImage(offer.image || null);
+    setCoverFile(null); // Limpiar el archivo físico al editar
     setMessage("");
     setTouched({});
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -92,28 +97,53 @@ function BusinessDashboard() {
     setDescription("");
     setServices([]);
     setCoverImage(null);
+    setCoverFile(null);
     setMessage("");
     setTouched({});
     setEditingId(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (editingId) {
-      const editedOffer = offers.find((o) => o.id === editingId);
-      const previousVersion =
-        editedOffer?.status === "active"
-          ? { ...editedOffer, previousVersion: undefined }
-          : editedOffer?.previousVersion;
-      updateOffer(editingId, { title: activityName, category, age, zone, tags: services, price, location: zone, description, image: coverImage, status: 'pending', previousVersion });
-      setConfirmMessage(t("biz_dashboard.confirm_updated"));
-    } else {
-      addOffer({ title: activityName, category, age, zone, tags: services, price, location: zone, description, image: coverImage, status: 'pending' });
-      setConfirmMessage(t("biz_dashboard.confirm_sent"));
+    setIsSubmitting(true);
+    setMessage(""); // Limpiar mensaje de error anterior
+    
+    try {
+      let finalImageUrl = coverImage;
+      
+      // Si hay un archivo nuevo seleccionado, subirlo primero
+      if (coverFile) {
+        const relativeUrl = await uploadImage(coverFile);
+        
+        // VITE_API_URL suele ser "http://localhost:3000/api", lo necesitamos sin "/api"
+        // para acceder a la carpeta "/uploads". Fallback a un string fijo por si VITE_API_URL falla.
+        const baseUrl = import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:3000';
+        finalImageUrl = baseUrl + relativeUrl;
+      }
+
+      if (editingId) {
+        const editedOffer = offers.find((o) => o.id === editingId);
+        const previousVersion =
+          editedOffer?.status === "active"
+            ? { ...editedOffer, previousVersion: undefined }
+            : editedOffer?.previousVersion;
+        updateOffer(editingId, { title: activityName, category, age, zone, tags: services, price, location: zone, description, image: finalImageUrl, status: 'pending', previousVersion });
+        setConfirmMessage(t("biz_dashboard.confirm_updated"));
+      } else {
+        addOffer({ title: activityName, category, age, zone, tags: services, price, location: zone, description, imagen_url: finalImageUrl, image: finalImageUrl, status: 'pending' });
+        setConfirmMessage(t("biz_dashboard.confirm_sent"));
+      }
+      
+      setShowConfirm(true);
+      setTimeout(() => setShowConfirm(false), 3000);
+      resetForm();
+    } catch (error) {
+      setMessage("Error al subir la imagen o enviar el formulario. Abre la consola (F12) para más detalles.");
+      console.error("Detalles del error al crear evento:", error);
+    } finally {
+      setIsSubmitting(false);
     }
-    setShowConfirm(true);
-    setTimeout(() => setShowConfirm(false), 3000);
-    resetForm();
   };
 
   return (
@@ -173,7 +203,10 @@ function BusinessDashboard() {
                 style={{ display: "none" }}
                 onChange={(e) => {
                   const file = e.target.files[0];
-                  if (file) setCoverImage(URL.createObjectURL(file));
+                  if (file) {
+                    setCoverFile(file);
+                    setCoverImage(URL.createObjectURL(file));
+                  }
                 }}
               />
             </div>

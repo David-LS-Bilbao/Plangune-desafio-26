@@ -44,4 +44,15 @@ export async function logout() {
   await apiClient.post("/auth/logout");
 }
 
-export default { login, register, fetchMe, logout };
+/**
+ * Inicia sesión o registra mediante un token de Google.
+ * @param {string} credential El JWT devuelto por Google
+ * @param {string} [role] El rol si es registro
+ * @returns {Promise<object>} usuario { id, email, role }
+ */
+export async function loginWithGoogle(credential, role) {
+  const { data } = await apiClient.post("/auth/google", { credential, role });
+  return data.user;
+}
+
+export default { login, register, loginWithGoogle, fetchMe, logout };

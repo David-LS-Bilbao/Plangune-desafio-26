@@ -1,26 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useAdminStore, useBusinessStore } from "../store";
 
 function AdminDashboard() {
   const { t } = useTranslation();
   const [reviewMessage, setReviewMessage] = useState("");
-  const { pendingBusinesses, approveBusiness, rejectBusiness, stats } = useAdminStore();
+  const [processingId, setProcessingId] = useState(null);
+  const [processingEventId, setProcessingEventId] = useState(null);
+  const { pendingBusinesses, approveBusiness, rejectBusiness, pendingEvents, approveEvent, rejectEvent, stats, fetchAdminData, isLoading } = useAdminStore();
   const businessOffers = useBusinessStore(state => state.offers);
 
-  const handleApprove = (id) => {
-    approveBusiness(id);
-    setReviewMessage(t("admin_dashboard.msg_approved"));
+  useEffect(() => {
+    fetchAdminData();
+  }, [fetchAdminData]);
+
+  const handleApprove = async (id) => {
+    setProcessingId(id);
+    await approveBusiness(id);
+    setProcessingId(null);
+    setReviewMessage(t("admin_dashboard.msg_approved", "El negocio ha sido aprobado."));
     setTimeout(() => setReviewMessage(""), 2000);
   };
-
-  const handleReject = (id) => {
-    if (window.confirm(t("admin_dashboard.confirm_reject"))) {
-      rejectBusiness(id);
-      setReviewMessage(t("admin_dashboard.msg_rejected"));
+  
+  const handleReject = async (id) => {
+    if(window.confirm(t("admin_dashboard.confirm_reject", "¿Estás seguro de rechazar este negocio?"))) {
+      setProcessingId(id);
+      await rejectBusiness(id);
+      setProcessingId(null);
+      setReviewMessage(t("admin_dashboard.msg_rejected", "El negocio ha sido rechazado."));
       setTimeout(() => setReviewMessage(""), 2000);
     }
   };
+
+  const handleApproveEvent = async (id) => {
+    setProcessingEventId(id);
+    await approveEvent(id);
+    setProcessingEventId(null);
+    setReviewMessage("La actividad ha sido aprobada.");
+    setTimeout(() => setReviewMessage(""), 2000);
+  };
+  
+  const handleRejectEvent = async (id) => {
+    if(window.confirm("¿Estás seguro de rechazar esta actividad?")) {
+      setProcessingEventId(id);
+      await rejectEvent(id);
+      setProcessingEventId(null);
+      setReviewMessage("La actividad ha sido rechazada.");
+      setTimeout(() => setReviewMessage(""), 2000);
+    }
+  };
+
+  if (isLoading) {
+    return <main className="admin-dashboard-main"><p>Cargando datos de administración...</p></main>;
+  }
 
   return (
     <main className="admin-dashboard-main">
@@ -100,11 +132,70 @@ function AdminDashboard() {
                     </div>
                   </div>
                   <div className="pending-actions">
-                    <button className="btn-reject" type="button" onClick={() => handleReject(business.id)}>
-                      {t("admin_dashboard.btn_reject")}
+                    <button
+                      className="btn-reject"
+                      type="button"
+                      disabled={processingId === business.id}
+                      onClick={() => handleReject(business.id)}
+                    >
+                      {processingId === business.id ? "..." : t("admin_dashboard.btn_reject", "Rechazar")}
                     </button>
-                    <button className="btn-approve" type="button" onClick={() => handleApprove(business.id)}>
-                      {t("admin_dashboard.btn_approve")}
+                    <button
+                      className="btn-approve"
+                      type="button"
+                      disabled={processingId === business.id}
+                      onClick={() => handleApprove(business.id)}
+                    >
+                      {processingId === business.id ? "Procesando..." : t("admin_dashboard.btn_approve", "Aprobar")}
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="section-title-row" style={{ marginTop: '2rem' }}>
+            <h3 className="section-title">Actividades pendientes</h3>
+          </div>
+
+          <div className="pending-list">
+            {pendingEvents?.length === 0 ? (
+              <p className="text-secondary mt-4">No hay actividades pendientes de revisión.</p>
+            ) : (
+              pendingEvents?.map((event) => (
+                <div className="pending-card" key={event.id}>
+                  <div className="pending-card-header">
+                    <div className="pending-card-avatar">
+                      {event.title.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="pending-card-body">
+                      <div className="pending-meta-row">
+                        <span className="badge-type">Nueva Actividad</span>
+                        <span className="time-ago">{event.requestDate}</span>
+                      </div>
+                      <h4 className="pending-title">{event.title}</h4>
+                      <p className="pending-by">
+                        <span className="material-symbols-outlined">storefront</span>
+                        {event.businessName} - {event.category || 'Sin categoría'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pending-actions">
+                    <button
+                      className="btn-reject"
+                      type="button"
+                      disabled={processingEventId === event.id}
+                      onClick={() => handleRejectEvent(event.id)}
+                    >
+                      {processingEventId === event.id ? "..." : "Rechazar"}
+                    </button>
+                    <button
+                      className="btn-approve"
+                      type="button"
+                      disabled={processingEventId === event.id}
+                      onClick={() => handleApproveEvent(event.id)}
+                    >
+                      {processingEventId === event.id ? "Procesando..." : "Aprobar"}
                     </button>
                   </div>
                 </div>

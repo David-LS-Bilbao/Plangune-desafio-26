@@ -11,6 +11,7 @@ const PROD_OK = {
   DATABASE_URL: 'postgresql://user:pass@db:5432/app',
   JWT_SECRET: 'x'.repeat(40),
   CLIENT_URL: 'https://plangune.example',
+  GOOGLE_CLIENT_ID: 'fake-google-client-id.apps.googleusercontent.com',
 };
 
 describe('validateEnv', () => {

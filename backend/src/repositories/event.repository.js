@@ -38,6 +38,8 @@ function buildWhere(filters) {
     if (filters.fecha_hasta) where.fecha_inicio.lte = new Date(filters.fecha_hasta);
   }
 
+  if (filters.status) where.status = filters.status;
+
   return where;
 }
 

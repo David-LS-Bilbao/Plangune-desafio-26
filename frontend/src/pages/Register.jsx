@@ -6,7 +6,7 @@ import NavbarResponsive from "../components/common/NavbarResponsive";
 import "../styles/login.css";
 
 /** Destino tras registrarse, según el rol elegido. */
-const HOME_BY_ROLE = { family: "/buscar", business: "/negocio" };
+const HOME_BY_ROLE = { family: "/buscar", business: "/negocio", admin: "/admin" };
 
 /**
  * Registro público mínimo (email + contraseña + rol family/business).
@@ -125,6 +125,23 @@ function Register() {
                     <div className="role-card">
                       <span className="material-symbols-outlined role-icon-secondary">storefront</span>
                       <span className="role-title">{t('roles.business')}</span>
+                      <div className="check-icon">
+                        <span className="material-symbols-outlined fill">check_circle</span>
+                      </div>
+                    </div>
+                  </label>
+                  <label className="role-label">
+                    <input
+                      type="radio"
+                      name="role"
+                      value="admin"
+                      className="sr-only"
+                      checked={role === "admin"}
+                      onChange={() => setRole("admin")}
+                    />
+                    <div className="role-card">
+                      <span className="material-symbols-outlined role-icon-secondary" style={{color: "var(--accent-color)"}}>admin_panel_settings</span>
+                      <span className="role-title">Admin</span>
                       <div className="check-icon">
                         <span className="material-symbols-outlined fill">check_circle</span>
                       </div>

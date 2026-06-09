@@ -2,10 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import router from './routes/index.js';
 import { apiRateLimit } from './middlewares/rateLimit.middleware.js';
 import { errorHandler, notFoundHandler } from './middlewares/error.middleware.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const DEFAULT_DEV_CLIENT_URL = 'http://localhost:5173';
 
@@ -41,7 +46,11 @@ export function createApp() {
   const allowedOrigins = getAllowedOrigins();
 
   // Seguridad y middlewares base
-  app.use(helmet());
+  app.use(helmet({ crossOriginResourcePolicy: false }));
+
+  // Archivos estáticos para subidas
+  const uploadsPath = path.join(__dirname, '..', 'uploads');
+  app.use('/uploads', express.static(uploadsPath));
   // `credentials: true` permite que el navegador envíe/reciba la cookie httpOnly de sesión.
   // Se aceptan solo orígenes explícitos: CLIENT_URL (coma-separado) o localhost en dev/test.
   app.use(cors({

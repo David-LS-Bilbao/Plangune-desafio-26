@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { query } from 'express-validator';
 
 import { validate } from '../middlewares/validate.js';
-import { listEvents, getEvent } from '../controllers/event.controller.js';
+import { requireAuth } from '../middlewares/auth.middleware.js';
+import { listEvents, getEvent, createEvent, getBusinessEvents } from '../controllers/event.controller.js';
 
 const router = Router();
 
@@ -24,6 +25,8 @@ const eventFilterValidator = [
 
 // Montado bajo /api/events desde routes/index.js
 router.get('/', eventFilterValidator, validate, listEvents);
+router.post('/', requireAuth, createEvent);
+router.get('/business/mine', requireAuth, getBusinessEvents);
 router.get('/:id', getEvent);
 
 export default router;

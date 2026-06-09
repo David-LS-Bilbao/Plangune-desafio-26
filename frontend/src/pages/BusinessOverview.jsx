@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useBusinessStore } from "../store";
@@ -6,7 +6,11 @@ import { useBusinessStore } from "../store";
 function BusinessOverview() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { offers, stats } = useBusinessStore();
+  const { offers, stats, fetchOffers } = useBusinessStore();
+
+  useEffect(() => {
+    fetchOffers();
+  }, [fetchOffers]);
 
   return (
     <main className="business-overview-main">
