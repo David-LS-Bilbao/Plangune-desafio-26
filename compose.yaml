@@ -64,8 +64,8 @@ services:
       # IMPORTANTE: dentro de Docker el host de la DB es `postgres` (nombre del servicio),
       # NO `localhost`. Credenciales de desarrollo local (no secretos reales).
       DATABASE_URL: "postgresql://desafio26:desafio26_dev_password@postgres:5432/desafio26_dev?schema=public"
-      # El usuario abre el frontend dockerizado en :8080 (Nginx). CORS lo permite.
-      CLIENT_URL: "http://localhost:8080"
+      # El usuario abre el frontend dockerizado en :8080 (Nginx) o en modo dev en :5173 (Vite). CORS los permite.
+      CLIENT_URL: "http://localhost:8080,http://localhost:5173"
       # Data como recomendador principal por nombre de servicio (red interna Docker).
       DATA_RECOMMENDER_ENABLED: "true"
       DATA_API_URL: "http://data-recommender:5000"
