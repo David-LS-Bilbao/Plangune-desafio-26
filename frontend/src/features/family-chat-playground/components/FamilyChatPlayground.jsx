@@ -219,13 +219,6 @@ function FamilyChatPlayground({ onClose }) {
           </button>
         </section>
 
-        {/* 3. Chips de prompts rápidos */}
-        <QuickPromptChips
-          prompts={QUICK_PROMPTS}
-          onSelect={handleSend}
-          disabled={loading}
-        />
-
         {/* 4 + 8. Chat y estados */}
         <section className="fcp-thread" aria-live="polite">
           {messages.map((msg) => (
@@ -265,6 +258,14 @@ function FamilyChatPlayground({ onClose }) {
           )}
         </section>
       </main>
+
+      {/* 3. Chips de prompts rápidos: banda fija sobre el input, fuera del scroll
+          del hilo para que las burbujas nunca los tapen. */}
+      <QuickPromptChips
+        prompts={QUICK_PROMPTS}
+        onSelect={handleSend}
+        disabled={loading}
+      />
 
       {/* 6. Input fijo inferior */}
       <form className="fcp-inputbar" onSubmit={handleSubmit}>

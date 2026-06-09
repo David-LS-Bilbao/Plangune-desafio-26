@@ -205,6 +205,32 @@
   overflow-x: visible;
 }
 
+/* Chips como banda fija entre el hilo y el input (hijo directo de .fcp):
+   siempre visibles, el chat no los tapa al crecer. Padding horizontal
+   alineado con .fcp-inputbar. */
+.fcp > .fcp-chips {
+  flex: 0 0 auto;
+  padding: 0.55rem 1rem 0.35rem;
+  background: var(--fcp-white);
+  border-top: 1px solid var(--fcp-border);
+}
+
+.fcp-chips + .fcp-inputbar {
+  border-top: none;
+  padding-top: 0.3rem;
+}
+
+/* En pantallas anchas la banda se ciñe a la misma columna centrada
+   (max-width: 680px) que .fcp-main y .fcp-inputbar, para no salirse
+   de la franja del chat por los lados. */
+@media (min-width: 768px) {
+  .fcp > .fcp-chips {
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+}
+
 .fcp-chip {
   flex: 0 0 auto;
   border: 1px solid var(--fcp-border);
@@ -299,6 +325,10 @@
   font-size: 0.92rem;
   line-height: 1.42;
   box-shadow: var(--fcp-shadow);
+  /* En un flex item, min-width:auto deja que el contenido largo (URLs de los enlaces)
+     estire la burbuja y desborde el hilo. min-width:0 la obliga a respetar el ancho. */
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Colita de viñeta (diamante girado) */
@@ -339,6 +369,80 @@
 .fcp-bubble__text {
   margin: 0;
   white-space: normal;
+  /* Corta URLs/palabras muy largas en vez de provocar scroll horizontal. */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* -------------------------------------------------------------------------
+   Markdown renderizado de las respuestas de GUNI (react-markdown).
+   Compacto y mobile-first; todo dentro de la burbuja, sin desbordes.
+   ------------------------------------------------------------------------- */
+.fcp-markdown > :first-child {
+  margin-top: 0;
+}
+
+.fcp-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.fcp-markdown h1,
+.fcp-markdown h2,
+.fcp-markdown h3 {
+  margin: 0.7em 0 0.35em;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.fcp-markdown h1 { font-size: 1.12rem; }
+.fcp-markdown h2 { font-size: 1.05rem; }
+.fcp-markdown h3 { font-size: 0.98rem; }
+
+.fcp-markdown p {
+  margin: 0.45em 0;
+}
+
+.fcp-markdown ul,
+.fcp-markdown ol {
+  margin: 0.45em 0;
+  padding-left: 1.25rem;
+}
+
+.fcp-markdown li {
+  margin: 0.2em 0;
+}
+
+.fcp-markdown a {
+  color: var(--fcp-accent, #c0492c);
+  font-weight: 600;
+  text-decoration: underline;
+  overflow-wrap: anywhere;
+}
+
+/* Imágenes de eventos: nunca más anchas que la burbuja. */
+.fcp-markdown img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.5em 0;
+  border-radius: 10px;
+}
+
+.fcp-markdown hr {
+  border: 0;
+  border-top: 1px solid var(--fcp-border);
+  margin: 0.6em 0;
+}
+
+.fcp-markdown strong {
+  font-weight: 700;
+}
+
+.fcp-markdown code {
+  background: rgba(22, 58, 74, 0.07);
+  padding: 0.05em 0.35em;
+  border-radius: 5px;
+  font-size: 0.88em;
 }
 
 /* Etiqueta "Modo orientación básica" en amarillo suave (sin saturar) */

@@ -50,7 +50,10 @@ export function buildFamilyPlanPayload(message, familyProfile = {}) {
 export async function sendFamilyPlanMessage({ message, familyProfile }) {
   const payload = buildFamilyPlanPayload(message, familyProfile);
 
-  const { data } = await apiClient.post("/assistant/family-plan", payload);
+  // El asistente puede tardar más que el timeout por defecto (10s) del apiClient:
+  // con parámetros de búsqueda el LLM local en CPU genera respuestas largas, y la
+  // cascada del backend (LLM 90s → Data 4s → fallback) puede llegar a ~95s en el peor caso.
+  const { data } = await apiClient.post("/assistant/family-plan", payload, { timeout: 100000 });
 
   return data;
 }

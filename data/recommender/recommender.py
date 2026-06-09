@@ -6,6 +6,7 @@ candidatos ya filtrados por los filtros duros.
 Modelo: intfloat/multilingual-e5-large -> requiere prefijos 'query:' / 'passage:'.
 """
 from datetime import datetime
+import math
 import numpy as np
 
 import config
@@ -16,6 +17,19 @@ import location as loc
 # ──────────────────────────────────────────────────────────────
 # HELPERS
 # ──────────────────────────────────────────────────────────────
+
+def _v(val):
+    """pandas lee NULLs de SQLite como float('nan'). Convertir a None para JSON válido."""
+    if isinstance(val, float) and math.isnan(val):
+        return None
+    return val
+
+
+def _bool_val(val):
+    """NaN o None → False; entero 0/1 → bool."""
+    v = _v(val)
+    return bool(v) if v is not None else False
+
 
 def _hoy():
     return datetime.today()
@@ -192,22 +206,22 @@ def puntuar_candidatos(candidatos_df, store, emb_consulta, emb_perfil,
         score_final = score_sin_boost * mult
         resultados.append({
             "id":              ev_id,
-            "title":           row["title"],
-            "categoria":       row["categoria"],
-            "municipio":       row["municipio"],
-            "description":     row.get("description"),
-            "lat":             row.get("lat"),
-            "lng":             row.get("lng"),
-            "price":           row.get("price"),
-            "imagen_url":      row.get("imagen_url"),
-            "website":         row.get("website"),
-            "fecha_inicio":    row.get("fecha_inicio"),
-            "fecha_fin":       row.get("fecha_fin"),
-            "es_interior":     bool(row.get("es_interior", 0)),
-            "es_carrito":      bool(row.get("es_carrito", 0)),
-            "es_cambiador":    bool(row.get("es_cambiador", 0)),
-            "es_silla_ruedas": bool(row.get("es_silla_ruedas", 0)),
-            "es_mascotas":     bool(row.get("es_mascotas", 0)),
+            "title":           _v(row["title"]),
+            "categoria":       _v(row["categoria"]),
+            "municipio":       _v(row["municipio"]),
+            "description":     _v(row.get("description")),
+            "lat":             _v(row.get("lat")),
+            "lng":             _v(row.get("lng")),
+            "price":           _v(row.get("price")),
+            "imagen_url":      _v(row.get("imagen_url")),
+            "website":         _v(row.get("website")),
+            "fecha_inicio":    _v(row.get("fecha_inicio")),
+            "fecha_fin":       _v(row.get("fecha_fin")),
+            "es_interior":     _bool_val(row.get("es_interior", 0)),
+            "es_carrito":      _bool_val(row.get("es_carrito", 0)),
+            "es_cambiador":    _bool_val(row.get("es_cambiador", 0)),
+            "es_silla_ruedas": _bool_val(row.get("es_silla_ruedas", 0)),
+            "es_mascotas":     _bool_val(row.get("es_mascotas", 0)),
             "sim_consulta":    round(float(sim_consulta[j]), 4),
             "sim_perfil":      round(float(sim_perfil[j]), 4),
             "penalizacion":    round(pen, 4),

@@ -38,6 +38,18 @@ python app.py
 
 El servicio queda en `http://localhost:5001`.
 
+> ⚠️ **Windows — arráncalo siempre con el `.venv` y con UTF-8.** Si lo lanzas con el Python
+> global (sin `pandas`) o sin forzar UTF-8, el subprocess interno falla y la respuesta cae
+> siempre en `mode: "fallback"`. Desde `ai-service/` en PowerShell:
+>
+> ```powershell
+> $env:PYTHONUTF8 = "1"
+> .\.venv\Scripts\python.exe app.py
+> ```
+>
+> (Desde la app, `app.py` ya fuerza UTF-8 en el subprocess; la variable es el cinturón de
+> seguridad si ejecutas `API_LLM_original.py` a mano.)
+
 ## Endpoints
 
 ### `GET /health`
@@ -105,6 +117,12 @@ Respuesta de fallback (sin resultados / error / timeout):
 
 ## Problemas frecuentes
 
+- **Siempre responde `mode: "fallback"`**: casi siempre es uno de estos dos en Windows:
+  1. El servidor se arrancó con el **Python global** (sin `pandas`): `ModuleNotFoundError: No module
+     named 'pandas'`. Arráncalo con el `.venv` (`.\.venv\Scripts\python.exe app.py`).
+  2. **`UnicodeEncodeError`** al imprimir los emojis del Markdown (codec `cp1252`). Arranca con
+     `$env:PYTHONUTF8 = "1"`. El código ya lo fuerza, pero la variable es la red de seguridad.
+  Para diagnosticar, ejecuta el script a mano: `.\.venv\Scripts\python.exe API_LLM_original.py "Plan gratis en Bilbao"`.
 - **Ollama no está arrancado**: inicia Ollama en el host y repite la petición.
 - **Modelo no descargado**: ejecuta `ollama pull qwen2.5-coder:latest`.
 - **Timeout**: la primera inferencia puede tardar; sube `AI_SCRIPT_TIMEOUT_SECONDS` para Flask o
