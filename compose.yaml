@@ -1,6 +1,22 @@
-# compose.yaml — PostgreSQL + backend local de desarrollo para DESAFIO-26
-# Uso: docker compose up -d postgres backend
-# Ver instrucciones completas en docs/docker-backend.md y docs/database.md
+# compose.yaml — Stack COMPLETO de desarrollo local para DESAFIO-26 / pLANGUNE
+#
+# Levanta la app entera con un comando:
+#   docker compose up -d --build
+#     → postgres + backend (Express) + frontend (Nginx) + data-recommender (Flask/Data)
+#
+# Asistente GUNI con chatbot local + Ollama (PESADO, opt-in):
+#   docker compose --profile chat up -d --build
+#     → además: data-chatbot + ollama  (requiere descargar el modelo, ver data/README.md)
+#
+# Topología:
+#   - El frontend (Nginx) es el único puerto que abre el usuario (http://localhost:8080)
+#     y hace de reverse proxy de /api → backend. El navegador nunca habla con Data/Ollama.
+#   - El backend Express es la única fachada de API. Llama al recomendador por nombre de
+#     servicio (http://data-recommender:5000). Data NO se publica a internet.
+#
+# ⚠️ Primer build: data-recommender descarga PyTorch (CPU) + el modelo e5-large (~2 GB),
+#    así que la primera vez tarda y la imagen es grande. Builds posteriores usan caché.
+#    Ver instrucciones completas en docs/docker-backend.md, data/README.md y docs/database.md
 
 services:
   postgres:
@@ -32,6 +48,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      # No bloquea el arranque por el recomendador (puede tardar en cargar el modelo):
+      # si Data aún no responde, el backend usa el fallback local reglado.
+      data-recommender:
+        condition: service_started
     # Carga en RUNTIME las flags del asistente y la CLOUD_ASSISTANT_API_KEY desde el .env del
     # host (LLM_ASSISTANT_*, CLOUD_ASSISTANT_*, DATA_RECOMMENDER_*). NO se hornea en la imagen:
     # .dockerignore ya excluye .env. Las claves de `environment` (abajo) tienen PRIORIDAD sobre
@@ -44,12 +64,82 @@ services:
       # IMPORTANTE: dentro de Docker el host de la DB es `postgres` (nombre del servicio),
       # NO `localhost`. Credenciales de desarrollo local (no secretos reales).
       DATABASE_URL: "postgresql://desafio26:desafio26_dev_password@postgres:5432/desafio26_dev?schema=public"
-      CLIENT_URL: "http://localhost:5173"
+      # El usuario abre el frontend dockerizado en :8080 (Nginx). CORS lo permite.
+      CLIENT_URL: "http://localhost:8080"
+      # Data como recomendador principal por nombre de servicio (red interna Docker).
+      DATA_RECOMMENDER_ENABLED: "true"
+      DATA_API_URL: "http://data-recommender:5000"
+      DATA_API_TIMEOUT_MS: "4000"
+      DATA_USER_ID: "0"
     ports:
       - "3000:3000"
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/ready').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Ruta relativa: Nginx enruta /api → backend (ver frontend/nginx.conf).
+        VITE_API_URL: /api
+    container_name: desafio26_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+
+  data-recommender:
+    build:
+      context: ./data
+      dockerfile: recommender/Dockerfile
+    container_name: desafio26_data_recommender
+    restart: unless-stopped
+    # Publicado en dev para poder probar el recomendador directamente (curl :5000/health).
+    # En producción NO se publica (ver compose.data.prod.yaml).
+    ports:
+      - "5000:5000"
+    healthcheck:
+      # Imagen python:slim (sin curl): sonda con urllib. start_period generoso: el modelo
+      # de ~2 GB se carga en memoria al arrancar antes de responder /health.
+      test:
+        - CMD-SHELL
+        - "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:5000/health').getcode()==200 else 1)\""
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+
+  # ── Asistente GUNI: chatbot local + Ollama (profile opt-in, PESADO) ──────────────
+  # Activar con: docker compose --profile chat up -d --build
+  # Tras arrancar, descargar el modelo una vez:
+  #   docker compose exec ollama ollama pull qwen2.5-coder:latest
+  # GUNI por defecto (sin este profile) usa el fallback/cloud configurado en backend/.env.
+  data-chatbot:
+    build:
+      context: ./data
+      dockerfile: chatbot/Dockerfile
+    container_name: desafio26_data_chatbot
+    restart: unless-stopped
+    profiles: ["chat"]
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+    # Interno: lo alcanza el backend por nombre de servicio (http://data-chatbot:5000).
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: desafio26_ollama
+    restart: unless-stopped
+    profiles: ["chat"]
+    volumes:
+      - desafio26_ollama_models:/root/.ollama
+    # Interno: solo el chatbot lo usa. No se publica a internet.
+
 volumes:
   desafio26_postgres_data:
     name: desafio26_postgres_data
+  desafio26_ollama_models:
+    name: desafio26_ollama_models

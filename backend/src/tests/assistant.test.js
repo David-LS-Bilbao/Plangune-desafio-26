@@ -21,7 +21,8 @@ vi.mock('../clients/llmAssistant.client.js', () => ({
 
 vi.mock('../clients/dataRecommender.client.js', () => ({
   isDataRecommenderEnabled: vi.fn(() => false),
-  fetchDataPlanes: vi.fn(),
+  getDataUserId: vi.fn(() => 0),
+  fetchDataRecomendar: vi.fn(),
 }));
 
 vi.mock('../repositories/event.repository.js', () => ({

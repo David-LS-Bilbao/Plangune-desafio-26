@@ -1,6 +1,6 @@
 import { findEvents } from '../repositories/event.repository.js';
 import { serializeEvent, toNumberOrNull } from '../utils/serializeEvent.js';
-import { isDataRecommenderEnabled, fetchDataPlanes } from '../clients/dataRecommender.client.js';
+import { isDataRecommenderEnabled, fetchDataRecomendar } from '../clients/dataRecommender.client.js';
 import { normalizeDataPlaneToEvent } from '../utils/normalizeDataEvent.js';
 
 /**
@@ -69,22 +69,34 @@ function scoreEvent(event, context) {
   return { score: Math.min(score, 100), reasons };
 }
 
-function mapContextToDataParams(context) {
-  const params = {};
-
-  if (context.municipality) params.ubicacion = context.municipality;
-  if (Array.isArray(context.childrenAges) && context.childrenAges.length > 0) {
-    params.edad_max = Math.min(...context.childrenAges);
+/**
+ * Mapea el `context` de Express a la petición real de Data (`POST /recomendar`):
+ *   - `filtros`: booleanos `es_*` (carrito/cambiador/interior/accesible/mascota) + `gratis`.
+ *   - `consulta`: texto libre con municipio y edades; Data extrae el municipio del texto
+ *     (no hay parámetro de municipio aparte) y usa el resto para la similitud semántica.
+ *
+ * El límite NO se envía a Data (su contrato no lo soporta): Express recorta con `slice`.
+ */
+function mapContextToDataRequest(context) {
+  const filtros = {};
+  if (context.strollerFriendly !== undefined) filtros.carrito = Boolean(context.strollerFriendly);
+  if (context.changingTable !== undefined) filtros.cambiador = Boolean(context.changingTable);
+  if (context.rainSuitable !== undefined) filtros.interior = Boolean(context.rainSuitable);
+  if (context.wheelchairAccessible !== undefined) {
+    filtros.accesible = Boolean(context.wheelchairAccessible);
   }
-  if (context.strollerFriendly !== undefined) params.carrito = context.strollerFriendly;
-  if (context.rainSuitable !== undefined) params.lluvia = context.rainSuitable;
-  if (context.changingTable !== undefined) params.cambiador = context.changingTable;
-  if (context.wheelchairAccessible !== undefined) params.silla_ruedas = context.wheelchairAccessible;
-  if (context.petsAllowed !== undefined) params.mascotas = context.petsAllowed;
-  if (context.includeKulturklik !== undefined) params.kulturklik = context.includeKulturklik;
-  params.limite = context.limit ?? DEFAULT_RECOMMENDATION_LIMIT;
+  if (context.petsAllowed !== undefined) filtros.mascota = Boolean(context.petsAllowed);
+  // `budget === 0` expresa "solo gratis" en el contrato público.
+  if (typeof context.budget === 'number' && context.budget === 0) filtros.gratis = true;
 
-  return params;
+  const parts = [];
+  if (context.municipality) parts.push(String(context.municipality));
+  if (Array.isArray(context.childrenAges) && context.childrenAges.length > 0) {
+    parts.push(`planes para niños de ${context.childrenAges.join(', ')} años`);
+  }
+  const consulta = parts.join(' ').trim();
+
+  return { consulta, filtros };
 }
 
 function getDataPlanesArray(response) {
@@ -133,8 +145,8 @@ async function getLocalRecommendations(context = {}) {
 export async function getRecommendations(context = {}) {
   if (isDataRecommenderEnabled()) {
     try {
-      const params = mapContextToDataParams(context);
-      const response = await fetchDataPlanes(params);
+      const { consulta, filtros } = mapContextToDataRequest(context);
+      const response = await fetchDataRecomendar({ consulta, filtros });
       const planes = getDataPlanesArray(response);
 
       if (Array.isArray(planes) && planes.length > 0) {

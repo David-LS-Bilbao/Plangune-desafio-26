@@ -1,0 +1,11 @@
+# No arrastrar dependencias/artefactos al build context del frontend.
+node_modules/
+dist/
+coverage/
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+.DS_Store
+*.log
