@@ -1,11 +1,11 @@
-# TxikiPlan Euskadi
+# Plangune Euskadi
 
 > **Nombre provisional del proyecto.**
 > El naming definitivo será definido más adelante por el equipo de Marketing.
 
 ## Descripción
 
-TxikiPlan Euskadi es una web/app responsive, mobile-first y SPA orientada a familias jóvenes con bebés y niños pequeños que buscan planes, lugares, actividades y negocios familiares en Euskadi de forma sencilla, segura y sin complicaciones.
+Plangune Euskadi es una web/app responsive, mobile-first y SPA orientada a familias jóvenes con bebés y niños pequeños que buscan planes, lugares, actividades y negocios familiares en Euskadi de forma sencilla, segura y sin complicaciones.
 
 El objetivo principal es ayudar a las familias a responder preguntas prácticas antes de salir de casa:
 
@@ -23,9 +23,7 @@ Este proyecto se desarrolla dentro del **Desafío de Tripulaciones 2026**.
 
 ## Estado del proyecto
 
-Proyecto en fase inicial de bootstrap.
-
-Actualmente existen:
+Proyecto en desarrollo del MVP. Producto y documentación inicial:
 
 * Brief oficial del desafío.
 * Investigación inicial de producto y competencia.
@@ -33,6 +31,116 @@ Actualmente existen:
 * Dosier preliminar de objetivos.
 * Carpeta Drive organizada por verticales.
 * Plan inicial de arquitectura Full Stack.
+
+### Backend MVP
+
+El backend Express expone la **API REST pública bajo `/api`**. El frontend consume siempre
+Express; no llama directamente a servicios internos como la API Flask de Data.
+
+Estado actual:
+
+* `/api/events`, `/api/recommendations` y `/api/favorites` usan datos reales vía PostgreSQL/Prisma.
+* Login real mínimo con roles (`family`, `business`, `admin`) en `/api/auth`.
+* La sesión usa cookie `httpOnly`; el frontend no guarda JWT en `localStorage`.
+* `/api/favorites` requiere usuario autenticado con rol `family`.
+* Auth endurecida para despliegue: CORS cerrado por `CLIENT_URL`, rate limit en login/registro,
+  `JWT_SECRET` fuerte, JWT `HS256` explícito y seed bloqueado en producción.
+* `/api/recommendations` usa **Data Flask** como recomendador principal cuando
+  `DATA_RECOMMENDER_ENABLED=true`.
+* Si Data está deshabilitada, falla o agota timeout, Express usa el recomendador local
+  Prisma/PostgreSQL como fallback.
+* Existe un servicio local opcional [`ai-service/`](ai-service/) para demo del asistente LLM
+  con Ollama. Corre en `http://localhost:5001` y Express lo consume desde
+  `POST /api/assistant/family-plan`; el frontend no llama a Flask.
+* Si `LLM_ASSISTANT_ENABLED=false` o el `ai-service` falla, Express mantiene el fallback local
+  sin IA.
+* El campo actual para planes interiores/a cubierto es `events.es_interior`.
+* Existe una migración incremental segura para renombrar `es_lluvia` a `es_interior`.
+* Tests backend actuales: **16 suites · 158/158 verdes**.
+* PostgreSQL local usa `localhost:5434` desde el host para evitar conflictos con otros
+  proyectos en `5432`; dentro de Docker el backend sigue usando `postgres:5432`.
+* Existe un importador CSV seguro (`backend/prisma/import-events-from-csv.js`) para ampliar
+  eventos con datos de Data bajo validación explícita. Ver [docs/database.md](docs/database.md).
+
+Endpoints actuales:
+
+* `GET /api/health`
+* `POST /api/auth/register` · `POST /api/auth/login` · `GET /api/auth/me` · `POST /api/auth/logout`
+* `GET /api/activities` · `GET /api/activities/:id` (solo `approved`)
+* `GET /api/recommendations` (hasta 3 planes con Family Score reglado y explicable)
+* `POST /api/assistant/family-plan` (LLM local opcional con fallback sin IA)
+* `POST /api/reviews` · `POST /api/incidents`
+* `GET/POST/DELETE /api/favorites` (requiere rol `family`)
+
+Detalle de la feature auth/roles:
+[docs/features/auth-roles-minimum.md](docs/features/auth-roles-minimum.md) · memoria de cierre:
+[docs/memoria/auth-roles-minimum-cierre.md](docs/memoria/auth-roles-minimum-cierre.md).
+
+Variables Data (`backend/.env.example`):
+
+```bash
+DATA_RECOMMENDER_ENABLED=false
+DATA_API_URL=http://localhost:5000
+DATA_API_TIMEOUT_MS=2000
+```
+
+Para activar Data en local:
+
+* Windows/Linux: `DATA_API_URL=http://localhost:5000`.
+* Mac: usar `DATA_API_URL=http://localhost:5050` si AirPlay/Control Center ocupa el puerto `5000`.
+
+Data vive en el repo externo `Desafio-Data`. Express sigue siendo la única fachada pública para
+frontend; el frontend nunca llama directamente a Data.
+
+Variables LLM local (`backend/.env.example`):
+
+```bash
+LLM_ASSISTANT_ENABLED=false
+LLM_ASSISTANT_API_URL=http://localhost:5001
+LLM_ASSISTANT_TIMEOUT_MS=8000
+LLM_ASSISTANT_CONTRACT=get-question
+```
+
+Con `LLM_ASSISTANT_CONTRACT=get-question`, Express consume el chatbot Data por contrato `GET
+/<pregunta>` y mantiene fallback local si Data falla. Documentación completa:
+[docs/integration-ai-ollama-local.md](docs/integration-ai-ollama-local.md).
+
+Arranque y tests (monorepo npm workspaces):
+
+```bash
+npm install
+npm run dev:backend     # API en http://localhost:3000
+npm run prisma:generate --workspace backend
+npm run prisma:migrate  --workspace backend
+npm run db:seed         --workspace backend
+npm run test:backend    # tests con Vitest + Supertest
+```
+
+Contrato detallado en [docs/api.md](docs/api.md) · base de datos y seed en [docs/database.md](docs/database.md) · seguridad en [docs/security.md](docs/security.md) · calidad y cobertura en [docs/quality/](docs/quality/).
+
+### Frontend · Asistente familiar GUNI (playground)
+
+El frontend incluye **GUNI**, el asistente familiar conversacional, como **playground visual aislado**
+en la ruta de desarrollo **`/dev/family-chat`**.
+
+* Consume el backend real en `POST /api/assistant/family-plan` vía `VITE_API_URL`.
+  El frontend ya usa backend real para auth/favoritos; varias pantallas de negocio/admin siguen
+  usando stores mock hasta sus features específicas.
+* La ruta **solo se registra en desarrollo** (`import.meta.env.DEV`); en el build de producción se
+  elimina y no es accesible.
+* Cumple el [contrato Frontend ↔ Backend](docs/contracts/frontend-backend-api-contract.md):
+  distingue `mode:"ai"` (`assistantMessageMarkdown`) y `mode:"fallback"` (`message` +
+  `recommendations`), degrada con un mensaje amable si la IA falla y **no expone `source`/`mode`
+  en crudo** al usuario.
+* Mobile-first, CSS propio namespaced (`.fcp`), accesible. Tests: **6/6 verdes**.
+
+Detalle completo en
+[docs/features/frontend-family-chat-playground-guni.md](docs/features/frontend-family-chat-playground-guni.md).
+
+```bash
+npm run dev:backend                  # API en http://localhost:3000
+npm run dev --workspace frontend     # http://localhost:5173/dev/family-chat
+```
 
 ---
 
@@ -232,7 +340,7 @@ Ejemplo de explicación al usuario:
 ## Arquitectura prevista
 
 ```txt
-txikiplan-euskadi/
+plangune-euskadi/
 ├── frontend/
 ├── backend/
 ├── docs/
@@ -584,7 +692,7 @@ Estructura esperada:
 
 ```bash
 git clone <url-del-repositorio>
-cd txikiplan-euskadi
+cd plangune-euskadi
 ```
 
 Instalar frontend:
@@ -626,7 +734,7 @@ Variables previstas:
 ```env
 PORT=3000
 NODE_ENV=development
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/desafio26_dev?schema=public
+DATABASE_URL=postgresql://desafio26:desafio26_dev_password@localhost:5434/desafio26_dev?schema=public
 JWT_SECRET=change_me
 JWT_EXPIRES_IN=7d
 CLIENT_URL=http://localhost:5173
@@ -745,6 +853,18 @@ docs/
 
 ---
 
+## Production/Demo deployment
+
+Despliegue en VPS (IONOS) detrás de **Nginx Proxy Manager**, con solo `80/443` públicos. El backend Express es la única fachada `/api`; PostgreSQL y servicios internos **no** se exponen a Internet.
+
+* Guía de despliegue: [docs/deployment/vps-demo-deploy.md](docs/deployment/vps-demo-deploy.md)
+* Checklist de seguridad pre-deploy: [docs/security/predeploy-checklist.md](docs/security/predeploy-checklist.md)
+* Plantilla compose de producción: [compose.prod.yaml](compose.prod.yaml)
+
+> No ejecutar deploy sin completar el checklist. Los secretos reales (JWT, DB, API keys) viven **fuera del repo** (env del host / Docker), nunca versionados.
+
+---
+
 ## Seguridad básica
 
 Medidas mínimas previstas:
@@ -792,10 +912,9 @@ Proyecto multidisciplinar con participación de:
 
 ## Notas importantes
 
-* El nombre **TxikiPlan Euskadi** es provisional.
+* El nombre **Plangune Euskadi** es provisional.
 * Los mocks UX/UI son referencia visual, no código final obligatorio.
 * Los archivos `code.html` de los mocks no deben condicionar la arquitectura final.
 * Prioridad absoluta: MVP funcional antes que funcionalidades avanzadas.
 * KISS: primero que funcione, luego se mejora.
 * La demo final manda sobre las ideas secundarias.
-

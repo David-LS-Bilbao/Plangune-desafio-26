@@ -1,0 +1,31 @@
+.language-switcher-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  margin-left: 16px;
+}
+
+.language-switcher-btn span {
+  opacity: 0.6;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.language-switcher-btn span.active {
+  opacity: 1;
+  color: var(--secondary-color);
+}
+
+.language-switcher-btn .separator {
+  opacity: 0.3;
+  font-weight: 400;
+}

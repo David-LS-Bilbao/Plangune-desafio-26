@@ -1,0 +1,202 @@
+
+ RUN  v2.1.9 /home/marcos/Documentos/desafio-26-1/backend
+
+ ✓ src/tests/serializeEvent.test.js > toNumberOrNull > mantiene un number nativo
+ ✓ src/tests/serializeEvent.test.js > toNumberOrNull > convierte un string numérico (Decimal serializado) a number
+ ✓ src/tests/serializeEvent.test.js > toNumberOrNull > convierte un objeto con toString() (Prisma Decimal) a number
+ ✓ src/tests/serializeEvent.test.js > toNumberOrNull > devuelve null para null y undefined
+ ✓ src/tests/serializeEvent.test.js > toIsoOrNull > convierte un Date a ISO string
+ ✓ src/tests/serializeEvent.test.js > toIsoOrNull > mantiene un string (ya ISO) tal cual
+ ✓ src/tests/serializeEvent.test.js > toIsoOrNull > devuelve null para null y undefined
+ ✓ src/tests/serializeEvent.test.js > serializeEvent > normaliza tipos sin cambiar ni eliminar campos
+ ✓ src/tests/serializeEvent.test.js > serializeEvent > es no-op sobre un evento mock con tipos ya nativos
+ × src/tests/env.test.js > validateEnv > production válido → no lanza y devuelve isProduction
+   → Insecure production configuration:
+- Missing required production environment variables: GOOGLE_CLIENT_ID
+ ✓ src/tests/env.test.js > validateEnv > production sin DATABASE_URL ni JWT_SECRET → lanza listando ambas (orden estable)
+ ✓ src/tests/env.test.js > validateEnv > production con JWT_SECRET demasiado corto (<32) → lanza
+ ✓ src/tests/env.test.js > validateEnv > production con JWT_SECRET placeholder → lanza
+ ✓ src/tests/env.test.js > validateEnv > production sin CLIENT_URL → lanza mencionándolo
+ ✓ src/tests/env.test.js > validateEnv > development sin variables → no bloquea el arranque
+ ✓ src/tests/env.test.js > validateEnv > sin NODE_ENV → trata como development (no lanza)
+ ✓ src/tests/env.test.js > validateEnv > el mensaje de error NUNCA incluye el valor del secreto
+ ✓ src/tests/normalizeDataEvent.test.js > coerceBool > respeta booleanos nativos
+ ✓ src/tests/normalizeDataEvent.test.js > coerceBool > convierte "True"/"False" a boolean real
+ ✓ src/tests/normalizeDataEvent.test.js > coerceBool > acepta "true"/"false" y tolera mayúsculas/espacios
+ ✓ src/tests/normalizeDataEvent.test.js > coerceBool > evita el bug Boolean("False") === true
+ ✓ src/tests/normalizeDataEvent.test.js > coerceBool > null/undefined → false
+ ✓ src/tests/normalizeDataEvent.test.js > normalizeDataPlaneToEvent > mapea nombre→title, descripcion→description, direccion→address, precio→price
+ ✓ src/tests/normalizeDataEvent.test.js > normalizeDataPlaneToEvent > mapea es_interior desde es_lluvia
+ ✓ src/tests/normalizeDataEvent.test.js > normalizeDataPlaneToEvent > convierte los booleanos string a boolean real
+ ✓ src/tests/normalizeDataEvent.test.js > normalizeDataPlaneToEvent > edad_minima como número
+ ✓ src/tests/normalizeDataEvent.test.js > normalizeDataPlaneToEvent > lat/lng como número
+ ✓ src/tests/normalizeDataEvent.test.js > normalizeDataPlaneToEvent > id null si Data no trae id; business_id null; fuente "data-api"
+ ✓ src/tests/normalizeDataEvent.test.js > normalizeDataPlaneToEvent > no arrastra claves crudas de Data (nombre, precio, direccion, es_lluvia)
+ ✓ src/tests/normalizeDataEvent.test.js > normalizeDataPlaneToEvent > respeta id si Data lo trae
+ ✓ src/tests/normalizeDataEvent.test.js > normalizeDataPlaneToEvent > edad_minima null y lat/lng null si no vienen
+ ✓ src/tests/pagination.test.js > parsePagination > sin query → page 1, limit por defecto, skip 0
+ ✓ src/tests/pagination.test.js > parsePagination > page/limit válidos → calcula skip y take
+ ✓ src/tests/pagination.test.js > parsePagination > limit por encima del máximo → se capa a MAX_LIMIT
+ ✓ src/tests/pagination.test.js > parsePagination > entradas inválidas (0, negativos, texto) → valores por defecto
+ ✓ src/tests/pagination.test.js > parsePagination > nunca devuelve un take mayor que MAX_LIMIT
+ ✓ src/tests/llmAssistant.client.test.js > getLlmAssistantContract > default es "post-family-plan" cuando no hay variable
+ ✓ src/tests/llmAssistant.client.test.js > getLlmAssistantContract > respeta LLM_ASSISTANT_CONTRACT=get-question
+ ✓ src/tests/llmAssistant.client.test.js > fetchLlmQuestion (contrato get-question) > 200 + Markdown → devuelve el texto (trim) y construye GET /<pregunta> codificada
+ ✓ src/tests/llmAssistant.client.test.js > fetchLlmQuestion (contrato get-question) > 200 + body vacío → lanza (fallo)
+ ✓ src/tests/llmAssistant.client.test.js > fetchLlmQuestion (contrato get-question) > 200 + body que empieza por "ERROR:" → lanza (fallo)
+ ✓ src/tests/llmAssistant.client.test.js > fetchLlmQuestion (contrato get-question) > 500 → lanza error con .status
+ ✓ src/tests/llmAssistant.client.test.js > fetchLlmQuestion (contrato get-question) > error de red / timeout → propaga el error de fetch
+ ✓ src/tests/cloudAssistant.client.test.js > isCloudAssistantEnabled / getCloudAssistantProvider > enabled solo si CLOUD_ASSISTANT_ENABLED === "true"
+ ✓ src/tests/cloudAssistant.client.test.js > isCloudAssistantEnabled / getCloudAssistantProvider > provider por defecto es "gemini"
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > 200 válido → assistantMessageMarkdown y recommendations []; key solo en cabecera
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > falta API key → error controlado (sin exponer la clave) y sin llamar a fetch ni reintentar
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > provider desconocido → error controlado y sin llamar a fetch
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > HTTP 401 → NO reintenta y lanza error con status 401
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > HTTP 404 → NO reintenta y lanza error con status 404
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > HTTP 429 (rate-limit) → NO reintenta, fetch una sola vez, lanza status 429 y no filtra la key
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > timeout / abort → lanza error controlado, NO reintenta y no filtra la key
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > JSON válido pero sin texto → lanza error y NO reintenta
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > JSON inválido (json() lanza) → lanza error y NO reintenta
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · camino feliz y errores NO recuperables > el payload enviado NO incluye datos identificativos (email/userId/name)
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · reintento ante errores transitorios > 1) primer intento 503, segundo 200 → devuelve assistantMessageMarkdown
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · reintento ante errores transitorios > 2) tres intentos 503 → agota reintentos y lanza (status 503) para que el service caiga a fallback
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · reintento ante errores transitorios > HTTP 500 en los 3 intentos → agota reintentos y lanza status 500
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · reintento ante errores transitorios > error de red transitorio ("fetch failed") y luego 200 → reintenta y devuelve markdown
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · reintento ante errores transitorios > 503 con Retry-After=1 → respeta el header (capado ≤1500ms) y reintenta una vez
+ ✓ src/tests/cloudAssistant.client.test.js > fetchCloudFamilyPlan · Gemini · seguridad de la API key > la API key nunca aparece en el mensaje de error, ni tras agotar reintentos (500×3)
+ ✓ src/tests/rateLimit.test.js > rateLimit middlewares > createApiRateLimit: 429 al superar el límite, con mensaje genérico seguro
+ ✓ src/tests/rateLimit.test.js > rateLimit middlewares > createAssistantRateLimit: 429 con el mensaje específico del asistente
+ ✓ src/tests/rateLimit.test.js > rateLimit middlewares > con skip activo no limita (comportamiento en tests)
+ ✓ src/tests/authRateLimit.test.js > authRateLimit middleware > devuelve 429 al superar el límite de intentos
+ ✓ src/tests/ready.test.js > GET /api/ready > DB responde → 200 { status: ready, database: ok }
+ ✓ src/tests/ready.test.js > GET /api/ready > DB falla → 503 { status: not_ready, database: unavailable } sin filtrar detalles
+ ✓ src/tests/error.test.js > notFoundHandler > ruta no definida en /api → 404 con JSON uniforme
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · fallback local (Data deshabilitado) > responde 200 con un array de como máximo 3 recomendaciones
+ ✓ src/tests/activities.test.js > GET /api/activities > responde 200 con un array
+ ✓ src/tests/activities.test.js > GET /api/activities > solo devuelve actividades approved y excluye la pending act-006
+ ✓ src/tests/events.test.js > GET /api/events > responde 200 y un array de eventos
+ ✓ src/tests/events.test.js > GET /api/events > por defecto reenvía un take seguro (límite duro) al repositorio
+ ✓ src/tests/favorites.test.js > Favoritos · autenticación > GET /api/favorites sin token responde 401
+ ✓ src/tests/favorites.test.js > Favoritos · autenticación > POST /api/favorites/:id sin token responde 401 (no añade)
+ ✓ src/tests/error.test.js > errorHandler > error sin status → 500 con campo error en JSON
+ ✓ src/tests/error.test.js > errorHandler > error con status 400 → 400 con mensaje controlado
+ ✓ src/tests/error.test.js > asyncHandler > captura el rechazo de una Promise y lo pasa al errorHandler → 500
+ ✓ src/tests/error.test.js > errorHandler · hardening Prisma/DB > init/conexión Prisma (DB caída) → 503 genérico sin filtrar internos
+ ✓ src/tests/error.test.js > errorHandler · hardening Prisma/DB > KnownRequestError P1001 (no alcanza la DB) → 503 genérico
+ ✓ src/tests/error.test.js > errorHandler · hardening Prisma/DB > otro error de Prisma (P2002) → 500 enmascarado, sin filtrar
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · fallback local (LLM deshabilitado) > responde 200 con mode "fallback"
+ ✓ src/tests/favorites.test.js > Favoritos · autenticación > POST /api/favorites/:id con rol business responde 403 (no añade)
+ ✓ src/tests/events.test.js > GET /api/events > reenvía page/limit como skip/take al repositorio
+ ✓ src/tests/events.test.js > GET /api/events > capa limit por encima del máximo a 50
+ ✓ src/tests/activities.test.js > GET /api/activities/:id > responde 200 para una actividad approved existente
+ ✓ src/tests/activities.test.js > GET /api/activities/:id > responde 404 para la actividad pendiente act-006
+ ✓ src/tests/activities.test.js > GET /api/activities/:id > responde 404 para un id inexistente
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · fallback local (Data deshabilitado) > cada item tiene shape { event, activity, score:número, reasons:array, source:"local-fallback" }
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · fallback local (Data deshabilitado) > activity es alias legacy de event (mismo objeto)
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · fallback local (Data deshabilitado) > ordena las recomendaciones de mayor a menor score
+ ✓ src/tests/favorites.test.js > Favoritos (events reales) > POST /api/favorites/:id añade (201) con eventId + activityId y aparece en GET
+ ✓ src/tests/cors.test.js > CORS credentials > en producción exige CLIENT_URL configurado
+ ✓ src/tests/favorites.test.js > Favoritos (events reales) > DELETE /api/favorites/:id quita (200) con removed:true y desaparece de GET
+ ✓ src/tests/events.test.js > GET /api/events > filtra por territorio (devuelve solo coincidencias, subconjunto)
+ ✓ src/tests/events.test.js > GET /api/events > filtra por municipio (case-insensitive)
+ ✓ src/tests/events.test.js > GET /api/events > filtra por es_carrito=true
+ ✓ src/tests/events.test.js > GET /api/events > filtra por es_interior=true (plan a cubierto)
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · fallback local (Data deshabilitado) > con una query familiar, el top result es explicable (tiene reasons)
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · fallback local (Data deshabilitado) > no rompe con query vacía
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · fallback local (Data deshabilitado) > strollerFriendly — el top result tiene es_carrito al filtrar por carrito
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · fallback local (Data deshabilitado) > municipality — el top result es del municipio indicado
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · fallback local (LLM deshabilitado) > devuelve recommendations como array (≤3)
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · fallback local (LLM deshabilitado) > acepta familyProfile anidado y responde 200
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · fallback local (LLM deshabilitado) > acepta body vacío y responde 200
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · fallback local (LLM deshabilitado) > rechaza message de más de 500 caracteres con 422
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · fallback local (LLM deshabilitado) > no llama al LLM cuando está deshabilitado
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · LLM local habilitado > LLM OK → mode "ai" y source "llm-local"
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · LLM local habilitado > LLM timeout/error → fallback local
+ ✓ src/tests/favorites.test.js > Favoritos (events reales) > POST a un evento inexistente responde 404
+ ✓ src/tests/events.test.js > GET /api/events > filtra por edad (apto si edad_minima <= edad)
+[0mGET /api/health [32m200[0m 26.950 ms - 42[0m
+ ✓ src/tests/cors.test.js > CORS credentials > en desarrollo permite localhost:5173 como origen por defecto
+ ✓ src/tests/favorites.test.js > Favoritos (events reales) > POST es idempotente: añadir dos veces no duplica ni falla
+ ✓ src/tests/favorites.test.js > Favoritos (events reales) > DELETE es idempotente: quitar algo no presente no falla (removed:false)
+ ✓ src/tests/favorites.test.js > Favoritos (events reales) > la respuesta contiene eventId y activityId (compatibilidad legacy)
+ ✓ src/tests/favorites.test.js > Favoritos (events reales) > GET devuelve eventos reales con shape de event (no activities mock)
+ ✓ src/tests/incidents.test.js > POST /api/incidents > crea una incidencia (201) para una actividad existente
+ ✓ src/tests/incidents.test.js > POST /api/incidents > rechaza una incidencia sin type con 422
+ ✓ src/tests/events.test.js > GET /api/events > filtra por rango de fechas sobre fecha_inicio
+ ✓ src/tests/events.test.js > GET /api/events > combina filtros (territorio + es_cambiador)
+ ✓ src/tests/events.test.js > GET /api/events > filtra por es_silla_ruedas=true (accesible con silla de ruedas)
+ ✓ src/tests/events.test.js > GET /api/events > filtra por es_silla_ruedas=false (no accesible con silla de ruedas)
+ ✓ src/tests/events.test.js > GET /api/events > filtra por es_mascotas=true (admite mascotas)
+ ✓ src/tests/events.test.js > GET /api/events > filtra por es_mascotas=false (no admite mascotas)
+ ✓ src/tests/incidents.test.js > POST /api/incidents > responde 404 si la actividad no existe
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · LLM local habilitado > LLM 500 → fallback local
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · LLM local habilitado > LLM respuesta inválida → fallback local
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · contrato get-question (chatbot Data) > OK → mode "ai", source "data-chatbot", Markdown y recommendations []
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · contrato get-question (chatbot Data) > timeout/error de fetch → fallback local
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · contrato get-question (chatbot Data) > respuesta vacía (client rechaza) → fallback local
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · contrato get-question (chatbot Data) > body que empieza por "ERROR:" (client rechaza) → fallback local
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · contrato get-question (chatbot Data) > 500 del chatbot Data → fallback local
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · contrato get-question (chatbot Data) > mantiene el contrato público: 200 y no usa el contrato POST
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · cascada con cloud (Gemini) > 1) local OK → usa local y NO llama a cloud
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · cascada con cloud (Gemini) > 2) local falla + cloud OK → mode "ai", source "cloud-gemini"
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · cascada con cloud (Gemini) > 3) local deshabilitado + cloud OK → cloud (sin llamar al LLM local)
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · cascada con cloud (Gemini) > 4) local falla + cloud falla → fallback local
+ ✓ src/tests/events.test.js > GET /api/events > rechaza un filtro booleano inválido con 422
+ ✓ src/tests/events.test.js > GET /api/events > rechaza es_silla_ruedas no booleano con 422
+ ✓ src/tests/events.test.js > GET /api/events > rechaza es_mascotas no booleano con 422
+ ✓ src/tests/events.test.js > GET /api/events > rechaza una edad no numérica con 422
+ ✓ src/tests/events.test.js > GET /api/events/:id > responde 200 con el evento si existe
+ ✓ src/tests/events.test.js > GET /api/events/:id > responde 404 si el evento no existe
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data OK ({ resultados }) → devuelve items con source "data-api"
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data OK (array directo) → aceptado de forma defensiva
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > normaliza el plan de Data al shape de events (title, municipio, price, id)
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > normalizador robusto: también acepta shape legacy (nombre/es_lluvia/strings)
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data { resultados: [] } (sin resultados) → fallback local
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > construye el body POST /recomendar: consulta (municipio + edades) y filtros booleanos
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data OK → activity sigue siendo alias de event
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data timeout/error → fallback local (source local-fallback)
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data 503 → fallback local
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data respuesta vacía (array vacío) → fallback local
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data respuesta inválida (no-array, sin resultados) → fallback local
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data devuelve más de 3 planes sin limit → Express devuelve 3
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · Data API principal > Data devuelve más de 5 planes con limit=5 → Express devuelve 5
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · parsePrice y presupuesto (fallback local) > "Gratis" se trata como 0 € → entra en presupuesto con etiqueta "Gratis"
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · parsePrice y presupuesto (fallback local) > string con número se parsea → "Desde 12€" entra con budget 40 (etiqueta "12€")
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · parsePrice y presupuesto (fallback local) > string con número por encima del presupuesto → sin bonus de presupuesto
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · parsePrice y presupuesto (fallback local) > precio null (desconocido) → NO se trata como gratis: sin bonus de presupuesto
+ ✓ src/tests/recommendations.test.js > GET /api/recommendations · parsePrice y presupuesto (fallback local) > precio no parseable ("Consultar") → NO se trata como gratis: sin bonus de presupuesto
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · cascada con cloud (Gemini) > 5) cloud deshabilitado (y local deshabilitado) → fallback local
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · cascada con cloud (Gemini) > 6) cloud 429 → fallback local
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · cascada con cloud (Gemini) > 7) cloud timeout → fallback local
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · cascada con cloud (Gemini) > 8) falta API key con cloud enabled → fallback local, sin filtrar el error
+ ✓ src/tests/assistant.test.js > POST /api/assistant/family-plan · cascada con cloud (Gemini) > 9) la respuesta final nunca contiene API key ni error interno
+ ✓ src/tests/health.test.js > GET /api/health > responde 200 con status ok y service DESAFIO-26 API
+ × src/tests/reviews.test.js > POST /api/reviews > crea una reseña (201) para una actividad existente
+   → expected 401 to be 201 // Object.is equality
+ × src/tests/reviews.test.js > POST /api/reviews > rechaza un rating fuera de rango con 422
+   → expected 401 to be 422 // Object.is equality
+ × src/tests/reviews.test.js > POST /api/reviews > responde 404 si la actividad no existe
+   → expected 401 to be 404 // Object.is equality
+ ✓ src/tests/auth.test.js > POST /api/auth/register > crea un usuario family (201), devuelve user sin password y fija cookie httpOnly 936ms
+ ✓ src/tests/auth.test.js > POST /api/auth/register > rechaza email duplicado con 409
+ × src/tests/auth.test.js > POST /api/auth/register > rechaza rol admin por registro público con 422
+   → expected 409 to be 422 // Object.is equality
+ ✓ src/tests/auth.test.js > POST /api/auth/register > rechaza password demasiado corta con 422
+ ✓ src/tests/auth.test.js > POST /api/auth/login > login correcto (200): devuelve user sin password y fija cookie
+ ✓ src/tests/auth.test.js > POST /api/auth/login > password incorrecta → 401 genérico
+ ✓ src/tests/auth.test.js > POST /api/auth/login > email inexistente → 401 (mismo error, no revela si existe)
+ ✓ src/tests/auth.test.js > GET /api/auth/me > sin token → 401
+ ✓ src/tests/auth.test.js > GET /api/auth/me > con token válido → 200 y user sin password
+ ✓ src/tests/auth.test.js > GET /api/auth/me > token también aceptado vía cookie httpOnly
+ ✓ src/tests/auth.test.js > POST /api/auth/logout > borra la cookie de sesión (200)
+ ✓ src/tests/auth.test.js > Middlewares requireAuth / requireRole > sin token → 401
+ ✓ src/tests/auth.test.js > Middlewares requireAuth / requireRole > rol incorrecto (family) → 403
+ ✓ src/tests/auth.test.js > Middlewares requireAuth / requireRole > rol correcto (admin) → 200
+ ✓ src/tests/auth.test.js > JWT hardening > rechaza JWT_SECRET débil o por defecto
+ ✓ src/tests/auth.test.js > JWT hardening > firma/verifica con HS256 explícito
+
+ Test Files  3 failed | 17 passed (20)
+      Tests  5 failed | 181 passed (186)
+   Start at  15:47:09
+   Duration  4.76s (transform 1.50s, setup 0ms, collect 14.81s, tests 5.46s, environment 7ms, prepare 3.33s)
+

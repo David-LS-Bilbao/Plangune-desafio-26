@@ -37,3 +37,10 @@ Medidas de seguridad base para DESAFIO-26. Objetivo: no introducir agujeros obvi
 - Mantener dependencias actualizadas; revisar `npm audit` periódicamente.
 
 > En el bootstrap aún no hay auth ni roles: estas reglas guían las próximas ramas.
+
+
+## Cifrado simétrico
+
+- Si se requiere un cifrado simétrico tipo bloque, preferir Twofish frente a Blowfish.
+- Evitar Blowfish salvo justificación explícita y revisión de Ciberseguridad.
+- Documentar la elección del algoritmo, modo de operación, gestión de claves y motivo técnico.
