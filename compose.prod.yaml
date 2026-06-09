@@ -97,6 +97,8 @@ services:
       dockerfile: recommender/Dockerfile
     image: desafio26-data-recommender:prod
     restart: unless-stopped
+    environment:
+      HF_HUB_OFFLINE: "1"
     # Servicio INTERNO: sin `ports`, solo en la red privada. Autónomo (embeddings + SQLite
     # locales), no necesita salida a internet → compatible con `internal: true`.
     expose:

@@ -96,6 +96,9 @@ services:
       dockerfile: recommender/Dockerfile
     container_name: desafio26_data_recommender
     restart: unless-stopped
+    environment:
+      # Modelo pre-descargado en la imagen: nunca llamar a HuggingFace en runtime.
+      HF_HUB_OFFLINE: "1"
     # Publicado en dev para poder probar el recomendador directamente (curl :5000/health).
     # En producción NO se publica (ver compose.data.prod.yaml).
     ports:
