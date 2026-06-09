@@ -139,7 +139,8 @@ def buscar_eventos_candidatos(filtros=None, municipio=None):
         SELECT id, title, description, categoria, tipo_plantilla,
                municipio, territorio, lat, lng, edad_minima,
                es_interior, es_carrito, es_cambiador, es_silla_ruedas, es_mascotas,
-               price, imagen_url, website
+               price, imagen_url, website,
+               fecha_inicio, fecha_fin
         FROM eventos
     """
     if where:
