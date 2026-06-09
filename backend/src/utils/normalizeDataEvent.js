@@ -26,6 +26,29 @@ export function coerceBool(value) {
   return Boolean(value);
 }
 
+/**
+ * Base pública para resolver imágenes de eventos de Euskadi servidas como ruta relativa.
+ * El recomendador de Data devuelve `imagen_url` como `/contenidos/evento/.../x.jpg`, que en
+ * el navegador se resolvería contra el origen del frontend (404). Se sirven bien desde aquí.
+ */
+const EUSKADI_IMAGE_BASE = 'https://www.euskadi.eus';
+
+/**
+ * Devuelve una URL de imagen ABSOLUTA usable por el frontend.
+ * - Rutas relativas que empiezan por `/` → se prefijan con `EUSKADI_IMAGE_BASE`.
+ * - URLs absolutas (`http(s)://`) y protocol-relative (`//`) → se respetan tal cual.
+ * - Vacío/null/undefined o tipo no string → `null` (el frontend usa el placeholder por categoría).
+ * @param {*} value
+ * @returns {string|null}
+ */
+export function toAbsoluteImageUrl(value) {
+  if (typeof value !== 'string' || value.trim() === '') return null;
+  const url = value.trim();
+  if (/^(https?:)?\/\//i.test(url)) return url;
+  if (url.startsWith('/')) return `${EUSKADI_IMAGE_BASE}${url}`;
+  return url;
+}
+
 /** number | string numérico → number; null/undefined/''/NaN → null. */
 function toNumberOrNull(value) {
   if (value === null || value === undefined || value === '') return null;
@@ -79,9 +102,9 @@ export function normalizeDataPlaneToEvent(plan = {}) {
     fecha_fin: p.fecha_fin ?? null,
     lugar: p.lugar ?? null,
     price: p.price ?? p.precio ?? null,
-    imagen_url: p.imagen_url ?? null,
+    imagen_url: toAbsoluteImageUrl(p.imagen_url),
     tipo_evento: p.tipo_evento ?? null,
   };
 }
 
-export default { normalizeDataPlaneToEvent, coerceBool };
+export default { normalizeDataPlaneToEvent, coerceBool, toAbsoluteImageUrl };

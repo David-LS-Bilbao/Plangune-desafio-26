@@ -1,6 +1,34 @@
 import { describe, it, expect } from 'vitest';
 
-import { normalizeDataPlaneToEvent, coerceBool } from '../utils/normalizeDataEvent.js';
+import {
+  normalizeDataPlaneToEvent,
+  coerceBool,
+  toAbsoluteImageUrl,
+} from '../utils/normalizeDataEvent.js';
+
+describe('toAbsoluteImageUrl', () => {
+  it('prefija el dominio de Euskadi en rutas relativas que empiezan por /', () => {
+    expect(toAbsoluteImageUrl('/contenidos/evento/2026/es_def/images/25.jpg')).toBe(
+      'https://www.euskadi.eus/contenidos/evento/2026/es_def/images/25.jpg',
+    );
+  });
+
+  it('respeta URLs absolutas http(s) y protocol-relative', () => {
+    expect(toAbsoluteImageUrl('https://opendata.euskadi.eus/x.jpg')).toBe(
+      'https://opendata.euskadi.eus/x.jpg',
+    );
+    expect(toAbsoluteImageUrl('http://example.com/a.png')).toBe('http://example.com/a.png');
+    expect(toAbsoluteImageUrl('//cdn.example.com/a.png')).toBe('//cdn.example.com/a.png');
+  });
+
+  it('null/undefined/vacío/no-string → null (cae al placeholder por categoría)', () => {
+    expect(toAbsoluteImageUrl(null)).toBeNull();
+    expect(toAbsoluteImageUrl(undefined)).toBeNull();
+    expect(toAbsoluteImageUrl('')).toBeNull();
+    expect(toAbsoluteImageUrl('   ')).toBeNull();
+    expect(toAbsoluteImageUrl(42)).toBeNull();
+  });
+});
 
 describe('coerceBool', () => {
   it('respeta booleanos nativos', () => {
@@ -103,6 +131,20 @@ describe('normalizeDataPlaneToEvent', () => {
 
   it('respeta id si Data lo trae', () => {
     expect(normalizeDataPlaneToEvent({ ...dataPlane, id: 5 }).id).toBe(5);
+  });
+
+  it('normaliza imagen_url relativa de Data a URL absoluta de Euskadi', () => {
+    const e = normalizeDataPlaneToEvent({
+      ...dataPlane,
+      imagen_url: '/contenidos/evento/2026/es_def/images/25.jpg',
+    });
+    expect(e.imagen_url).toBe(
+      'https://www.euskadi.eus/contenidos/evento/2026/es_def/images/25.jpg',
+    );
+  });
+
+  it('imagen_url null cuando Data no trae imagen', () => {
+    expect(normalizeDataPlaneToEvent(dataPlane).imagen_url).toBeNull();
   });
 
   it('edad_minima null y lat/lng null si no vienen', () => {

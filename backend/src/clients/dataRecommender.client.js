@@ -32,6 +32,22 @@ export function isDataRecommenderEnabled() {
 }
 
 /**
+ * Saneador de JSON no estándar de Data.
+ *
+ * El recomendador (Python/Flask) serializa los campos numéricos ausentes como `NaN`
+ * (y podría emitir `Infinity`/`-Infinity`), tokens que Python admite pero que NO son JSON
+ * válido: `JSON.parse` de Node los rechaza y el cliente caería al fallback aunque Data haya
+ * respondido 200 con datos buenos. Aquí se sustituyen por `null` SOLO en posición de valor
+ * (precedidos de `:`/`,`/`[` y seguidos de `,`/`]`/`}`), para no tocar textos entrecomillados.
+ *
+ * @param {string} text cuerpo crudo de la respuesta
+ * @returns {string} JSON saneado, parseable por `JSON.parse`
+ */
+export function sanitizeNonFiniteJson(text) {
+  return String(text).replace(/([:[,]\s*)(-?Infinity|NaN)(?=\s*[,\]}])/g, '$1null');
+}
+
+/**
  * id_user a enviar a Data. Sin auth todavía, se usa un id anónimo configurable.
  * Data tolera un id sin historial: degrada a recomendación semántica pura.
  * @returns {number}
@@ -73,10 +89,17 @@ export async function fetchDataRecomendar({ consulta = '', filtros = {}, idUser 
       throw error;
     }
 
-    return await response.json();
+    // Data puede emitir NaN/Infinity (JSON no estándar): se sanea antes de parsear.
+    const text = await response.text();
+    return JSON.parse(sanitizeNonFiniteJson(text));
   } finally {
     clearTimeout(timer);
   }
 }
 
-export default { isDataRecommenderEnabled, getDataUserId, fetchDataRecomendar };
+export default {
+  isDataRecommenderEnabled,
+  getDataUserId,
+  fetchDataRecomendar,
+  sanitizeNonFiniteJson,
+};
