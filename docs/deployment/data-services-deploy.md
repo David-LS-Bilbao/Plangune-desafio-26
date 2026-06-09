@@ -1,163 +1,153 @@
 # Despliegue de servicios DATA · DESAFIO-26 / pLANGUNE
 
-Cómo añadir los servicios del equipo **Data** (recomendador y, en el futuro, chatbot) al
-despliegue de pLANGUNE en el VPS, de forma **conservadora** y **sin exponerlos a Internet**.
+Los servicios del equipo **Data** (recomendador y chatbot GUNI) viven ahora **dentro del repo
+principal**, en [`data/`](../../data/README.md), para poder orquestar **toda la app** (frontend +
+backend + PostgreSQL + Data) con un solo `docker compose`, **sin exponer Data a Internet** y
+manteniendo los servicios **separados** (Data nunca va dentro del contenedor backend).
 
-> Estado: **Fase A (recomendador)** lista para revisar. **Fase B (chatbot + Ollama) diferida.**
+> Origen del código/datos: `urkomen/Desafio-Data` (copiado, no modificado). Solo se añadieron los
+> `Dockerfile` y `wsgi.py` de orquestación.
 > Complementa [vps-demo-deploy.md](vps-demo-deploy.md) y [../security/predeploy-checklist.md](../security/predeploy-checklist.md).
-> Repos separados: el backend vive en `desafio-26-1`; Data en `Desafio-Data` (compose propio).
 
 ---
 
 ## Arquitectura
 
 ```
-Internet ─443/80─> Nginx Proxy Manager ─(plangune_proxy)─> backend (Express :3000, expose)
+Internet ─443/80─> Nginx Proxy Manager ─(plangune_proxy)─> frontend (Nginx :80, expose)
+                                                              │  /api → reverse proxy
+                                                              ▼
+                                       (red interna REAL · plangune_internal · sin Internet)
+                                                              ├──> backend (Express :3000, expose)
+                                                              │       ├──> postgres :5432       (expose)
+                                                              │       └──> data-recommender :5000 (expose)
                                                               │
-                                       (red interna REAL de pLANGUNE · internal · sin Internet)
-                                                              ├──> postgres :5432            (expose)
-                                                              └──> data-recommender :5000     (expose)  ← Data, Fase A
-                                                  [Fase B, diferida] data-chatbot :5000 ──> ollama :11434
+                          [overlay chat, red CON internet]   └··> data-chatbot :5000 ──> ollama :11434
 ```
 
-- **Data NUNCA es público**: sin `ports:`, solo `expose` en la red interna de pLANGUNE.
+- **Data NUNCA es público**: sin `ports:` en producción, solo `expose` en la red interna.
 - El backend alcanza el recomendador por **nombre de servicio**: `http://data-recommender:5000`.
-- Se reutiliza la **red interna real ya creada por pLANGUNE** (no se crea ninguna red nueva,
-  no se modifica el `compose.prod.yaml` de pLANGUNE).
+- El **recomendador** es autónomo (embeddings + SQLite locales) → compatible con `internal: true`.
+- El **chatbot** necesita salida a Internet (`api.euskadi.eus`, `open-meteo`) y Ollama → vive en una
+  **red propia con internet** (`compose.data.prod.yaml`), nunca en la red `internal: true`.
 
 ### Hallazgos que justifican el alcance
-- **Recomendador**: Flask + pandas con **CSV horneados** (≈4.274 planes), `/health` OK. Autónomo:
-  sin Ollama, sin DB, sin red externa, sin secretos. → **VPS-friendly, Fase A.**
-- **Chatbot**: depende de **Ollama** (`OLLAMA_HOST`, modelo tipo `qwen2.5-coder`), **pesado** en
-  VPS CPU-only y **sin Dockerfile/fuente reproducible** en el repo Data. Además GUNI ya funciona
-  con **Gemini cloud**. → **Fase B diferida.**
+- **Recomendador**: Flask + `sentence-transformers` (modelo `multilingual-e5-large`, ~2 GB horneado
+  en la imagen) sobre `eventos.db` + `embeddings.npy`. Contrato `POST /recomendar`. Autónomo: sin
+  Ollama, sin red externa, sin secretos. → **Activo por defecto.**
+- **Chatbot**: depende de **Ollama** (`qwen2.5-coder`), llama a APIs externas y usa `eval()` sobre
+  código generado por el LLM (riesgo). Pesado en VPS CPU-only. GUNI ya funciona con **Gemini cloud**.
+  → **Overlay opcional (profile `chat`), diferido en la demo.**
 
 ---
 
-## Fase A — Recomendador (lista para revisar)
+## Contrato real del recomendador (importante)
 
-Archivo: **`Desafio-Data/docker-compose.data.prod.yml`** (creado). Servicio `data-recommender`,
-`expose: "5000"` (sin `ports`), `image: desafio-data-recommender:prod`, healthcheck contra `/health`,
-red `external: true`.
+`POST {DATA_API_URL}/recomendar`
 
-### Paso 1 · Detectar la red interna REAL de pLANGUNE (en el VPS)
-```bash
-sudo docker network ls | grep -E 'plangune|desafio'
-sudo docker inspect plangune-backend-1 \
-  --format '{{range $name, $_ := .NetworkSettings.Networks}}{{println $name}}{{end}}'
+```jsonc
+{ "id_user": 0, "consulta": "Bilbao planes para niños de 2 años",
+  "filtros": { "carrito": true, "interior": false, "gratis": false } }
 ```
-Anota el nombre de la red **interna** (la que NO da salida a Internet; normalmente la que
-comparte backend ↔ postgres, no la de Nginx Proxy Manager).
 
-### Paso 2 · Inyectar ese nombre por variable (sin editar el compose)
-El compose toma la red de la variable **obligatoria** `PLANGUNE_INTERNAL_NETWORK`
-(`name: ${PLANGUNE_INTERNAL_NETWORK:?...}`). En el VPS, antes de levantar Data, definirla:
-```bash
-# opción 1 — export en el shell
-export PLANGUNE_INTERNAL_NETWORK="<NOMBRE_REAL_DETECTADO>"   # p. ej. plangune_default
+- El backend construye `consulta` (municipio + edades) y `filtros` desde los params de
+  `/api/recommendations`. El recomendador **extrae el municipio del texto** de `consulta`.
+- `id_user=0` = sesión anónima (sin auth): Data degrada a recomendación semántica pura, sin error.
+- `GET /health` → `{ status, n_eventos }`.
 
-# opción 2 — archivo .env local en Desafio-Data (lo lee docker compose)
-echo 'PLANGUNE_INTERNAL_NETWORK=<NOMBRE_REAL_DETECTADO>' > .env
-```
-> `external: true` + variable obligatoria: si falta o es incorrecta, `docker compose` **falla**
-> ("network not found") en vez de crear una red a ciegas. El `.env` local **NO se sube** a Git
-> (ya existe `Desafio-Data/.gitignore` con `.env`; plantilla en `Desafio-Data/.env.example`).
+Variables del backend (ver [`backend/.env.production.example`](../../backend/.env.production.example)):
 
-### Paso 3 · Variables que debe añadir pLANGUNE
-Documentadas en la plantilla [`backend/.env.production.example`](../../backend/.env.production.example).
-En el `backend/.env.production` **real** del VPS (host, **no versionado**):
 ```env
-DATA_RECOMMENDER_ENABLED=true            # en el .example va =false; se activa aquí manualmente
+DATA_RECOMMENDER_ENABLED=true
 DATA_API_URL=http://data-recommender:5000
 DATA_API_TIMEOUT_MS=4000
-```
-> `DATA_API_URL` apunta al **nombre de servicio** interno Docker (`data-recommender`): nunca IP
-> pública, dominio, localhost ni puerto publicado. No requiere tocar `compose.prod.yaml`; basta
-> con la variable del backend. Recrear solo el backend cuando Data ya esté arriba (Paso 4).
-
-### Paso 4 · Comandos de despliegue propuestos (NO ejecutar aquí)
-```bash
-# 1) Data (recomendador) en la red interna real de pLANGUNE
-cd /ruta/al/Desafio-Data
-docker compose -f docker-compose.data.prod.yml up -d --build
-
-# 2) Recoger DATA_API_URL en el backend (relee env_file al recrear el contenedor)
-cd /ruta/al/desafio-26-1
-docker compose -f compose.prod.yaml up -d --force-recreate backend
+DATA_USER_ID=0
 ```
 
-### Paso 5 · Verificación
+Si Data está deshabilitado, falla, agota timeout o no devuelve resultados → **fallback local reglado**
+(Family Score sobre Prisma/PostgreSQL). El despliegue queda **desacoplado**: quitar Data no rompe nada.
+
+---
+
+## Desarrollo local (stack completo)
+
 ```bash
-# a) Data arriba y SANO, sin puerto público
-docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' | grep data-recommender
-#    → Status "Up (healthy)" y SIN "0.0.0.0:5000" (solo expose)
+docker compose up -d --build      # postgres + backend + frontend + data-recommender
+# App en http://localhost:8080
+```
+
+Chat GUNI con LLM local (opt-in, pesado): ver [`data/README.md`](../../data/README.md).
+
+---
+
+## Producción (VPS)
+
+### 1 · Preparación (una vez)
+```bash
+docker network create plangune_proxy           # red compartida con Nginx Proxy Manager
+cp backend/.env.example backend/.env.production # rellenar secretos REALES (JWT_SECRET, etc.)
+# exportar credenciales de Postgres (POSTGRES_DB/USER/PASSWORD) en un .env junto al compose
+```
+
+### 2 · Levantar el stack principal (con recomendador)
+```bash
+docker compose -f compose.prod.yaml up -d --build
+```
+Esto levanta `frontend` + `backend` + `postgres` + `data-recommender` en la topología segura
+(redes internas, sin puertos públicos; NPM enruta al `frontend`, que proxya `/api` al backend).
+
+### 3 · Verificación
+```bash
+# a) Recomendador SANO y SIN puerto público
+docker compose -f compose.prod.yaml ps data-recommender   # healthy, sin 0.0.0.0:5000
 
 # b) El backend alcanza el recomendador por la red interna
 docker compose -f compose.prod.yaml exec backend \
-  node -e "fetch('http://data-recommender:5000/health').then(r=>r.json()).then(j=>console.log('data:',j.status,j.total)).catch(e=>{console.error('FAIL',e.message);process.exit(1)})"
+  node -e "fetch('http://data-recommender:5000/health').then(r=>r.json()).then(j=>console.log('data:',j.status,j.n_eventos)).catch(e=>{console.error('FAIL',e.message);process.exit(1)})"
 
-# c) Por la fachada pública (debe traer planes reales de Data, no fallback local)
+# c) Por la fachada pública (planes reales de Data, no fallback)
 curl -s "https://<dominio>/api/recommendations?childrenAges=2&municipality=Bilbao" | head -c 300
 
-# d) Data NO accesible desde fuera (debe FALLAR / timeout)
+# d) Data NO accesible desde fuera (debe FALLAR)
 curl -s --max-time 4 "http://<dominio>:5000/health" && echo "⚠ EXPUESTO" || echo "OK: cerrado"
-nmap -p 5000 <dominio>   # 5000 closed/filtered
 ```
 
-### Paso 6 · Rollback
+### 4 · Chat GUNI en el VPS (overlay opcional, diferido)
 ```bash
-# Quitar Data sin tocar pLANGUNE (el backend vuelve a su fallback local reglado)
-cd /ruta/al/Desafio-Data
-docker compose -f docker-compose.data.prod.yml down
-
-# (Opcional) desactivar Data en el backend y recrearlo
-#   en backend/.env.production:  DATA_RECOMMENDER_ENABLED=false
-cd /ruta/al/desafio-26-1
-docker compose -f compose.prod.yaml up -d --force-recreate backend
+# Detectar el nombre real de la red interna de pLANGUNE y exportarlo:
+export PLANGUNE_INTERNAL_NETWORK="<nombre_real>"   # docker network ls | grep plangune
+docker compose -f compose.data.prod.yaml up -d --build
+docker compose -f compose.data.prod.yaml exec ollama ollama pull qwen2.5-coder:latest
+# En backend/.env.production: LLM_ASSISTANT_ENABLED=true, LLM_ASSISTANT_CONTRACT=get-question,
+#   LLM_ASSISTANT_API_URL=http://data-chatbot:5000 ; luego recrear el backend.
 ```
-> Quitar Data **no rompe** pLANGUNE: si Data no responde o está deshabilitado, el backend usa
-> el **recomendador local reglado** (Family Score) como fallback. Despliegue desacoplado.
 
----
-
-## Fase B — Chatbot + Ollama (DIFERIDA, no preparar aún)
-
-No se despliega en la demo. Bloqueantes a resolver **antes** de plantearlo:
-1. **Falta fuente/Dockerfile** del chatbot en el repo Data (solo queda `__pycache__` de
-   `API_LLM_original_v3` + imagen pre-construida). Recuperar `app4.py` y escribir `Dockerfile.chatbot`.
-2. **Ollama** como servicio interno (imagen `ollama/ollama:<versión>`, volumen para el modelo,
-   `ollama pull qwen2.5-coder`). En VPS **CPU-only** las respuestas pueden tardar **10–60 s**.
-3. **Recursos**: el modelo necesita varios GB de RAM. Verificar el plan del VPS.
-4. **Impacto en GUNI**: la cascada es LLM-local → cloud → fallback. Un chatbot lento delante de
-   **Gemini** degradaría la UX. Por eso para la demo **GUNI sigue en Gemini** (chatbot desactivado:
-   no definir `LLM_ASSISTANT_ENABLED`).
-
-Wiring futuro (referencia, no aplicar): `LLM_ASSISTANT_ENABLED=true`,
-`LLM_ASSISTANT_CONTRACT=get-question`, `LLM_ASSISTANT_API_URL=http://data-chatbot:5000`,
-`LLM_ASSISTANT_TIMEOUT_MS=30000`, y en el chatbot `OLLAMA_HOST=http://ollama:11434`.
+### 5 · Rollback desacoplado
+```bash
+# Quitar el chat sin tocar el stack principal
+docker compose -f compose.data.prod.yaml down
+# Desactivar Data recommender: en backend/.env.production DATA_RECOMMENDER_ENABLED=false
+docker compose -f compose.prod.yaml up -d --force-recreate backend  # vuelve al fallback local
+```
 
 ---
 
 ## Riesgos
 
-| # | Riesgo | Mitigación |
-|---|---|---|
-| R1 | **Repos separados** (Data ≠ backend) | Red interna real compartida (`external: true`); arrancar **Data antes** que recrear el backend. |
-| R2 | Nombre de red incorrecto | `external: true` → falla en vez de crear red a ciegas; detectar con los comandos del Paso 1. |
-| R3 | **CSV horneados** → datos estáticos (2026-06-02) | Rebuild de la imagen para actualizar datos; documentar la fecha del dataset. |
-| R4 | DNS `data-recommender` no resuelve | Compose añade el nombre de servicio como alias en la red; alternativa: `container_name` `desafio_data_recommender`. |
-| R5 | `DATA_API_TIMEOUT_MS=2000` justo en VPS | Subido a **4000** en la variable propuesta. |
-| R6 | Recomendador debe escuchar en `0.0.0.0:5000` | Ya lo hace (el mapeo local funciona); confirmar en `recomendador/app.py` si se cambia. |
-| R7 | Exposición accidental | Sin `ports:`; verificar con `nmap`/`ss` que `5000` no es público (Paso 5d). |
+| # | Prioridad | Riesgo | Mitigación |
+|---|---|---|---|
+| R1 | P1 | Imagen del recomendador grande (~modelo e5-large 2 GB) y build lento | Modelo horneado en build (offline en runtime); torch CPU-only; documentar primer build. |
+| R2 | P1 | Carga del modelo ~30–60 s tras arrancar | `start_period: 180s` en el healthcheck; el backend usa `service_started` (no bloquea) + fallback. |
+| R3 | P1 | Chatbot necesita Internet y Ollama (CPU-only lento, varios GB RAM) | Overlay aparte (`compose.data.prod.yaml`) en red con internet; diferido en la demo (GUNI = Gemini). |
+| R4 | **P0** | Chatbot usa `eval()` sobre output del LLM | No exponer a internet; profile opt-in; sanear el `eval()` antes de habilitar en serio. |
+| R5 | P1 | Nombre de red interna distinto en el VPS | `compose.data.prod.yaml` usa `external: true` + `PLANGUNE_INTERNAL_NETWORK` (falla claro si no existe). |
+| R6 | P2 | Datasets estáticos (snapshot 2026-06-02) | Regenerar en el repo Data y volver a copiar `data/datasets/` + rebuild. |
+| R7 | P2 | Escala del `score` de Data (coseno) ≠ score local | El frontend usa etiqueta amable, no el número; sin impacto visible. |
 
 ---
 
 ## Resumen operativo
-1. Detectar red interna real (Paso 1).
-2. Fijar `name:` en `docker-compose.data.prod.yml` (Paso 2).
-3. Añadir las 3 variables al `backend/.env.production` (Paso 3).
-4. `up` Data → recrear backend (Paso 4).
-5. Verificar salud + no-exposición (Paso 5).
-6. Rollback desacoplado disponible (Paso 6).
-
-**No se ha ejecutado nada en el VPS. No se ha tocado `compose.prod.yaml` de pLANGUNE ni su red.**
+1. `docker compose up -d --build` levanta toda la app en local (http://localhost:8080).
+2. En el VPS, `compose.prod.yaml` levanta frontend + backend + postgres + recomendador.
+3. El chat (chatbot + Ollama) es un overlay opcional `compose.data.prod.yaml`, diferido en la demo.
+4. Quitar Data nunca rompe pLANGUNE: el backend cae al recomendador local reglado.

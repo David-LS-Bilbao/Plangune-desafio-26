@@ -44,12 +44,20 @@ services:
       # DB por nombre de servicio en la red interna. Las credenciales vienen de variables del
       # host/.env (interpolación de compose); NO se hardcodean contraseñas aquí.
       DATABASE_URL: postgresql://${POSTGRES_USER:?set POSTGRES_USER}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:?set POSTGRES_DB}?schema=public
+      # Data como recomendador principal por nombre de servicio (red interna privada).
+      # Si data-recommender no responde, el backend usa el fallback local reglado.
+      DATA_RECOMMENDER_ENABLED: "true"
+      DATA_API_URL: http://data-recommender:5000
+      DATA_API_TIMEOUT_MS: "4000"
+      DATA_USER_ID: "0"
     # NO se publica el puerto a internet (sin `ports`). Solo visible en la red de NPM.
     expose:
       - "3000"
     depends_on:
       postgres:
         condition: service_healthy
+      data-recommender:
+        condition: service_started
     # Liveness del proceso. Para readiness con DB, NPM/orquestador puede sondear /api/ready.
     healthcheck:
       test:
@@ -64,6 +72,45 @@ services:
     networks:
       - plangune_internal # acceso a Postgres (privado)
       - plangune_proxy # expuesto a Nginx Proxy Manager (sin publicar puertos)
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Ruta relativa: Nginx del frontend enruta /api → backend (red interna).
+        VITE_API_URL: /api
+    image: desafio26-frontend:prod
+    restart: unless-stopped
+    depends_on:
+      - backend
+    # Público solo a través de NPM (sin publicar puertos). Sirve el SPA y proxya /api → backend.
+    expose:
+      - "80"
+    networks:
+      - plangune_internal # alcanza al backend por nombre de servicio
+      - plangune_proxy # expuesto a Nginx Proxy Manager (sin publicar puertos)
+
+  data-recommender:
+    build:
+      context: ./data
+      dockerfile: recommender/Dockerfile
+    image: desafio26-data-recommender:prod
+    restart: unless-stopped
+    # Servicio INTERNO: sin `ports`, solo en la red privada. Autónomo (embeddings + SQLite
+    # locales), no necesita salida a internet → compatible con `internal: true`.
+    expose:
+      - "5000"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:5000/health').getcode()==200 else 1)\""
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 180s
+    networks:
+      - plangune_internal # red privada: solo backend ↔ data-recommender
 
   postgres:
     image: postgres:16-alpine # versión concreta (no `latest`)
