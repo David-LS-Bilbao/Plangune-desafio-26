@@ -71,6 +71,13 @@ services:
       DATA_API_URL: "http://data-recommender:5000"
       DATA_API_TIMEOUT_MS: "4000"
       DATA_USER_ID: "0"
+      # Asistente LLM: apunta al ai-service corriendo en la máquina anfitriona (host.docker.internal)
+      LLM_ASSISTANT_ENABLED: "true"
+      LLM_ASSISTANT_API_URL: "http://host.docker.internal:5001"
+      LLM_ASSISTANT_TIMEOUT_MS: "90000"
+      LLM_ASSISTANT_CONTRACT: "post-family-plan"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "3000:3000"
     healthcheck:

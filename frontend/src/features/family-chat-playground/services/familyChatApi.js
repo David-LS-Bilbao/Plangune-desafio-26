@@ -50,7 +50,11 @@ export function buildFamilyPlanPayload(message, familyProfile = {}) {
 export async function sendFamilyPlanMessage({ message, familyProfile }) {
   const payload = buildFamilyPlanPayload(message, familyProfile);
 
-  const { data } = await apiClient.post("/assistant/family-plan", payload);
+  const { data } = await apiClient.post(
+    "/assistant/family-plan",
+    payload,
+    { timeout: 120000 } // 2 min: Ollama en CPU puede tardar en el arranque en frío
+  );
 
   return data;
 }

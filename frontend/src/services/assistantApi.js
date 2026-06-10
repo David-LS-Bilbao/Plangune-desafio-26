@@ -13,10 +13,11 @@ import apiClient from "./apiClient";
  * `source`/`mode` son metadatos técnicos: la UI no los muestra en crudo.
  */
 export async function sendFamilyPlan({ message, familyProfile = {} }) {
-  const { data } = await apiClient.post("/assistant/family-plan", {
-    message,
-    familyProfile,
-  });
+  const { data } = await apiClient.post(
+    "/assistant/family-plan",
+    { message, familyProfile },
+    { timeout: 120000 } // 2 min: Ollama en CPU puede tardar en el arranque en frío
+  );
   return data;
 }
 
