@@ -2,10 +2,6 @@
   <img src="./frontend/src/assets/logo.svg" alt="Plangune logo" width="180" />
 </p>
 
-# DESAFIO-26
-
-> Nombre técnico estable del proyecto.
-> Nombre comercial provisional: Plangune.
 
 Web/demo pública: https://plangune.davlos.es/  
 Repositorio: https://github.com/David-LS-Bilbao/Plangune-desafio-26.git
