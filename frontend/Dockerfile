@@ -23,6 +23,11 @@ COPY . .
 # Ruta relativa: el bundle pedirá `/api/...` al mismo origen (lo enruta Nginx).
 ARG VITE_API_URL=/api
 ENV VITE_API_URL=$VITE_API_URL
+# Client ID de Google OAuth. Vite lo "hornea" en build time: hay que pasarlo como build-arg
+# (es PÚBLICO, no un secreto: ya viaja en el bundle del navegador). Sin esto, el login con
+# Google da "Error 401: invalid_client" en la imagen desplegada.
+ARG VITE_GOOGLE_CLIENT_ID=
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 RUN npm run build
 
 # ── Stage 2: serve ───────────────────────────────────────────────────────────
