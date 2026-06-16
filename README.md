@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./frontend/src/assets/logo.svg" alt="Plangune logo" width="180" />
+</p>
+
 # DESAFIO-26
 
 > Nombre técnico estable del proyecto.
