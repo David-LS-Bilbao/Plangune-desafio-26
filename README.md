@@ -8,7 +8,7 @@ Repositorio: https://github.com/David-LS-Bilbao/Plangune-desafio-26.git
 
 ## Descripción
 
-`DESAFIO-26` es una web/app responsive, mobile-first, orientada a familias con bebés y niños pequeños en Euskadi. Su objetivo es ayudar a encontrar planes, actividades, eventos y negocios familiares con información útil para decidir con rapidez: edad recomendada, accesibilidad, si es interior, comodidad para carrito, servicios disponibles y contexto familiar.
+`PlanGune` es una web/app responsive, mobile-first, orientada a familias con bebés y niños pequeños en Euskadi. Su objetivo es ayudar a encontrar planes, actividades, eventos y negocios familiares con información útil para decidir con rapidez: edad recomendada, accesibilidad, si es interior, comodidad para carrito, servicios disponibles y contexto familiar.
 
 Por la naturaleza del producto, puede manejar datos sensibles relacionados con menores. La seguridad y la prudencia en el tratamiento de datos son requisitos de base.
 
