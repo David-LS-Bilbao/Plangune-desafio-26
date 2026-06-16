@@ -83,6 +83,10 @@ services:
       args:
         # Ruta relativa: Nginx enruta /api → backend (ver frontend/nginx.conf).
         VITE_API_URL: /api
+        # Client ID de Google OAuth (público, opcional en dev). Para probar el login con
+        # Google en el frontend dockerizado (:8080), exporta VITE_GOOGLE_CLIENT_ID antes
+        # del build y añade http://localhost:8080 a los orígenes autorizados en Google.
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
     container_name: desafio26_frontend
     restart: unless-stopped
     depends_on:

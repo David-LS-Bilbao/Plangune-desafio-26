@@ -80,6 +80,11 @@ services:
       args:
         # Ruta relativa: Nginx del frontend enruta /api → backend (red interna).
         VITE_API_URL: /api
+        # Client ID de Google OAuth (público). Exporta VITE_GOOGLE_CLIENT_ID en el host
+        # (o ponlo en el .env junto a este compose) ANTES del build. Recuerda añadir el
+        # dominio de prod a "Orígenes de JavaScript autorizados" en Google Cloud Console
+        # y publicar la pantalla de consentimiento para admitir usuarios nuevos.
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:?set VITE_GOOGLE_CLIENT_ID}
     image: desafio26-frontend:prod
     restart: unless-stopped
     depends_on:

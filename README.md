@@ -1,735 +1,156 @@
-# Plangune Euskadi
+# DESAFIO-26
 
-> **Nombre provisional del proyecto.**
-> El naming definitivo será definido más adelante por el equipo de Marketing.
+> Nombre técnico estable del proyecto.
+> Nombre comercial provisional: Plangune.
+
+Web/demo pública: https://plangune.davlos.es/  
+Repositorio: https://github.com/David-LS-Bilbao/Plangune-desafio-26.git
 
 ## Descripción
 
-Plangune Euskadi es una web/app responsive, mobile-first y SPA orientada a familias jóvenes con bebés y niños pequeños que buscan planes, lugares, actividades y negocios familiares en Euskadi de forma sencilla, segura y sin complicaciones.
+`DESAFIO-26` es una web/app responsive, mobile-first, orientada a familias con bebés y niños pequeños en Euskadi. Su objetivo es ayudar a encontrar planes, actividades, eventos y negocios familiares con información útil para decidir con rapidez: edad recomendada, accesibilidad, si es interior, comodidad para carrito, servicios disponibles y contexto familiar.
 
-El objetivo principal es ayudar a las familias a responder preguntas prácticas antes de salir de casa:
+Por la naturaleza del producto, puede manejar datos sensibles relacionados con menores. La seguridad y la prudencia en el tratamiento de datos son requisitos de base.
 
-* ¿Es adecuado para la edad de mi peque?
-* ¿Puedo ir con carrito?
-* ¿Hay baño o cambiador?
-* ¿Es un plan a cubierto si llueve?
-* ¿Es tranquilo y cómodo?
-* ¿Qué opinan otras familias?
-* ¿Hay ofertas o actividades familiares cerca?
+## Estado actual
 
-Este proyecto se desarrolla dentro del **Desafío de Tripulaciones 2026**.
+El proyecto está en desarrollo activo y ya dispone de una base funcional sobre monorepo.
 
----
+Estado técnico actual:
 
-## Estado del proyecto
+- `frontend/` con React + Vite
+- `backend/` con Node.js + Express
+- PostgreSQL + Prisma en uso en el backend
+- tests automatizados en frontend y backend
+- API REST bajo `/api`
+- autenticación mínima con roles
+- recomendaciones familiares con backend principal en Express y posibilidad de integración con servicios auxiliares
+- playground visual del asistente familiar GUNI en entorno de desarrollo
 
-Proyecto en desarrollo del MVP. Producto y documentación inicial:
+## Enlaces
 
-* Brief oficial del desafío.
-* Investigación inicial de producto y competencia.
-* Mocks UX/UI.
-* Dosier preliminar de objetivos.
-* Carpeta Drive organizada por verticales.
-* Plan inicial de arquitectura Full Stack.
+- Repositorio: https://github.com/David-LS-Bilbao/Plangune-desafio-26.git
+- Web/demo pública: https://plangune.davlos.es/
 
-### Backend MVP
+## Estructura real del repositorio
 
-El backend Express expone la **API REST pública bajo `/api`**. El frontend consume siempre
-Express; no llama directamente a servicios internos como la API Flask de Data.
-
-Estado actual:
-
-* `/api/events`, `/api/recommendations` y `/api/favorites` usan datos reales vía PostgreSQL/Prisma.
-* Login real mínimo con roles (`family`, `business`, `admin`) en `/api/auth`.
-* La sesión usa cookie `httpOnly`; el frontend no guarda JWT en `localStorage`.
-* `/api/favorites` requiere usuario autenticado con rol `family`.
-* Auth endurecida para despliegue: CORS cerrado por `CLIENT_URL`, rate limit en login/registro,
-  `JWT_SECRET` fuerte, JWT `HS256` explícito y seed bloqueado en producción.
-* `/api/recommendations` usa **Data Flask** como recomendador principal cuando
-  `DATA_RECOMMENDER_ENABLED=true`.
-* Si Data está deshabilitada, falla o agota timeout, Express usa el recomendador local
-  Prisma/PostgreSQL como fallback.
-* Existe un servicio local opcional [`ai-service/`](ai-service/) para demo del asistente LLM
-  con Ollama. Corre en `http://localhost:5001` y Express lo consume desde
-  `POST /api/assistant/family-plan`; el frontend no llama a Flask.
-* Si `LLM_ASSISTANT_ENABLED=false` o el `ai-service` falla, Express mantiene el fallback local
-  sin IA.
-* El campo actual para planes interiores/a cubierto es `events.es_interior`.
-* Existe una migración incremental segura para renombrar `es_lluvia` a `es_interior`.
-* Tests backend actuales: **16 suites · 158/158 verdes**.
-* PostgreSQL local usa `localhost:5434` desde el host para evitar conflictos con otros
-  proyectos en `5432`; dentro de Docker el backend sigue usando `postgres:5432`.
-* Existe un importador CSV seguro (`backend/prisma/import-events-from-csv.js`) para ampliar
-  eventos con datos de Data bajo validación explícita. Ver [docs/database.md](docs/database.md).
-
-Endpoints actuales:
-
-* `GET /api/health`
-* `POST /api/auth/register` · `POST /api/auth/login` · `GET /api/auth/me` · `POST /api/auth/logout`
-* `GET /api/activities` · `GET /api/activities/:id` (solo `approved`)
-* `GET /api/recommendations` (hasta 3 planes con Family Score reglado y explicable)
-* `POST /api/assistant/family-plan` (LLM local opcional con fallback sin IA)
-* `POST /api/reviews` · `POST /api/incidents`
-* `GET/POST/DELETE /api/favorites` (requiere rol `family`)
-
-Detalle de la feature auth/roles:
-[docs/features/auth-roles-minimum.md](docs/features/auth-roles-minimum.md) · memoria de cierre:
-[docs/memoria/auth-roles-minimum-cierre.md](docs/memoria/auth-roles-minimum-cierre.md).
-
-Variables Data (`backend/.env.example`):
-
-```bash
-DATA_RECOMMENDER_ENABLED=false
-DATA_API_URL=http://localhost:5000
-DATA_API_TIMEOUT_MS=2000
+```txt
+desafio-26/
+├── frontend/      # Cliente React + Vite
+├── backend/       # API REST Express + Prisma + PostgreSQL
+├── docs/          # Documentación técnica, IA, features, despliegue y calidad
+├── ai-service/    # Servicio local opcional para demo del asistente LLM
+├── data/          # Servicios y datasets auxiliares de datos/recomendación
+├── compose.yaml
+├── compose.prod.yaml
+├── package.json
+└── README.md
 ```
-
-Para activar Data en local:
-
-* Windows/Linux: `DATA_API_URL=http://localhost:5000`.
-* Mac: usar `DATA_API_URL=http://localhost:5050` si AirPlay/Control Center ocupa el puerto `5000`.
-
-Data vive en el repo externo `Desafio-Data`. Express sigue siendo la única fachada pública para
-frontend; el frontend nunca llama directamente a Data.
-
-Variables LLM local (`backend/.env.example`):
-
-```bash
-LLM_ASSISTANT_ENABLED=false
-LLM_ASSISTANT_API_URL=http://localhost:5001
-LLM_ASSISTANT_TIMEOUT_MS=8000
-LLM_ASSISTANT_CONTRACT=get-question
-```
-
-Con `LLM_ASSISTANT_CONTRACT=get-question`, Express consume el chatbot Data por contrato `GET
-/<pregunta>` y mantiene fallback local si Data falla. Documentación completa:
-[docs/integration-ai-ollama-local.md](docs/integration-ai-ollama-local.md).
-
-Arranque y tests (monorepo npm workspaces):
-
-```bash
-npm install
-npm run dev:backend     # API en http://localhost:3000
-npm run prisma:generate --workspace backend
-npm run prisma:migrate  --workspace backend
-npm run db:seed         --workspace backend
-npm run test:backend    # tests con Vitest + Supertest
-```
-
-Contrato detallado en [docs/api.md](docs/api.md) · base de datos y seed en [docs/database.md](docs/database.md) · seguridad en [docs/security.md](docs/security.md) · calidad y cobertura en [docs/quality/](docs/quality/).
-
-### Frontend · Asistente familiar GUNI (playground)
-
-El frontend incluye **GUNI**, el asistente familiar conversacional, como **playground visual aislado**
-en la ruta de desarrollo **`/dev/family-chat`**.
-
-* Consume el backend real en `POST /api/assistant/family-plan` vía `VITE_API_URL`.
-  El frontend ya usa backend real para auth/favoritos; varias pantallas de negocio/admin siguen
-  usando stores mock hasta sus features específicas.
-* La ruta **solo se registra en desarrollo** (`import.meta.env.DEV`); en el build de producción se
-  elimina y no es accesible.
-* Cumple el [contrato Frontend ↔ Backend](docs/contracts/frontend-backend-api-contract.md):
-  distingue `mode:"ai"` (`assistantMessageMarkdown`) y `mode:"fallback"` (`message` +
-  `recommendations`), degrada con un mensaje amable si la IA falla y **no expone `source`/`mode`
-  en crudo** al usuario.
-* Mobile-first, CSS propio namespaced (`.fcp`), accesible. Tests: **6/6 verdes**.
-
-Detalle completo en
-[docs/features/frontend-family-chat-playground-guni.md](docs/features/frontend-family-chat-playground-guni.md).
-
-```bash
-npm run dev:backend                  # API en http://localhost:3000
-npm run dev --workspace frontend     # http://localhost:5173/dev/family-chat
-```
-
----
-
-## Público objetivo
-
-Familias jóvenes, locales o visitantes, con bebés o niños pequeños, que buscan planes cómodos, seguros y bien planificados en Euskadi.
-
-Especialmente familias que valoran:
-
-* evitar improvisaciones;
-* saber si un sitio es cómodo con carrito;
-* filtrar por edad, clima, precio, zona y duración;
-* consultar reseñas útiles de otras familias;
-* encontrar lugares y actividades familiares sin perder tiempo.
-
----
-
-## Propuesta de valor
-
-**Planes familiares en Euskadi filtrados por edad, comodidad, ubicación y necesidades reales de las familias.**
-
-La aplicación no pretende ser otro portal genérico de ocio, sino una herramienta práctica para decidir rápido qué hacer con peques.
-
----
-
-## Roles principales
-
-### Familia
-
-Usuario final de la aplicación.
-
-Funcionalidades previstas:
-
-* registrarse e iniciar sesión;
-* crear perfil familiar básico;
-* buscar planes;
-* filtrar por edad, zona, precio, interior/exterior, carrito, cambiador y duración;
-* consultar detalle de planes;
-* guardar favoritos;
-* dejar reseñas;
-* reportar incidencias.
-
-### Negocio / Actividad
-
-Comercios, entidades o profesionales que quieran publicar actividades, eventos, planes u ofertas familiares.
-
-Funcionalidades previstas:
-
-* registrarse como negocio;
-* crear perfil de negocio;
-* publicar actividades;
-* crear ofertas o promociones;
-* consultar estado de publicaciones;
-* ver reseñas recibidas.
-
-### Admin
-
-Rol interno encargado de moderar y controlar la calidad del contenido.
-
-Funcionalidades previstas:
-
-* aprobar o rechazar actividades;
-* moderar reseñas e incidencias;
-* gestionar usuarios y negocios;
-* revisar métricas básicas;
-* mantener la calidad de los datos.
-
----
-
-## MVP
-
-El MVP se centra en construir una demo funcional, clara y defendible.
-
-### Must have
-
-* Landing inicial.
-* Login y registro.
-* Selección de rol: familia o negocio.
-* Rol admin interno.
-* Perfil familiar básico.
-* Buscador de planes.
-* Filtros familiares.
-* Resultados en listado.
-* Detalle de plan.
-* Reseñas e incidencias.
-* Alta de actividad por negocio.
-* Alta de oferta por negocio.
-* Panel admin para aprobar/rechazar contenido.
-* Sistema de recomendación mediante **Family Score** reglado y explicable.
-
-### Should have
-
-* Favoritos.
-* Vista mapa simple.
-* Métricas básicas de negocio.
-* Métricas básicas de admin.
-* Moderación básica de reseñas.
-* Sellos familiares propios.
-
-### Could have
-
-* Recomendación por clima.
-* Itinerarios familiares.
-* Multiidioma.
-* QR para negocios.
-* Notificaciones.
-
-### Won’t have en MVP
-
-* Pagos reales.
-* Reservas reales.
-* Chat en tiempo real.
-* Red social completa.
-* App móvil nativa.
-* Marketplace complejo.
-* IA generativa compleja.
-* Machine Learning avanzado.
-
----
-
-## Sellos familiares propuestos
-
-La aplicación podrá usar sellos propios para ayudar a las familias a decidir rápido:
-
-* **Carrito Friendly**
-* **Plan a Cubierto**
-* **Baño / Cambiador**
-* **Ambiente Tranquilo**
-* **Familia Verificada**
-
-Estos sellos deberán ser asignados o validados por el equipo admin, por datos de negocio o por reseñas verificadas.
-
----
-
-## Family Score
-
-El recomendador inicial será un sistema de scoring simple y explicable.
-
-No se plantea un modelo de Machine Learning complejo en la primera versión.
-
-Ejemplo de variables para calcular el Family Score:
-
-* edad recomendada;
-* distancia o zona;
-* interior/exterior;
-* plan a cubierto;
-* accesibilidad con carrito;
-* baño o cambiador;
-* duración;
-* precio;
-* valoración media;
-* incidencias recientes;
-* popularidad;
-* fiabilidad del dato.
-
-Ejemplo de explicación al usuario:
-
-> Te recomendamos este plan porque es a cubierto, apto para carrito, adecuado para 0-3 años y tiene buenas valoraciones recientes.
-
----
 
 ## Stack técnico
 
 ### Frontend
 
-* React
-* Vite
-* React Router
-* CSS modular o sistema de estilos acordado por el equipo
-* Diseño mobile-first
+- React
+- Vite
+- React Router
+- CSS
+- Vitest + Testing Library
+- i18n
 
 ### Backend
 
-* Node.js
-* Express
-* Arquitectura MVC práctica
-* API REST
-* Middlewares de autenticación y roles
+- Node.js
+- Express
+- Prisma
+- PostgreSQL
+- JWT en cookie `httpOnly`
+- Vitest + Supertest
 
-### Base de datos
+### Servicios auxiliares
 
-* PostgreSQL
-* Prisma (ORM)
+- `ai-service/`: servicio local opcional para asistente LLM
+- `data/`: utilidades y servicios Python relacionados con recomendación y datos
 
-> Decisión de equipo: 
->  **de momento NO se usa MongoDB**. La base de datos actual es **PostgreSQL con Prisma**.
+## Monorepo y workspaces
 
-### Herramientas
+El repositorio usa npm workspaces en la raíz.
 
-* GitHub
-* Git Flow simplificado
-* Postman / Insomnia para pruebas de API
-* Figma, Excalidraw o recursos UX/UI compartidos en Drive
+Workspaces actuales:
 
----
+- `frontend`
+- `backend`
 
-## Arquitectura prevista
-
-```txt
-plangune-euskadi/
-├── frontend/
-├── backend/
-├── docs/
-├── README.md
-├── .gitignore
-└── package.json
-```
-
-### Backend
-
-```txt
-backend/
-├── src/
-│   ├── config/
-│   ├── controllers/
-│   ├── middlewares/
-│   ├── models/
-│   ├── routes/
-│   ├── seed/
-│   ├── services/
-│   ├── utils/
-│   └── app.js
-├── server.js
-├── .env.example
-└── package.json
-```
-
-### Frontend
-
-```txt
-frontend/
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── context/
-│   ├── hooks/
-│   ├── pages/
-│   ├── routes/
-│   ├── services/
-│   ├── styles/
-│   ├── App.jsx
-│   └── main.jsx
-├── .env.example
-└── package.json
-```
-
----
-
-## Modelos principales previstos
-
-### User
-
-Representa a cualquier usuario autenticado.
-
-Campos mínimos:
-
-* name
-* email
-* passwordHash
-* role: family | business | admin
-* status
-* createdAt
-* updatedAt
-
-### FamilyProfile
-
-Perfil familiar asociado a un usuario familia.
-
-Campos mínimos:
-
-* userId
-* city
-* childrenAgeRanges
-* strollerNeeded
-* preferredIndoor
-* preferredBudget
-* favoriteCategories
-
-Nota: no se deben guardar nombres reales, fotos ni datos sensibles de menores.
-
-### Business
-
-Perfil de negocio o entidad.
-
-Campos mínimos:
-
-* ownerId
-* name
-* description
-* category
-* city
-* address
-* contactEmail
-* status
-
-### Activity
-
-Plan, lugar, evento o actividad familiar.
-
-Campos mínimos:
-
-* businessId
-* title
-* description
-* category
-* city
-* address
-* location
-* ageMin
-* ageMax
-* indoorOutdoor
-* isCovered
-* strollerFriendly
-* hasChangingTable
-* hasBathroom
-* calmEnvironment
-* priceType
-* durationMinutes
-* images
-* status
-* familyScore
-* source
-
-### Review
-
-Reseña de una familia sobre una actividad.
-
-Campos mínimos:
-
-* userId
-* activityId
-* rating
-* comment
-* tags
-* status
-
-### Incident
-
-Incidencia reportada por una familia.
-
-Campos mínimos:
-
-* userId
-* activityId
-* type
-* description
-* status
-
-### Favorite
-
-Actividad guardada por una familia.
-
-Campos mínimos:
-
-* userId
-* activityId
-
-### Offer
-
-Oferta o promoción creada por un negocio.
-
-Campos mínimos:
-
-* businessId
-* activityId
-* title
-* description
-* conditions
-* validFrom
-* validTo
-* status
-* sponsoredTier
-
-### RecommendationLog
-
-Registro opcional para explicar recomendaciones.
-
-Campos mínimos:
-
-* userId
-* activityId
-* score
-* reasons
-* createdAt
-
----
-
-## Endpoints previstos
-
-### Auth
-
-```txt
-POST   /api/auth/register
-POST   /api/auth/login
-GET    /api/auth/me
-POST   /api/auth/logout
-```
-
-### Family
-
-```txt
-GET    /api/family/profile
-POST   /api/family/profile
-PUT    /api/family/profile
-```
-
-### Activities
-
-```txt
-GET    /api/activities
-GET    /api/activities/:id
-POST   /api/activities
-PUT    /api/activities/:id
-DELETE /api/activities/:id
-```
-
-### Reviews
-
-```txt
-GET    /api/activities/:id/reviews
-POST   /api/activities/:id/reviews
-PUT    /api/reviews/:id
-DELETE /api/reviews/:id
-```
-
-### Incidents
-
-```txt
-POST   /api/activities/:id/incidents
-GET    /api/admin/incidents
-PATCH  /api/admin/incidents/:id/status
-```
-
-### Favorites
-
-```txt
-GET    /api/favorites
-POST   /api/favorites/:activityId
-DELETE /api/favorites/:activityId
-```
-
-### Business
-
-```txt
-GET    /api/business/me
-POST   /api/business/profile
-PUT    /api/business/profile
-GET    /api/business/activities
-GET    /api/business/offers
-```
-
-### Offers
-
-```txt
-POST   /api/offers
-GET    /api/offers
-GET    /api/offers/:id
-PUT    /api/offers/:id
-DELETE /api/offers/:id
-```
-
-### Admin
-
-```txt
-GET    /api/admin/dashboard
-GET    /api/admin/activities/pending
-PATCH  /api/admin/activities/:id/approve
-PATCH  /api/admin/activities/:id/reject
-GET    /api/admin/reviews
-PATCH  /api/admin/reviews/:id/status
-GET    /api/admin/users
-```
-
-### Recommendations
-
-```txt
-GET    /api/recommendations
-GET    /api/recommendations/activity/:id/explanation
-```
-
----
-
-## Rutas frontend previstas
-
-```txt
-/
- /login
- /register
- /home
- /search
- /activities
- /activities/:id
- /family-profile
- /favorites
- /business
- /business/activities/new
- /business/offers/new
- /business/offers
- /admin
- /admin/activities
- /admin/reviews
- /admin/incidents
-```
-
----
-
-## Flujo principal de demo
-
-### Familia
-
-```txt
-Landing
-→ Registro/Login
-→ Perfil familiar
-→ Buscar planes
-→ Aplicar filtros
-→ Ver resultados
-→ Ver detalle
-→ Guardar favorito o dejar reseña/incidencia
-```
-
-### Negocio
-
-```txt
-Login como negocio
-→ Panel negocio
-→ Crear actividad
-→ Crear oferta
-→ Ver estado pendiente/aprobado
-```
-
-### Admin
-
-```txt
-Login admin
-→ Panel admin
-→ Revisar actividad pendiente
-→ Aprobar o rechazar
-→ Moderar reseñas/incidencias
-```
-
----
-
-## Instalación
-
-Pendiente de cerrar durante el bootstrap técnico.
-
-Estructura esperada:
+Scripts principales en raíz:
 
 ```bash
-git clone <url-del-repositorio>
-cd plangune-euskadi
-```
-
-Instalar frontend:
-
-```bash
-cd frontend
 npm install
-npm run dev
+npm run dev:backend
+npm run dev:frontend
+npm test
+npm run test:backend
+npm run test:frontend
 ```
 
-Instalar backend:
+## Descarga e instalación
+
+Clonar el repositorio:
 
 ```bash
-cd backend
+git clone https://github.com/David-LS-Bilbao/Plangune-desafio-26.git
+cd Plangune-desafio-26
 npm install
-npm run dev
 ```
 
----
+## Arranque local
+
+### Requisitos
+
+- Node.js 18 o superior
+- npm
+- PostgreSQL disponible
+- variables de entorno configuradas
+
+### Desarrollo
+
+Backend:
+
+```bash
+npm run dev:backend
+```
+
+Frontend:
+
+```bash
+npm run dev:frontend
+```
+
+URLs locales por defecto:
+
+- frontend: `http://localhost:5173`
+- backend: `http://localhost:3000`
+
+## Base de datos y Prisma
+
+El backend usa PostgreSQL con Prisma.
+
+Comandos principales:
+
+```bash
+npm run prisma:generate --workspace backend
+npm run prisma:migrate --workspace backend
+npm run prisma:studio --workspace backend
+npm run prisma:format --workspace backend
+npm run db:seed --workspace backend
+```
 
 ## Variables de entorno
 
 ### Backend
 
-Crear archivo:
+Crear `backend/.env` a partir de `backend/.env.example`.
 
-```txt
-backend/.env
-```
-
-Basado en:
-
-```txt
-backend/.env.example
-```
-
-Variables previstas:
+Variables habituales:
 
 ```env
 PORT=3000
@@ -740,181 +161,213 @@ JWT_EXPIRES_IN=7d
 CLIENT_URL=http://localhost:5173
 ```
 
+Variables opcionales para recomendación externa:
+
+```env
+DATA_RECOMMENDER_ENABLED=false
+DATA_API_URL=http://localhost:5000
+DATA_API_TIMEOUT_MS=2000
+```
+
+Variables opcionales para asistente LLM:
+
+```env
+LLM_ASSISTANT_ENABLED=false
+LLM_ASSISTANT_API_URL=http://localhost:5001
+LLM_ASSISTANT_TIMEOUT_MS=8000
+LLM_ASSISTANT_CONTRACT=get-question
+```
+
 ### Frontend
 
-Crear archivo:
-
-```txt
-frontend/.env
-```
-
-Basado en:
-
-```txt
-frontend/.env.example
-```
-
-Variables previstas:
+Crear `frontend/.env` a partir de `frontend/.env.example`.
 
 ```env
 VITE_API_URL=http://localhost:3000/api
 ```
 
----
+## Backend actual
 
-## Scripts previstos
+El backend Express expone la API pública bajo `/api`.
 
-### Backend
-
-```json
-{
-  "dev": "nodemon server.js",
-  "start": "node server.js",
-  "seed": "node src/seed/index.js"
-}
-```
-
-### Frontend
-
-```json
-{
-  "dev": "vite",
-  "build": "vite build",
-  "preview": "vite preview"
-}
-```
-
----
-
-## Flujo Git
-
-Ramas principales:
+Rutas principales implementadas:
 
 ```txt
-main    → rama estable/final
-dev     → rama de integración
-feat/*  → nuevas funcionalidades
-fix/*   → correcciones
-docs/*  → documentación
-test/*  → pruebas
+GET    /api/health
+GET    /api/ready
+
+POST   /api/auth/register
+POST   /api/auth/login
+GET    /api/auth/me
+POST   /api/auth/logout
+
+GET    /api/activities
+GET    /api/activities/:id
+
+GET    /api/events
+POST   /api/events
+GET    /api/events/business/mine
+GET    /api/events/:id
+
+GET    /api/recommendations
+
+GET    /api/reviews
+POST   /api/reviews
+
+POST   /api/incidents
+
+GET    /api/favorites
+POST   /api/favorites/:activityId
+DELETE /api/favorites/:activityId
+
+POST   /api/assistant/family-plan
+
+GET    /api/admin/dashboard
+GET    /api/admin/businesses/pending
+PATCH  /api/admin/businesses/:id/approve
+PATCH  /api/admin/businesses/:id/reject
+GET    /api/admin/events/pending
+PATCH  /api/admin/events/:id/approve
+PATCH  /api/admin/events/:id/reject
 ```
 
-Reglas:
+Notas importantes:
 
-* No trabajar directamente sobre `main`.
-* Crear ramas desde `dev`.
-* Pull Requests siempre hacia `dev`.
-* Commits pequeños y descriptivos.
-* No subir secretos.
-* No usar `git add .` sin revisar antes.
-* Probar antes de abrir PR.
+- el frontend consume siempre el backend Express
+- el frontend no llama directamente a `ai-service` ni a servicios de `data`
+- `/api/favorites` requiere autenticación y rol `family`
+- la autenticación usa cookie `httpOnly`
 
-Ejemplos de ramas iniciales:
+## Frontend actual
+
+La aplicación frontend incluye rutas públicas, familiares, de negocio y de administración.
+
+Rutas destacadas:
+
+- `/`
+- `/login`
+- `/register`
+- `/crear-familia`
+- `/crear-negocio`
+- `/ofertas`
+- `/planes`
+- `/planes/:id`
+- `/favoritos`
+- `/perfil`
+- `/buscar`
+- `/negocio`
+- `/admin`
+
+Ruta de desarrollo:
+
+- `/dev/family-chat` solo en entorno `DEV`
+
+## GUNI y asistente familiar
+
+El frontend incluye un playground visual aislado para el asistente familiar GUNI.
+
+Características:
+
+- disponible solo en desarrollo
+- consume `POST /api/assistant/family-plan`
+- usa `VITE_API_URL`
+- degrada con fallback controlado si la IA no está disponible
+
+Servicio relacionado:
+
+- `ai-service/` corre localmente en `http://localhost:5001` cuando se activa
+
+## Testing
+
+Tests disponibles desde el inicio.
+
+Comandos:
+
+```bash
+npm test
+npm run test:backend
+npm run test:frontend
+```
+
+## Docker y despliegue
+
+El repositorio incluye archivos de Docker Compose para desarrollo y producción:
+
+- `compose.yaml`
+- `compose.prod.yaml`
+- `compose.data.prod.yaml`
+- `compose.local-override.yaml`
+
+La web pública está desplegada en:
 
 ```txt
-feat/project-bootstrap
-feat/frontend-shell
-feat/backend-api-base
-feat/auth-roles
-feat/family-search
-feat/activity-detail
-feat/business-admin-flow
-docs/project-documentation
+https://plangune.davlos.es/
 ```
 
-Ejemplos de commits:
+El despliegue de demo/producción está documentado en:
 
-```txt
-chore: initialize project structure
-feat: add backend healthcheck
-feat: add frontend shell layout
-docs: add initial README
-feat: add auth routes
-feat: add activity model
+- `docs/deployment/vps-demo-deploy.md`
+- `docs/security/predeploy-checklist.md`
+
+La arquitectura de servidor usa Docker Compose detrás de Nginx Proxy Manager. Solo deben exponerse públicamente los puertos `80` y `443`; PostgreSQL y servicios internos no deben exponerse a Internet.
+
+Antes de desplegar o modificar producción, revisar la configuración:
+
+```bash
+docker compose -f compose.prod.yaml config
 ```
 
----
+No ejecutar despliegue sin completar el checklist de seguridad y sin configurar los secretos reales fuera del repositorio.
 
-## Documentación prevista
+## Documentación relacionada
 
-La carpeta `/docs` deberá contener progresivamente:
+Referencias útiles del repo:
 
-```txt
-docs/
-├── architecture.md
-├── api.md
-├── data-model.md
-├── security.md
-├── family-score.md
-├── git-workflow.md
-├── presentation-script.md
-└── decisions.md
-```
+- `docs/api.md`
+- `docs/database.md`
+- `docs/security.md`
+- `docs/quality/README.md`
+- `docs/contracts/frontend-backend-api-contract.md`
+- `docs/features/`
+- `docs/ai/AGENT_WORKFLOW.md`
+- `docs/ai/GIT_BRANCHING_POLICY.md`
+- `docs/ai/AGENT_RULES.md`
 
----
+## Reglas de trabajo
 
-## Production/Demo deployment
+Para trabajo de agentes y colaboración técnica, la fuente de verdad operativa es:
 
-Despliegue en VPS (IONOS) detrás de **Nginx Proxy Manager**, con solo `80/443` públicos. El backend Express es la única fachada `/api`; PostgreSQL y servicios internos **no** se exponen a Internet.
+- `AGENTS.md`
 
-* Guía de despliegue: [docs/deployment/vps-demo-deploy.md](docs/deployment/vps-demo-deploy.md)
-* Checklist de seguridad pre-deploy: [docs/security/predeploy-checklist.md](docs/security/predeploy-checklist.md)
-* Plantilla compose de producción: [compose.prod.yaml](compose.prod.yaml)
+Puntos clave:
 
-> No ejecutar deploy sin completar el checklist. Los secretos reales (JWT, DB, API keys) viven **fuera del repo** (env del host / Docker), nunca versionados.
+- no trabajar directamente sobre `main`, `dev`, `frontend` ni `backend`
+- no hacer `commit`, `push`, `merge`, `rebase`, `reset` o `clean` sin confirmación humana
+- no usar `git add .` ni `git add -A`
+- no versionar secretos ni `.env`
 
----
+## Alcance y roadmap
 
-## Seguridad básica
+Este repositorio ya contiene piezas funcionales, pero no todo el producto final está cerrado.
 
-Medidas mínimas previstas:
+Fuera de alcance como producto final estable:
 
-* Autenticación con JWT.
-* Hash de contraseñas.
-* Roles y permisos.
-* Validación de inputs.
-* Protección de rutas admin.
-* Moderación de reseñas e incidencias.
-* No almacenar datos sensibles de menores.
-* No subir `.env` ni secretos al repositorio.
-* Sanitización de contenido generado por usuarios.
-* Rate limiting si da tiempo.
+- naming comercial definitivo
+- cierre visual final
+- expansión completa de dashboards
+- alcance completo de negocio y admin
+- features avanzadas fuera del MVP
 
----
+## Seguridad
 
-## Criterios de aceptación del MVP
+Principios mínimos:
 
-El MVP será válido si permite demostrar:
+- no almacenar secretos en el repo
+- usar `.env.example` como referencia
+- proteger rutas con autenticación y rol
+- prudencia máxima con datos relacionados con menores
+- revisar checklist de predeploy antes de cualquier exposición pública
 
-* Una familia puede registrarse, buscar planes y ver detalles.
-* La búsqueda permite filtros familiares útiles.
-* Una actividad muestra información práctica: edad, precio, duración, carrito, cambiador, interior/exterior y valoración.
-* Un negocio puede crear una actividad u oferta.
-* Un admin puede aprobar o rechazar contenido.
-* Existe un Family Score explicable.
-* La app es responsive y usable en móvil.
-* La solución está documentada.
-* Cada vertical puede explicar su aportación.
+## Licencia
 
----
-
-## Equipo y verticales
-
-Proyecto multidisciplinar con participación de:
-
-* Full Stack
-* Data Science
-* Ciberseguridad
-* Marketing Digital
-* UX/UI
-
----
-
-## Notas importantes
-
-* El nombre **Plangune Euskadi** es provisional.
-* Los mocks UX/UI son referencia visual, no código final obligatorio.
-* Los archivos `code.html` de los mocks no deben condicionar la arquitectura final.
-* Prioridad absoluta: MVP funcional antes que funcionalidades avanzadas.
-* KISS: primero que funcione, luego se mejora.
-* La demo final manda sobre las ideas secundarias.
+Pendiente de definir.
