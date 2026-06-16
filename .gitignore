@@ -1,0 +1,41 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+build/
+
+# Cobertura de tests
+coverage/
+
+# Variables de entorno (nunca commitear secretos)
+.env
+.env.*
+!.env.example
+!.env.production.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Editor (solo configuración personal)
+.vscode/settings.json
+
+# Claude Code (configuración local personal)
+.claude/
+.claude/settings.local.json
+
+# Python / ai-service / data services
+__pycache__/
+*.pyc
+.venv/
+ai-service/events_weather.csv
+# Caché que el chatbot Data genera en runtime (no versionar)
+data/**/events_weather.csv

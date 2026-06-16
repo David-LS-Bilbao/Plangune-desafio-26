@@ -1,0 +1,36 @@
+{
+  "name": "@desafio-26/frontend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cliente React + Vite de DESAFIO-26 (JavaScript, mobile-first).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@react-oauth/google": "^0.13.5",
+    "i18next": "^26.3.1",
+    "i18next-browser-languagedetector": "^8.2.1",
+    "lucide-react": "^0.469.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.8",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^6.28.0",
+    "remark-gfm": "^4.0.1",
+    "zustand": "^5.0.14"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}
